@@ -1,9 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { Search, Scale, ArrowLeft } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { pets, type Pet } from '../data/pets';
+import { fetchPets, type Pet } from '../data/pets';
 import dogsHeroImg from '../../imports/WhatsApp_Image_2026-06-16_at_3.21.02_PM__1_.jpeg';
 import catsHeroImg from '../../imports/WhatsApp_Image_2026-06-16_at_3.21.02_PM__2_.jpeg';
 import othersHeroImg from '../../imports/WhatsApp_Image_2026-06-16_at_3.21.02_PM__3_.jpeg';
@@ -57,9 +57,14 @@ function PetCard({ pet }: { pet: Pet }) {
 
 export function AdoptionCategory() {
   const { category } = useParams<{ category: string }>();
+  const [pets, setPets] = useState<Pet[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sizeFilter, setSizeFilter] = useState<string | null>(null);
   const [genderFilter, setGenderFilter] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchPets().then(setPets).catch(() => setPets([]));
+  }, []);
 
   const categoryInfo = useMemo(() => {
     switch (category) {

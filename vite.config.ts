@@ -33,4 +33,19 @@ export default defineConfig({
 
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
+
+  server: {
+    proxy: {
+      // Forwards to the huellitas-web (Next.js) backend running on port 3000.
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
+      // Uploaded pet photos are served by the backend from public/uploads too.
+      '/uploads': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
+    },
+  },
 })

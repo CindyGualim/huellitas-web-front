@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, Calendar, MapPin, ArrowRight } from 'lucide-
 import { Layout } from '../components/Layout';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { pets } from '../data/pets';
+import { fetchPets, type Pet } from '../data/pets';
 import { events } from '../data/events';
 import logoImg from '../../imports/huellitaslogo.png';
 
@@ -158,7 +158,7 @@ function HeroCarousel() {
   );
 }
 
-function FeaturedPetCard({ pet }: { pet: typeof pets[0] }) {
+function FeaturedPetCard({ pet }: { pet: Pet }) {
   return (
     <Link to={`/adoptions/pet-profile/${pet.id}`} className="group block h-full">
       <div className="bg-white rounded-[20px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-250 border border-[#D9D9D9]/50 transform hover:-translate-y-1 h-full flex flex-col">
@@ -198,7 +198,12 @@ function FeaturedPetCard({ pet }: { pet: typeof pets[0] }) {
 }
 
 export function Home() {
+  const [pets, setPets] = useState<Pet[]>([]);
   const upcomingEvents = events.slice(0, 3);
+
+  useEffect(() => {
+    fetchPets().then(setPets).catch(() => setPets([]));
+  }, []);
 
   return (
     <Layout>

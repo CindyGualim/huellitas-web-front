@@ -1,13 +1,31 @@
+import { useState, useEffect } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { Share2, ArrowLeft, Instagram, Scale, CheckCircle2, Sparkles, HeartHandshake, Info, Clock } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { getPetById, pets } from '../data/pets';
+import { fetchPetById, fetchPets, type Pet } from '../data/pets';
 
 export function PetProfile() {
   const { petId } = useParams<{ petId: string }>();
-  const pet = getPetById(petId ?? '');
+  const [pet, setPet] = useState<Pet | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
+  const [otherPets, setOtherPets] = useState<Pet[]>([]);
 
+  useEffect(() => {
+    setLoading(true);
+    fetchPetById(petId ?? '')
+      .then(setPet)
+      .finally(() => setLoading(false));
+  }, [petId]);
+
+  useEffect(() => {
+    if (!pet) return;
+    fetchPets()
+      .then(all => setOtherPets(all.filter(p => p.id !== pet.id && p.species === pet.species).slice(0, 3)))
+      .catch(() => setOtherPets([]));
+  }, [pet]);
+
+  if (loading) return null;
   if (!pet) return <Navigate to="/adoptions" replace />;
 
   const handleShare = () => {
@@ -18,8 +36,6 @@ export function PetProfile() {
   // Determine back link and category based on species
   const categoryLink = pet.species === 'Perro' ? 'dogs' : pet.species === 'Gato' ? 'cats' : 'others';
   const categoryLabel = pet.species === 'Perro' ? 'perritos' : pet.species === 'Gato' ? 'gatitos' : 'otras mascotas';
-
-  const otherPets = pets.filter(p => p.id !== pet.id && p.species === pet.species).slice(0, 3);
 
   return (
     <Layout>

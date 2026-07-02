@@ -1,12 +1,17 @@
+import { useState, useEffect } from 'react';
 import { Heart, Package, Banknote, ShieldAlert, Info, HelpCircle } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { pets } from '../data/pets';
+import { fetchPets, type Pet } from '../data/pets';
 
 export function Help() {
-  const casesNeedingHelp = pets.filter(pet => 
-    ['princesa-jr', 'peluche-yamal', 'rocky-ronaldo'].includes(pet.id)
-  );
+  const [casesNeedingHelp, setCasesNeedingHelp] = useState<Pet[]>([]);
+
+  useEffect(() => {
+    fetchPets()
+      .then(pets => setCasesNeedingHelp(pets.filter(pet => pet.needs.length > 0).slice(0, 3)))
+      .catch(() => setCasesNeedingHelp([]));
+  }, []);
 
   return (
     <Layout>
