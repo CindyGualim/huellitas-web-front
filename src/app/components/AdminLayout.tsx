@@ -1,8 +1,25 @@
-import { Link, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Heart, Users, User, LogOut } from 'lucide-react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Calendar, Heart, Users, User, LogOut, Home } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export function AdminLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const initials = user?.name
+    ? user.name
+        .split(' ')
+        .map(part => part[0])
+        .slice(0, 2)
+        .join('')
+        .toUpperCase()
+    : '';
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const isActive = (path: string) => {
     if (path === '/admin') return location.pathname === '/admin';
@@ -23,11 +40,11 @@ export function AdminLayout() {
         <div className="p-6 border-b border-white/10">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-full bg-[#20A83E] border-2 border-white/30 flex items-center justify-center text-sm font-medium text-white">
-              MG
+              {initials}
             </div>
             <div>
-              <div className="font-medium text-sm">Admin</div>
-              <div className="text-xs text-white/60">Huellitas de la Calle</div>
+              <div className="font-medium text-sm">{user?.name}</div>
+              <div className="text-xs text-white/60">{user?.role}</div>
             </div>
           </div>
         </div>
@@ -52,14 +69,22 @@ export function AdminLayout() {
           </ul>
         </nav>
 
-        <div className="p-4 border-t border-white/10">
+        <div className="p-4 border-t border-white/10 space-y-1">
           <Link
             to="/home"
             className="flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:bg-white/10 hover:text-white transition-all duration-250 text-sm"
           >
-            <LogOut size={18} />
+            <Home size={18} />
             <span>Ir al Sitio Público</span>
           </Link>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:bg-white/10 hover:text-white transition-all duration-250 text-sm cursor-pointer"
+          >
+            <LogOut size={18} />
+            <span>Cerrar sesión</span>
+          </button>
         </div>
       </aside>
 

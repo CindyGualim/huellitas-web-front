@@ -1,31 +1,29 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { Search, Scale, ArrowLeft } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { pets, type Pet } from '../data/pets';
+import { apiGetPets, ApiPet } from '../lib/api';
+import { SIZE_OPTIONS, GENDER_OPTIONS, sizeLabel, statusLabel, statusBadgeClass } from '../lib/petMappings';
 import dogsHeroImg from '../../imports/WhatsApp_Image_2026-06-16_at_3.21.02_PM__1_.jpeg';
 import catsHeroImg from '../../imports/WhatsApp_Image_2026-06-16_at_3.21.02_PM__2_.jpeg';
-import othersHeroImg from '../../imports/WhatsApp_Image_2026-06-16_at_3.21.02_PM__3_.jpeg';
 
-function PetCard({ pet }: { pet: Pet }) {
+function PetCard({ pet }: { pet: ApiPet }) {
+  const coverImage = pet.images.find(image => image.isCover) ?? pet.images[0];
+
   return (
     <div className="bg-white rounded-[20px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-250 border border-[#D9D9D9]/50 transform hover:-translate-y-1 h-full flex flex-col group">
-      <div className="relative overflow-hidden h-64 shrink-0">
-        <img
-          src={pet.image}
-          alt={pet.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-        />
+      <div className="relative overflow-hidden h-64 shrink-0 bg-[#F8F8F8]">
+        {coverImage && (
+          <img
+            src={coverImage.imageUrl}
+            alt={pet.name}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+        )}
         <div className="absolute top-3 right-3">
-          <span className={`px-3 py-1.5 rounded-full text-xs font-medium shadow-sm ${
-            pet.status === 'Disponible'
-              ? 'bg-[#20A83E] text-white'
-              : pet.status === 'En proceso'
-              ? 'bg-[#146B27] text-white'
-              : 'bg-[#D9D9D9] text-[#222222]'
-          }`}>
-            {pet.status}
+          <span className={`px-3 py-1.5 rounded-full text-xs font-medium shadow-sm ${statusBadgeClass(pet.status)}`}>
+            {statusLabel(pet.status)}
           </span>
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
@@ -33,19 +31,15 @@ function PetCard({ pet }: { pet: Pet }) {
           <h3 className="text-white text-xl font-medium">{pet.name}</h3>
           <div className="flex items-center gap-1.5 text-white/80 text-sm mt-1">
             <Scale size={14} />
-            <span>{pet.weight} · {pet.age}</span>
+            <span>{pet.weight} kg · {pet.estimatedAge}</span>
           </div>
         </div>
       </div>
       <div className="p-5 flex-1 flex flex-col justify-between">
         <div className="flex flex-wrap gap-2 mb-6">
           <span className="bg-[#F8F8F8] text-[#222222] px-3 py-1.5 rounded-md text-xs border border-[#D9D9D9]">{pet.gender}</span>
-          <span className="bg-[#F8F8F8] text-[#222222] px-3 py-1.5 rounded-md text-xs border border-[#D9D9D9]">{pet.size}</span>
-          {pet.traits.slice(0, 2).map(trait => (
-            <span key={trait} className="bg-[#F8F8F8] text-[#222222] px-3 py-1.5 rounded-md text-xs border border-[#D9D9D9]">
-              {trait}
-            </span>
-          ))}
+          <span className="bg-[#F8F8F8] text-[#222222] px-3 py-1.5 rounded-md text-xs border border-[#D9D9D9]">{sizeLabel(pet.size)}</span>
+          <span className="bg-[#F8F8F8] text-[#222222] px-3 py-1.5 rounded-md text-xs border border-[#D9D9D9]">{pet.breed}</span>
         </div>
         <Link to={`/adoptions/pet-profile/${pet.id}`}>
           <PrimaryButton variant="primary" fullWidth className="font-medium">Ver perfil de {pet.name.split(' ')[0]}</PrimaryButton>
@@ -57,9 +51,18 @@ function PetCard({ pet }: { pet: Pet }) {
 
 export function AdoptionCategory() {
   const { category } = useParams<{ category: string }>();
+  const [pets, setPets] = useState<ApiPet[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [sizeFilter, setSizeFilter] = useState<string | null>(null);
   const [genderFilter, setGenderFilter] = useState<string | null>(null);
+
+  useEffect(() => {
+    apiGetPets()
+      .then(setPets)
+      .catch(() => setPets([]))
+      .finally(() => setIsLoading(false));
+  }, []);
 
   const categoryInfo = useMemo(() => {
     switch (category) {
@@ -67,22 +70,15 @@ export function AdoptionCategory() {
         return {
           title: 'Perritos en Adopción',
           subtitle: 'Lealtad incondicional esperando por ti',
-          species: 'Perro',
+          species: 'Perro' as const,
           hero: dogsHeroImg
         };
       case 'cats':
         return {
           title: 'Gatitos en Adopción',
           subtitle: 'Encuentra a tu nuevo compañero ronroneador',
-          species: 'Gato',
+          species: 'Gato' as const,
           hero: catsHeroImg
-        };
-      case 'others':
-        return {
-          title: 'Otras Mascotas',
-          subtitle: 'Pequeños amigos que también necesitan amor',
-          species: 'Otra',
-          hero: othersHeroImg
         };
       default:
         return null;
@@ -100,10 +96,6 @@ export function AdoptionCategory() {
     const matchesGender = !genderFilter || pet.gender === genderFilter;
     return matchesSearch && matchesSize && matchesGender;
   });
-
-  const featuredPets = filteredPets.slice(0, 2); // Show top 2 as featured if any exist, or adjust as needed. 
-  // In a real app we might flag them specifically. 
-  const displayPets = filteredPets;
 
   const filterChipClasses = (isActive: boolean) =>
     `px-5 py-2.5 rounded-xl transition-all duration-250 cursor-pointer text-sm font-medium transform hover:scale-[1.02] active:scale-95 ${
@@ -146,15 +138,15 @@ export function AdoptionCategory() {
               </div>
 
               <div className="flex gap-3 overflow-x-auto pb-2 md:pb-0 scrollbar-hide shrink-0 items-center">
-                {['Pequeño', 'Mediano', 'Grande'].map(size => (
-                  <button key={size} onClick={() => setSizeFilter(sizeFilter === size ? null : size)} className={filterChipClasses(sizeFilter === size)}>
-                    {size}
+                {SIZE_OPTIONS.map(size => (
+                  <button key={size.value} onClick={() => setSizeFilter(sizeFilter === size.value ? null : size.value)} className={filterChipClasses(sizeFilter === size.value)}>
+                    {size.label}
                   </button>
                 ))}
                 <div className="w-px h-8 bg-[#D9D9D9] mx-1 hidden md:block" />
-                {['Macho', 'Hembra'].map(gender => (
-                  <button key={gender} onClick={() => setGenderFilter(genderFilter === gender ? null : gender)} className={filterChipClasses(genderFilter === gender)}>
-                    {gender}
+                {GENDER_OPTIONS.map(gender => (
+                  <button key={gender.value} onClick={() => setGenderFilter(genderFilter === gender.value ? null : gender.value)} className={filterChipClasses(genderFilter === gender.value)}>
+                    {gender.label}
                   </button>
                 ))}
               </div>
@@ -162,16 +154,18 @@ export function AdoptionCategory() {
           </div>
 
           {/* Results */}
-          {displayPets.length > 0 ? (
+          {isLoading ? (
+            <p className="text-center text-[#222222]/50 py-24">Cargando...</p>
+          ) : filteredPets.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayPets.map(pet => <PetCard key={pet.id} pet={pet} />)}
+              {filteredPets.map(pet => <PetCard key={pet.id} pet={pet} />)}
             </div>
           ) : (
             <div className="text-center py-24 bg-[#F8F8F8] rounded-[24px] border border-[#D9D9D9]/50">
               <div className="text-6xl mb-4 opacity-50">🐾</div>
               <h3 className="text-[#222222] mb-2 text-xl font-medium">No encontramos {categoryInfo.species.toLowerCase()}s</h3>
               <p className="text-[#222222]/60">Intenta ajustar los filtros de búsqueda</p>
-              <button 
+              <button
                 onClick={() => { setSearchTerm(''); setSizeFilter(null); setGenderFilter(null); }}
                 className="mt-6 text-[#20A83E] font-medium hover:text-[#146B27] transition-colors"
               >

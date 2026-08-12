@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, Calendar, MapPin, ArrowRight } from 'lucide-
 import { Layout } from '../components/Layout';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { pets } from '../data/pets';
+import { apiGetPets, ApiPet } from '../lib/api';
 import { events } from '../data/events';
 import logoImg from '../../imports/huellitaslogo.png';
 
@@ -158,16 +158,20 @@ function HeroCarousel() {
   );
 }
 
-function FeaturedPetCard({ pet }: { pet: typeof pets[0] }) {
+function FeaturedPetCard({ pet }: { pet: ApiPet }) {
+  const coverImage = pet.images.find(image => image.isCover) ?? pet.images[0];
+
   return (
     <Link to={`/adoptions/pet-profile/${pet.id}`} className="group block h-full">
       <div className="bg-white rounded-[20px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-250 border border-[#D9D9D9]/50 transform hover:-translate-y-1 h-full flex flex-col">
-        <div className="relative overflow-hidden h-64 md:h-72 shrink-0">
-          <ImageWithFallback
-            src={pet.image}
-            alt={pet.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          />
+        <div className="relative overflow-hidden h-64 md:h-72 shrink-0 bg-[#F8F8F8]">
+          {coverImage && (
+            <ImageWithFallback
+              src={coverImage.imageUrl}
+              alt={pet.name}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+          )}
           <div className="absolute top-3 right-3">
             <span className="bg-[#20A83E] text-white px-3 py-1 rounded-full text-xs font-medium shadow-sm">
               {pet.status}
@@ -176,16 +180,17 @@ function FeaturedPetCard({ pet }: { pet: typeof pets[0] }) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-4">
             <h3 className="text-white text-xl font-medium">{pet.name}</h3>
-            <p className="text-white/80 text-sm">{pet.weight}</p>
+            <p className="text-white/80 text-sm">{pet.weight} kg</p>
           </div>
         </div>
         <div className="p-5 flex-1 flex flex-col justify-between">
           <div className="flex flex-wrap gap-2 mb-4">
-            {pet.traits.map(trait => (
-              <span key={trait} className="bg-[#F8F8F8] text-[#222222] px-3 py-1 rounded-md text-xs border border-[#D9D9D9]">
-                {trait}
-              </span>
-            ))}
+            <span className="bg-[#F8F8F8] text-[#222222] px-3 py-1 rounded-md text-xs border border-[#D9D9D9]">
+              {pet.breed}
+            </span>
+            <span className="bg-[#F8F8F8] text-[#222222] px-3 py-1 rounded-md text-xs border border-[#D9D9D9]">
+              {pet.gender}
+            </span>
           </div>
           <div className="flex items-center gap-2 text-[#146B27] group-hover:text-[#20A83E] font-medium transition-all duration-250">
             <span className="text-sm">Ver perfil</span>
@@ -199,6 +204,13 @@ function FeaturedPetCard({ pet }: { pet: typeof pets[0] }) {
 
 export function Home() {
   const upcomingEvents = events.slice(0, 3);
+  const [featuredPets, setFeaturedPets] = useState<ApiPet[]>([]);
+
+  useEffect(() => {
+    apiGetPets()
+      .then(allPets => setFeaturedPets(allPets.filter(pet => pet.featured)))
+      .catch(() => setFeaturedPets([]));
+  }, []);
 
   return (
     <Layout>
@@ -217,7 +229,7 @@ export function Home() {
               </Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {pets.map(pet => (
+              {featuredPets.map(pet => (
                 <FeaturedPetCard key={pet.id} pet={pet} />
               ))}
             </div>
