@@ -199,10 +199,55 @@ export interface ApiEvent {
   createdAt: string;
 }
 
+export interface EventPayload {
+  title: string;
+  type: string;
+  description: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  status: string;
+}
+
 export async function apiGetEvents() {
   const response = await fetch(`${API_URL}/events`);
 
   return parseResponse<ApiEvent[]>(response);
+}
+
+export async function apiCreateEvent(token: string, payload: EventPayload) {
+  const response = await fetch(`${API_URL}/events`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  return parseResponse<ApiEvent>(response);
+}
+
+export async function apiUpdateEvent(token: string, id: number, payload: Partial<EventPayload>) {
+  const response = await fetch(`${API_URL}/events/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  return parseResponse<ApiEvent>(response);
+}
+
+export async function apiDeleteEvent(token: string, id: number) {
+  const response = await fetch(`${API_URL}/events/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  return parseResponse<null>(response);
 }
 
 export interface ApiDonation {
@@ -215,12 +260,46 @@ export interface ApiDonation {
   notes: string | null;
 }
 
+export interface DonationPayload {
+  donorName: string;
+  donorEmail: string;
+  amount: number;
+  paymentMethod: string;
+  notes?: string;
+}
+
 export async function apiGetDonations(token: string) {
   const response = await fetch(`${API_URL}/donations`, {
     headers: { Authorization: `Bearer ${token}` }
   });
 
   return parseResponse<ApiDonation[]>(response);
+}
+
+export async function apiCreateDonation(token: string, payload: DonationPayload) {
+  const response = await fetch(`${API_URL}/donations`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  return parseResponse<ApiDonation>(response);
+}
+
+export async function apiUpdateDonation(token: string, id: number, payload: Partial<DonationPayload>) {
+  const response = await fetch(`${API_URL}/donations/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  return parseResponse<ApiDonation>(response);
 }
 
 export interface ApiAdoptionRequest {
