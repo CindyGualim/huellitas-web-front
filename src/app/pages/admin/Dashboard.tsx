@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Calendar, Users, DollarSign, Gift } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { apiGetPets, apiGetEvents, apiGetDonations, apiGetAdoptionRequests, ApiEvent, ApiDonation, ApiAdoptionRequest } from '../../lib/api';
+import { apiGetPets, apiGetEvents, apiGetDonations, apiGetAdoptionRequests, ApiPet, ApiEvent, ApiDonation, ApiAdoptionRequest } from '../../lib/api';
+import { ChartCarousel } from '../../components/admin/ChartCarousel';
+import { PetsByStatusChart, PetsBySpeciesChart, DonationsTrendChart, AdoptionRequestsChart } from '../../components/admin/DashboardCharts';
 
 interface ActivityItem {
   key: string;
@@ -10,6 +12,13 @@ interface ActivityItem {
   title: string;
   subtitle: string;
   date: Date;
+}
+
+interface DashboardData {
+  pets: ApiPet[];
+  events: ApiEvent[];
+  donations: ApiDonation[];
+  requests: ApiAdoptionRequest[];
 }
 
 function timeAgo(date: Date) {
@@ -25,7 +34,7 @@ function timeAgo(date: Date) {
 
 export function AdminDashboard() {
   const { token } = useAuth();
-  const [stats, setStats] = useState<{ availablePets: number; upcomingEvents: number; pendingRequests: number; donationsThisMonth: number } | null>(null);
+  const [data, setData] = useState<DashboardData | null>(null);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,26 +42,14 @@ export function AdminDashboard() {
   useEffect(() => {
     if (!token) return;
 
-    const now = new Date();
-
     Promise.all([
       apiGetPets(),
       apiGetEvents(),
       apiGetDonations(token),
       apiGetAdoptionRequests(token)
     ])
-      .then(([pets, events, donations, requests]: [Awaited<ReturnType<typeof apiGetPets>>, ApiEvent[], ApiDonation[], ApiAdoptionRequest[]]) => {
-        const availablePets = pets.filter(p => p.status === 'Disponible').length;
-        const upcomingEvents = events.filter(e => e.status === 'Programado').length;
-        const pendingRequests = requests.filter(r => r.status === 'Pendiente').length;
-        const donationsThisMonth = donations
-          .filter(d => {
-            const date = new Date(d.donationDate);
-            return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
-          })
-          .reduce((sum, d) => sum + Number(d.amount), 0);
-
-        setStats({ availablePets, upcomingEvents, pendingRequests, donationsThisMonth });
+      .then(([pets, events, donations, requests]) => {
+        setData({ pets, events, donations, requests });
 
         const eventItems: ActivityItem[] = events.map(e => ({
           key: `event-${e.id}`,
@@ -88,11 +85,24 @@ export function AdminDashboard() {
       .finally(() => setIsLoading(false));
   }, [token]);
 
-  const statCards = stats ? [
-    { label: 'Mascotas Disponibles', value: String(stats.availablePets), icon: Heart, link: '/admin/adoptions', color: '#20A83E' },
-    { label: 'Próximas Jornadas', value: String(stats.upcomingEvents), icon: Calendar, link: '/admin/events', color: '#146B27' },
-    { label: 'Adopciones Pendientes', value: String(stats.pendingRequests), icon: Users, link: '/admin/adoptions', color: '#20A83E' },
-    { label: 'Donaciones Este Mes', value: `Q${stats.donationsThisMonth.toFixed(2)}`, icon: DollarSign, link: '/admin', color: '#146B27' }
+  const now = new Date();
+  const statCards = data ? [
+    { label: 'Mascotas Disponibles', value: String(data.pets.filter(p => p.status === 'Disponible').length), icon: Heart, link: '/admin/adoptions', color: '#20A83E' },
+    { label: 'Próximas Jornadas', value: String(data.events.filter(e => e.status === 'Programado').length), icon: Calendar, link: '/admin/events', color: '#146B27' },
+    { label: 'Adopciones Pendientes', value: String(data.requests.filter(r => r.status === 'Pendiente').length), icon: Users, link: '/admin/adoptions', color: '#20A83E' },
+    {
+      label: 'Donaciones Este Mes',
+      value: `Q${data.donations
+        .filter(d => {
+          const date = new Date(d.donationDate);
+          return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+        })
+        .reduce((sum, d) => sum + Number(d.amount), 0)
+        .toFixed(2)}`,
+      icon: DollarSign,
+      link: '/admin/donations',
+      color: '#146B27'
+    }
   ] : [];
 
   return (
@@ -131,25 +141,16 @@ export function AdminDashboard() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <div className="bg-white rounded-[16px] p-6 shadow-sm border border-[#D9D9D9]/50">
-              <h2 className="text-[#222222] mb-4 text-xl">Acceso Rápido</h2>
-              <div className="space-y-2">
-                {[
-                  { to: '/admin/events', label: 'Gestionar Jornadas', sub: 'Crear y editar eventos de castración' },
-                  { to: '/admin/adoptions', label: 'Gestionar Adopciones', sub: 'Administrar perritos disponibles' },
-                  { to: '/admin/profile', label: 'Mi Perfil', sub: 'Ver información de cuenta' },
-                ].map(item => (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    className="block p-4 bg-[#F8F8F8] rounded-xl hover:bg-[#20A83E]/5 hover:border-[#20A83E]/20 transition-all duration-250 border border-transparent"
-                  >
-                    <div className="font-medium text-[#222222] text-sm">{item.label}</div>
-                    <div className="text-xs text-[#222222]/40 mt-0.5">{item.sub}</div>
-                  </Link>
-                ))}
-              </div>
-            </div>
+            {data && (
+              <ChartCarousel
+                slides={[
+                  { title: 'Mascotas por estado', subtitle: 'Distribución actual del refugio', content: <PetsByStatusChart pets={data.pets} /> },
+                  { title: 'Mascotas por especie', subtitle: 'Perros vs. gatos disponibles', content: <PetsBySpeciesChart pets={data.pets} /> },
+                  { title: 'Donaciones', subtitle: 'Total recaudado por mes (últimos 6 meses)', content: <DonationsTrendChart donations={data.donations} /> },
+                  { title: 'Solicitudes de adopción', subtitle: 'Distribución por estado', content: <AdoptionRequestsChart requests={data.requests} /> }
+                ]}
+              />
+            )}
 
             <div className="bg-white rounded-[16px] p-6 shadow-sm border border-[#D9D9D9]/50">
               <h2 className="text-[#222222] mb-4 text-xl">Actividad Reciente</h2>
