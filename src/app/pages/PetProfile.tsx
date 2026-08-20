@@ -25,7 +25,7 @@ export function PetProfile() {
     apiGetPet(id)
       .then(fetchedPet => {
         setPet(fetchedPet);
-        return apiGetPets().then(allPets => {
+        return apiGetPets({ availableOnly: true }).then(allPets => {
           setOtherPets(allPets.filter(p => p.id !== fetchedPet.id && p.species === fetchedPet.species).slice(0, 3));
         });
       })

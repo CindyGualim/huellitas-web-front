@@ -207,7 +207,7 @@ export function Home() {
   const [featuredPets, setFeaturedPets] = useState<ApiPet[]>([]);
 
   useEffect(() => {
-    apiGetPets()
+    apiGetPets({ availableOnly: true })
       .then(allPets => setFeaturedPets(allPets.filter(pet => pet.featured)))
       .catch(() => setFeaturedPets([]));
   }, []);

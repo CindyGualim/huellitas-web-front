@@ -58,7 +58,7 @@ export function AdoptionCategory() {
   const [genderFilter, setGenderFilter] = useState<string | null>(null);
 
   useEffect(() => {
-    apiGetPets()
+    apiGetPets({ availableOnly: true })
       .then(setPets)
       .catch(() => setPets([]))
       .finally(() => setIsLoading(false));
