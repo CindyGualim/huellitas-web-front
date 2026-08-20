@@ -184,3 +184,57 @@ export async function apiDeletePet(token: string, id: number) {
 
   return parseResponse<null>(response);
 }
+
+export interface ApiEvent {
+  id: number;
+  title: string;
+  type: string;
+  description: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  status: 'Programado' | 'En_curso' | 'Finalizado' | 'Cancelado';
+  createdBy: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export async function apiGetEvents() {
+  const response = await fetch(`${API_URL}/events`);
+
+  return parseResponse<ApiEvent[]>(response);
+}
+
+export interface ApiDonation {
+  id: number;
+  donorName: string;
+  donorEmail: string;
+  amount: number;
+  paymentMethod: string;
+  donationDate: string;
+  notes: string | null;
+}
+
+export async function apiGetDonations(token: string) {
+  const response = await fetch(`${API_URL}/donations`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  return parseResponse<ApiDonation[]>(response);
+}
+
+export interface ApiAdoptionRequest {
+  id: number;
+  status: 'Pendiente' | 'En_revision' | 'Aprobada' | 'Rechazada';
+  submittedAt: string;
+  adopter: { fullName: string };
+  pet: { name: string };
+}
+
+export async function apiGetAdoptionRequests(token: string) {
+  const response = await fetch(`${API_URL}/adoption-requests`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  return parseResponse<ApiAdoptionRequest[]>(response);
+}
