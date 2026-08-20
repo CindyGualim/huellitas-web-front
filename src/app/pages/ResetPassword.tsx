@@ -63,7 +63,7 @@ export function ResetPassword() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="password" className="block text-[#222222] mb-2 font-medium text-sm">
-              Nueva contraseña
+              Nueva contraseña <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <input

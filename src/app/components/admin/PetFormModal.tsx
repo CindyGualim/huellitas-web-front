@@ -38,6 +38,7 @@ export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormMo
 
   const inputClass = "w-full px-4 py-3 bg-[#F8F8F8] rounded-xl text-[#222222] placeholder-[#222222]/30 focus:outline-none focus:ring-2 focus:ring-[#20A83E] border border-[#D9D9D9] transition-all duration-250 text-sm";
   const labelClass = "block text-[#222222] mb-1.5 font-medium text-sm";
+  const required = <span className="text-red-500">*</span>;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -97,14 +98,18 @@ export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormMo
             </div>
           )}
 
+          <p className="text-xs text-[#222222]/50">
+            <span className="text-red-500">*</span> Campos obligatorios
+          </p>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-              <label className={labelClass}>Nombre</label>
+              <label className={labelClass}>Nombre {required}</label>
               <input name="name" required value={formData.name} onChange={handleChange} className={inputClass} />
             </div>
 
             <div>
-              <label className={labelClass}>Especie</label>
+              <label className={labelClass}>Especie {required}</label>
               <select name="species" value={formData.species} onChange={handleChange} className={inputClass}>
                 {SPECIES_OPTIONS.map(option => (
                   <option key={option.value} value={option.value}>{option.label}</option>
@@ -113,12 +118,12 @@ export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormMo
             </div>
 
             <div>
-              <label className={labelClass}>Raza</label>
+              <label className={labelClass}>Raza {required}</label>
               <input name="breed" required value={formData.breed} onChange={handleChange} className={inputClass} />
             </div>
 
             <div>
-              <label className={labelClass}>Género</label>
+              <label className={labelClass}>Género {required}</label>
               <select name="gender" value={formData.gender} onChange={handleChange} className={inputClass}>
                 {GENDER_OPTIONS.map(option => (
                   <option key={option.value} value={option.value}>{option.label}</option>
@@ -127,12 +132,12 @@ export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormMo
             </div>
 
             <div>
-              <label className={labelClass}>Edad estimada</label>
+              <label className={labelClass}>Edad estimada {required}</label>
               <input name="estimatedAge" required placeholder="Ej. 2 años" value={formData.estimatedAge} onChange={handleChange} className={inputClass} />
             </div>
 
             <div>
-              <label className={labelClass}>Tamaño</label>
+              <label className={labelClass}>Tamaño {required}</label>
               <select name="size" value={formData.size} onChange={handleChange} className={inputClass}>
                 {SIZE_OPTIONS.map(option => (
                   <option key={option.value} value={option.value}>{option.label}</option>
@@ -141,17 +146,17 @@ export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormMo
             </div>
 
             <div>
-              <label className={labelClass}>Peso (kg)</label>
+              <label className={labelClass}>Peso (kg) {required}</label>
               <input name="weight" type="number" step="0.1" min="0" required value={formData.weight} onChange={handleChange} className={inputClass} />
             </div>
 
             <div>
-              <label className={labelClass}>Color</label>
+              <label className={labelClass}>Color {required}</label>
               <input name="color" required value={formData.color} onChange={handleChange} className={inputClass} />
             </div>
 
             <div>
-              <label className={labelClass}>Estado</label>
+              <label className={labelClass}>Estado {required}</label>
               <select name="status" value={formData.status} onChange={handleChange} className={inputClass}>
                 {STATUS_OPTIONS.map(option => (
                   <option key={option.value} value={option.value}>{option.label}</option>
@@ -161,12 +166,12 @@ export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormMo
           </div>
 
           <div>
-            <label className={labelClass}>Descripción</label>
+            <label className={labelClass}>Descripción {required}</label>
             <textarea name="description" required rows={3} value={formData.description} onChange={handleChange} className={inputClass} />
           </div>
 
           <div>
-            <label className={labelClass}>Historia de rescate</label>
+            <label className={labelClass}>Historia de rescate {required}</label>
             <textarea name="rescueStory" required rows={3} value={formData.rescueStory} onChange={handleChange} className={inputClass} />
           </div>
 
@@ -176,7 +181,7 @@ export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormMo
           </label>
 
           <div>
-            <label className={labelClass}>Imágenes (URL)</label>
+            <label className={labelClass}>Imágenes (URL) <span className="text-[#222222]/40 font-normal">(opcional)</span></label>
             <div className="space-y-2">
               {imageUrls.map((url, index) => (
                 <div key={index} className="flex gap-2">

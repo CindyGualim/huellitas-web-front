@@ -31,7 +31,7 @@ describe('Login — envío de credenciales', () => {
     );
 
     fireEvent.change(screen.getByLabelText(/correo electrónico/i), { target: { value: 'admin@huellitas.org' } });
-    fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: 'secret123' } });
+    fireEvent.change(screen.getByLabelText(/^contraseña/i), { target: { value: 'secret123' } });
     fireEvent.click(screen.getByRole('button', { name: /ingresar/i }));
 
     await waitFor(() => {
@@ -51,7 +51,7 @@ describe('Login — envío de credenciales', () => {
     );
 
     fireEvent.change(screen.getByLabelText(/correo electrónico/i), { target: { value: 'admin@huellitas.org' } });
-    fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: 'mala-clave' } });
+    fireEvent.change(screen.getByLabelText(/^contraseña/i), { target: { value: 'mala-clave' } });
     fireEvent.click(screen.getByRole('button', { name: /ingresar/i }));
 
     expect(await screen.findByText('Credenciales inválidas')).toBeInTheDocument();

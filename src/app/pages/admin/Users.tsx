@@ -53,28 +53,32 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
             </div>
           )}
 
+          <p className="text-xs text-[#222222]/50">
+            <span className="text-red-500">*</span> Campos obligatorios
+          </p>
+
           <div>
-            <label className={labelClass}>Nombre completo</label>
+            <label className={labelClass}>Nombre completo <span className="text-red-500">*</span></label>
             <input name="name" required value={formData.name} onChange={handleChange} className={inputClass} />
           </div>
 
           <div>
-            <label className={labelClass}>Correo electrónico</label>
+            <label className={labelClass}>Correo electrónico <span className="text-red-500">*</span></label>
             <input name="email" type="email" required value={formData.email} onChange={handleChange} className={inputClass} />
           </div>
 
           <div>
-            <label className={labelClass}>Teléfono</label>
+            <label className={labelClass}>Teléfono <span className="text-red-500">*</span></label>
             <input name="phone" required value={formData.phone} onChange={handleChange} className={inputClass} />
           </div>
 
           <div>
-            <label className={labelClass}>Contraseña</label>
+            <label className={labelClass}>Contraseña <span className="text-red-500">*</span></label>
             <input name="password" type="password" required minLength={8} value={formData.password} onChange={handleChange} className={inputClass} placeholder="Mínimo 8 caracteres" />
           </div>
 
           <div>
-            <label className={labelClass}>Rol</label>
+            <label className={labelClass}>Rol <span className="text-red-500">*</span></label>
             <select name="role" value={formData.role} onChange={handleChange} className={inputClass}>
               {ROLE_OPTIONS.map(role => (
                 <option key={role} value={role}>{role}</option>

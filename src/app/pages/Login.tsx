@@ -53,7 +53,7 @@ export function Login() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="email" className="block text-[#222222] mb-2 font-medium text-sm">
-              Correo electrónico
+              Correo electrónico <span className="text-red-500">*</span>
             </label>
             <input
               type="email" id="email" name="email" required
@@ -65,7 +65,7 @@ export function Login() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label htmlFor="password" className="block text-[#222222] font-medium text-sm">
-                Contraseña
+                Contraseña <span className="text-red-500">*</span>
               </label>
               <Link to="/forgot-password" className="text-[#20A83E] text-sm hover:text-[#146B27] transition-colors">
                 ¿Olvidaste tu contraseña?

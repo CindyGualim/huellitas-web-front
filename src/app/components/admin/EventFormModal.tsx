@@ -78,14 +78,18 @@ export function EventFormModal({ mode, initialData, onSubmit, onClose }: EventFo
             </div>
           )}
 
+          <p className="text-xs text-[#222222]/50">
+            <span className="text-red-500">*</span> Campos obligatorios
+          </p>
+
           <div>
-            <label className={labelClass}>Título</label>
+            <label className={labelClass}>Título <span className="text-red-500">*</span></label>
             <input name="title" required value={formData.title} onChange={handleChange} className={inputClass} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>Tipo</label>
+              <label className={labelClass}>Tipo <span className="text-red-500">*</span></label>
               <select name="type" value={formData.type} onChange={handleChange} className={inputClass}>
                 {EVENT_TYPE_OPTIONS.map(option => (
                   <option key={option.value} value={option.value}>{option.label}</option>
@@ -94,7 +98,7 @@ export function EventFormModal({ mode, initialData, onSubmit, onClose }: EventFo
             </div>
 
             <div>
-              <label className={labelClass}>Estado</label>
+              <label className={labelClass}>Estado <span className="text-red-500">*</span></label>
               <select name="status" value={formData.status} onChange={handleChange} className={inputClass}>
                 {EVENT_STATUS_OPTIONS.map(option => (
                   <option key={option.value} value={option.value}>{option.label}</option>
@@ -104,24 +108,24 @@ export function EventFormModal({ mode, initialData, onSubmit, onClose }: EventFo
           </div>
 
           <div>
-            <label className={labelClass}>Ubicación</label>
+            <label className={labelClass}>Ubicación <span className="text-red-500">*</span></label>
             <input name="location" required value={formData.location} onChange={handleChange} className={inputClass} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>Fecha y hora de inicio</label>
+              <label className={labelClass}>Fecha y hora de inicio <span className="text-red-500">*</span></label>
               <input name="startDate" type="datetime-local" required value={formData.startDate} onChange={handleChange} className={inputClass} />
             </div>
 
             <div>
-              <label className={labelClass}>Fecha y hora de fin</label>
+              <label className={labelClass}>Fecha y hora de fin <span className="text-red-500">*</span></label>
               <input name="endDate" type="datetime-local" required value={formData.endDate} onChange={handleChange} className={inputClass} />
             </div>
           </div>
 
           <div>
-            <label className={labelClass}>Descripción</label>
+            <label className={labelClass}>Descripción <span className="text-red-500">*</span></label>
             <textarea name="description" required rows={3} value={formData.description} onChange={handleChange} className={inputClass} />
           </div>
 

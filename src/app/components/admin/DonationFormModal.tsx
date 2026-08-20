@@ -70,24 +70,28 @@ export function DonationFormModal({ mode, initialData, onSubmit, onClose }: Dona
             </div>
           )}
 
+          <p className="text-xs text-[#222222]/50">
+            <span className="text-red-500">*</span> Campos obligatorios
+          </p>
+
           <div>
-            <label className={labelClass}>Nombre del donante</label>
+            <label className={labelClass}>Nombre del donante <span className="text-red-500">*</span></label>
             <input name="donorName" required value={formData.donorName} onChange={handleChange} className={inputClass} />
           </div>
 
           <div>
-            <label className={labelClass}>Correo del donante</label>
+            <label className={labelClass}>Correo del donante <span className="text-red-500">*</span></label>
             <input name="donorEmail" type="email" required value={formData.donorEmail} onChange={handleChange} className={inputClass} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>Monto (Q)</label>
+              <label className={labelClass}>Monto (Q) <span className="text-red-500">*</span></label>
               <input name="amount" type="number" step="0.01" min="0.01" required value={formData.amount} onChange={handleChange} className={inputClass} />
             </div>
 
             <div>
-              <label className={labelClass}>Método de pago</label>
+              <label className={labelClass}>Método de pago <span className="text-red-500">*</span></label>
               <select name="paymentMethod" value={formData.paymentMethod} onChange={handleChange} className={inputClass}>
                 {PAYMENT_METHOD_OPTIONS.map(option => (
                   <option key={option.value} value={option.value}>{option.label}</option>

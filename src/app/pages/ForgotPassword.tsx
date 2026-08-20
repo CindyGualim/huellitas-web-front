@@ -55,7 +55,7 @@ export function ForgotPassword() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="email" className="block text-[#222222] mb-2 font-medium text-sm">
-              Correo electrónico
+              Correo electrónico <span className="text-red-500">*</span>
             </label>
             <input
               type="email" id="email" name="email" required
