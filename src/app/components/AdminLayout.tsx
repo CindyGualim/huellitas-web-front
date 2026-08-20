@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Heart, Users, User, LogOut, Home } from 'lucide-react';
+import { LayoutDashboard, Calendar, Heart, Users, User, LogOut, Home, UserCog } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export function AdminLayout() {
@@ -31,7 +31,10 @@ export function AdminLayout() {
     { path: '/admin/events', label: 'Eventos', icon: Calendar },
     { path: '/admin/adoptions', label: 'Adopciones', icon: Heart },
     { path: '/admin/registrations', label: 'Inscripciones', icon: Users },
-    { path: '/admin/profile', label: 'Perfil', icon: User }
+    { path: '/admin/profile', label: 'Perfil', icon: User },
+    ...(user?.role === 'Superadministrador'
+      ? [{ path: '/admin/users', label: 'Usuarios', icon: UserCog }]
+      : [])
   ];
 
   return (
