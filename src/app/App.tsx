@@ -16,6 +16,7 @@ import { AdminRegistrations } from './pages/admin/Registrations';
 import { AdminProfile } from './pages/admin/Profile';
 import { AdminSettings } from './pages/admin/Settings';
 import { AdminUsers } from './pages/admin/Users';
+import { AdminDonations } from './pages/admin/Donations';
 import { AdminLayout } from './components/AdminLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
@@ -60,6 +61,7 @@ export default function App() {
             <Route path="profile" element={<AdminProfile />} />
             <Route path="settings" element={<AdminSettings />} />
             <Route path="users" element={<AdminUsers />} />
+            <Route path="donations" element={<AdminDonations />} />
           </Route>
         </Routes>
       </AuthProvider>
