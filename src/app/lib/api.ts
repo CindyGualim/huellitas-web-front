@@ -1,11 +1,13 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
+export type UserRole = 'Superadministrador' | 'Voluntario' | 'Operador';
+
 export interface AuthUser {
   id: number;
   name: string;
   email: string;
   phone: string;
-  role: 'Administrador' | 'Voluntario';
+  role: UserRole;
   isActive: boolean;
   createdAt: string;
 }
@@ -40,6 +42,55 @@ export async function apiLogin(email: string, password: string) {
 export async function apiGetMe(token: string) {
   const response = await fetch(`${API_URL}/auth/me`, {
     headers: { Authorization: `Bearer ${token}` }
+  });
+
+  return parseResponse<AuthUser>(response);
+}
+
+export async function apiForgotPassword(email: string) {
+  const response = await fetch(`${API_URL}/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  });
+
+  return parseResponse<null>(response);
+}
+
+export async function apiResetPassword(token: string, password: string) {
+  const response = await fetch(`${API_URL}/auth/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, password })
+  });
+
+  return parseResponse<null>(response);
+}
+
+export interface UserPayload {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  role: UserRole;
+}
+
+export async function apiGetUsers(token: string) {
+  const response = await fetch(`${API_URL}/users`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  return parseResponse<AuthUser[]>(response);
+}
+
+export async function apiCreateUser(token: string, payload: UserPayload) {
+  const response = await fetch(`${API_URL}/users`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
   });
 
   return parseResponse<AuthUser>(response);
@@ -86,8 +137,9 @@ export interface PetPayload {
   images?: { imageUrl: string; isCover?: boolean }[];
 }
 
-export async function apiGetPets() {
-  const response = await fetch(`${API_URL}/pets`);
+export async function apiGetPets(options?: { availableOnly?: boolean }) {
+  const query = options?.availableOnly ? '?availableOnly=true' : '';
+  const response = await fetch(`${API_URL}/pets${query}`);
 
   return parseResponse<ApiPet[]>(response);
 }

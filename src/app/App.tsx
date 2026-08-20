@@ -15,10 +15,13 @@ import { AdminAdoptions } from './pages/admin/Adoptions';
 import { AdminRegistrations } from './pages/admin/Registrations';
 import { AdminProfile } from './pages/admin/Profile';
 import { AdminSettings } from './pages/admin/Settings';
+import { AdminUsers } from './pages/admin/Users';
 import { AdminLayout } from './components/AdminLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import { Login } from './pages/Login';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { ResetPassword } from './pages/ResetPassword';
 
 export default function App() {
   return (
@@ -38,6 +41,8 @@ export default function App() {
           <Route path="/events/register/:eventId" element={<EventRegistration />} />
           <Route path="/castration/confirmation" element={<CastrationConfirmation />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Admin Routes */}
           <Route
@@ -54,6 +59,7 @@ export default function App() {
             <Route path="registrations" element={<AdminRegistrations />} />
             <Route path="profile" element={<AdminProfile />} />
             <Route path="settings" element={<AdminSettings />} />
+            <Route path="users" element={<AdminUsers />} />
           </Route>
         </Routes>
       </AuthProvider>

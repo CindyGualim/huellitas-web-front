@@ -1,5 +1,6 @@
 import { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { useAuth } from '../context/AuthContext';
 import logoImg from '../../imports/huellitaslogo.png';
@@ -11,6 +12,7 @@ export function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -61,14 +63,29 @@ export function Login() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-[#222222] mb-2 font-medium text-sm">
-              Contraseña
-            </label>
-            <input
-              type="password" id="password" name="password" required
-              value={formData.password} onChange={handleChange}
-              className={inputClass} placeholder="••••••••"
-            />
+            <div className="flex items-center justify-between mb-2">
+              <label htmlFor="password" className="block text-[#222222] font-medium text-sm">
+                Contraseña
+              </label>
+              <Link to="/forgot-password" className="text-[#20A83E] text-sm hover:text-[#146B27] transition-colors">
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'} id="password" name="password" required
+                value={formData.password} onChange={handleChange}
+                className={`${inputClass} pr-12`} placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#222222]/40 hover:text-[#222222] transition-colors cursor-pointer"
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
 
           <PrimaryButton type="submit" variant="primary" fullWidth disabled={isSubmitting}>
