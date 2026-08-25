@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, Calendar, MapPin, ArrowLeft } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { events } from '../data/events';
+import { apiGetEvent, ApiEvent } from '../lib/api';
 
 const timeSlots = [
   { time: '8:00 AM', available: true },
@@ -19,13 +19,36 @@ const timeSlots = [
 export function EventRegistration() {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
-  const event = events.find(e => e.id === eventId);
-  
+  const [event, setEvent] = useState<ApiEvent | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [step, setStep] = useState(1);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [formData, setFormData] = useState({ ownerName: '', phone: '', petName: '', species: 'Perro', age: '' });
 
-  if (!event || event.category !== 'Jornadas de Castración') {
+  useEffect(() => {
+    const id = Number(eventId);
+
+    if (!id) {
+      setIsLoading(false);
+      return;
+    }
+
+    apiGetEvent(id)
+      .then(setEvent)
+      .catch(() => setEvent(null))
+      .finally(() => setIsLoading(false));
+  }, [eventId]);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="min-h-[50vh] flex items-center justify-center text-[#222222]/50">Cargando...</div>
+      </Layout>
+    );
+  }
+
+  if (!event || event.type !== 'Jornada_castracion') {
     return (
       <Layout>
         <div className="min-h-[50vh] flex flex-col items-center justify-center">
@@ -67,11 +90,11 @@ export function EventRegistration() {
             <div className="flex flex-wrap gap-4 text-white/80">
               <div className="flex items-center gap-2">
                 <MapPin size={18} />
-                <span>{event.municipality}</span>
+                <span>{event.location}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar size={18} />
-                <span>{event.date}</span>
+                <span>{new Date(event.startDate).toLocaleDateString('es-GT', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
               </div>
             </div>
           </div>

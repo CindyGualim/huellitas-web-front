@@ -4,8 +4,8 @@ import { ChevronLeft, ChevronRight, Calendar, MapPin, ArrowRight } from 'lucide-
 import { Layout } from '../components/Layout';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { apiGetPets, ApiPet } from '../lib/api';
-import { events } from '../data/events';
+import { apiGetPets, apiGetEvents, ApiPet, ApiEvent } from '../lib/api';
+import { eventTypeLabel } from '../lib/eventMappings';
 import logoImg from '../../imports/huellitaslogo.png';
 
 // Carousel photos
@@ -203,13 +203,17 @@ function FeaturedPetCard({ pet }: { pet: ApiPet }) {
 }
 
 export function Home() {
-  const upcomingEvents = events.slice(0, 3);
   const [featuredPets, setFeaturedPets] = useState<ApiPet[]>([]);
+  const [upcomingEvents, setUpcomingEvents] = useState<ApiEvent[]>([]);
 
   useEffect(() => {
     apiGetPets({ availableOnly: true })
       .then(allPets => setFeaturedPets(allPets.filter(pet => pet.featured)))
       .catch(() => setFeaturedPets([]));
+
+    apiGetEvents()
+      .then(events => setUpcomingEvents(events.filter(e => e.status === 'Programado' || e.status === 'En_curso').slice(0, 3)))
+      .catch(() => setUpcomingEvents([]));
   }, []);
 
   return (
@@ -252,48 +256,33 @@ export function Home() {
                 <div key={event.id} className="bg-white rounded-[24px] p-6 border border-[#D9D9D9]/60 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col transform hover:-translate-y-1">
                   <div className="mb-4">
                     <span className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm ${
-                      event.category === 'Jornadas de Castración' ? 'bg-[#20A83E] text-white' : 
-                      event.category === 'Jornadas de Adopción' ? 'bg-[#146B27] text-white' : 
+                      event.type === 'Jornada_castracion' ? 'bg-[#20A83E] text-white' :
+                      event.type === 'Jornada_adopcion' ? 'bg-[#146B27] text-white' :
                       'bg-[#D9D9D9] text-[#222222]'
                     }`}>
-                      {event.category}
+                      {eventTypeLabel(event.type)}
                     </span>
                   </div>
                   <h3 className="text-[#222222] text-xl font-bold mb-3">{event.title}</h3>
                   <div className="flex flex-col gap-2 mb-4">
                     <div className="flex items-center gap-2 text-[#222222]/70 text-sm">
                       <Calendar size={16} className="text-[#20A83E]" />
-                      <span>{event.date}</span>
+                      <span>{new Date(event.startDate).toLocaleDateString('es-GT', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                     </div>
                     <div className="flex items-center gap-2 text-[#222222]/70 text-sm">
                       <MapPin size={16} className="text-[#20A83E]" />
-                      <span>{event.municipality}</span>
+                      <span>{event.location}</span>
                     </div>
                   </div>
-                  
+
                   <p className="text-[#222222]/70 text-sm mb-6 flex-1 line-clamp-3">
                     {event.description}
                   </p>
 
-                  {event.category === 'Jornadas de Castración' && event.slotsTotal > 0 && (
-                    <div className="mb-6">
-                      <div className="flex justify-between text-xs text-[#222222]/60 mb-1.5 font-medium">
-                        <span>Cupos disponibles</span>
-                        <span>{event.slotsTotal - event.slotsUsed} de {event.slotsTotal}</span>
-                      </div>
-                      <div className="w-full bg-[#D9D9D9]/40 rounded-full h-1.5">
-                        <div
-                          className={`h-1.5 rounded-full ${event.slotsUsed >= event.slotsTotal ? 'bg-red-500' : 'bg-[#20A83E]'}`}
-                          style={{ width: `${Math.min((event.slotsUsed / event.slotsTotal) * 100, 100)}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
-
                   <div className="mt-auto">
-                    <Link to={event.category === 'Jornadas de Castración' ? `/events/register/${event.id}` : '/events'} className="block">
+                    <Link to={event.type === 'Jornada_castracion' ? `/events/register/${event.id}` : '/events'} className="block">
                       <button className="w-full bg-[#F8F8F8] hover:bg-[#D9D9D9]/50 text-[#222222] py-3 rounded-xl font-medium transition-colors border border-[#D9D9D9] flex items-center justify-center gap-2">
-                        {event.category === 'Jornadas de Castración' ? 'Inscribirse' : 'Más información'} <ArrowRight size={16} />
+                        {event.type === 'Jornada_castracion' ? 'Inscribirse' : 'Más información'} <ArrowRight size={16} />
                       </button>
                     </Link>
                   </div>

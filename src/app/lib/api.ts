@@ -242,6 +242,12 @@ export async function apiGetEvents() {
   return parseResponse<ApiEvent[]>(response);
 }
 
+export async function apiGetEvent(id: number) {
+  const response = await fetch(`${API_URL}/events/${id}`);
+
+  return parseResponse<ApiEvent>(response);
+}
+
 export async function apiCreateEvent(token: string, payload: EventPayload) {
   const response = await fetch(`${API_URL}/events`, {
     method: 'POST',
@@ -343,4 +349,29 @@ export async function apiGetAdoptionRequests(token: string) {
   });
 
   return parseResponse<ApiAdoptionRequest[]>(response);
+}
+
+export interface AdoptionRequestPayload {
+  fullName: string;
+  dpi: string;
+  phone: string;
+  email: string;
+  address: string;
+  municipality: string;
+  petId: number;
+  reason: string;
+  hasChildren: boolean;
+  familyAgreement: boolean;
+  hasVeterinarian: boolean;
+  secureSpace: boolean;
+}
+
+export async function apiCreateAdoptionRequest(payload: AdoptionRequestPayload) {
+  const response = await fetch(`${API_URL}/adoption-requests`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  return parseResponse<{ id: number }>(response);
 }
