@@ -37,7 +37,7 @@ export default function App() {
           <Route path="/adoptions" element={<Adoptions />} />
           <Route path="/adoptions/:category" element={<AdoptionCategory />} />
           <Route path="/adoptions/pet-profile/:petId" element={<PetProfile />} />
-          <Route path="/adoption-request" element={<AdoptionRequest />} />
+          <Route path="/adoption-request/:petId" element={<AdoptionRequest />} />
           <Route path="/events" element={<Events />} />
           <Route path="/events/register/:eventId" element={<EventRegistration />} />
           <Route path="/castration/confirmation" element={<CastrationConfirmation />} />

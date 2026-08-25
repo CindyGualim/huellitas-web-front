@@ -156,7 +156,7 @@ export function PetProfile() {
 
               {pet.status === 'Disponible' && (
                 <div className="mt-auto">
-                  <Link to="/adoption-request">
+                  <Link to={`/adoption-request/${pet.id}`}>
                     <button className="w-full bg-[#20A83E] hover:bg-[#146B27] text-white py-4 rounded-xl text-lg font-bold transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 mb-4">
                       Solicitar adopción de {pet.name.split(' ')[0]}
                     </button>
