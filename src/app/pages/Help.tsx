@@ -1,12 +1,21 @@
+import { useEffect, useState } from 'react';
 import { Heart, Package, Banknote, ShieldAlert, Info, HelpCircle } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { pets } from '../data/pets';
+import { apiGetPets, ApiPet } from '../lib/api';
 
 export function Help() {
-  const casesNeedingHelp = pets.filter(pet => 
-    ['princesa-jr', 'peluche-yamal', 'rocky-ronaldo'].includes(pet.id)
-  );
+  const [casesNeedingHelp, setCasesNeedingHelp] = useState<ApiPet[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    apiGetPets()
+      .then(allPets => {
+        setCasesNeedingHelp(allPets.filter(pet => pet.status === 'En_tratamiento').slice(0, 3));
+      })
+      .catch(() => setCasesNeedingHelp([]))
+      .finally(() => setIsLoading(false));
+  }, []);
 
   return (
     <Layout>
@@ -93,38 +102,41 @@ export function Help() {
               <h2 className="text-[#222222] text-2xl font-bold">Casos que Necesitan Ayuda</h2>
             </div>
             
-            <div className="grid md:grid-cols-3 gap-6">
-              {casesNeedingHelp.map(pet => (
-                <div key={pet.id} className="bg-[#F8F8F8] rounded-2xl overflow-hidden border border-[#D9D9D9]/50 flex flex-col">
-                  <div className="h-48 relative">
-                    <ImageWithFallback src={pet.image} alt={pet.name} className="absolute inset-0 w-full h-full object-cover" />
-                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-[#146B27]">
-                      {pet.species}
-                    </div>
-                  </div>
-                  <div className="p-5 flex-1 flex flex-col">
-                    <h3 className="text-xl font-bold text-[#222222] mb-2">{pet.name}</h3>
-                    <p className="text-[#222222]/70 text-sm mb-4 line-clamp-3">
-                      {pet.rescueStory}
-                    </p>
-                    
-                    <div className="mt-auto">
-                      <div className="bg-[#20A83E]/10 rounded-xl p-3">
-                        <h4 className="text-xs font-semibold uppercase text-[#146B27] mb-2 tracking-wider">Necesidades Urgentes</h4>
-                        <ul className="space-y-1.5">
-                          {pet.needs.slice(0, 3).map((need, i) => (
-                            <li key={i} className="text-sm text-[#222222]/80 flex items-start gap-2">
-                              <span className="text-[#20A83E] mt-0.5">•</span>
-                              <span className="leading-tight">Necesita {need.toLowerCase()}</span>
-                            </li>
-                          ))}
-                        </ul>
+            {isLoading ? (
+              <p className="text-[#222222]/50 text-sm">Cargando casos...</p>
+            ) : casesNeedingHelp.length === 0 ? (
+              <p className="text-[#222222]/50 text-sm">Por el momento no hay casos en tratamiento activo. ¡Gracias a tu apoyo!</p>
+            ) : (
+              <div className="grid md:grid-cols-3 gap-6">
+                {casesNeedingHelp.map(pet => {
+                  const cover = pet.images.find(img => img.isCover) ?? pet.images[0];
+
+                  return (
+                    <div key={pet.id} className="bg-[#F8F8F8] rounded-2xl overflow-hidden border border-[#D9D9D9]/50 flex flex-col">
+                      <div className="h-48 relative">
+                        <ImageWithFallback src={cover?.imageUrl} alt={pet.name} className="absolute inset-0 w-full h-full object-cover" />
+                        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-[#146B27]">
+                          {pet.species}
+                        </div>
+                      </div>
+                      <div className="p-5 flex-1 flex flex-col">
+                        <h3 className="text-xl font-bold text-[#222222] mb-2">{pet.name}</h3>
+                        <p className="text-[#222222]/70 text-sm mb-4 line-clamp-3">
+                          {pet.rescueStory}
+                        </p>
+
+                        <div className="mt-auto">
+                          <div className="bg-[#20A83E]/10 rounded-xl p-3">
+                            <h4 className="text-xs font-semibold uppercase text-[#146B27] mb-2 tracking-wider">En Recuperación</h4>
+                            <p className="text-sm text-[#222222]/80 leading-tight">{pet.breed} · Actualmente bajo tratamiento veterinario</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </section>
 
           {/* Section 5: Preguntas Frecuentes */}
