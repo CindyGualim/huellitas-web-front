@@ -375,3 +375,85 @@ export async function apiCreateAdoptionRequest(payload: AdoptionRequestPayload) 
 
   return parseResponse<{ id: number }>(response);
 }
+
+export interface ApiMedicalRecord {
+  id: number;
+  petId: number;
+  consultationDate: string;
+  recordType: 'Consulta' | 'Desparasitacion' | 'Tratamiento' | 'Vacunacion' | 'Castracion';
+  description: string;
+  treatment: string;
+  observations: string;
+}
+
+export interface MedicalRecordPayload {
+  consultationDate: string;
+  recordType: string;
+  description: string;
+  treatment: string;
+  observations: string;
+}
+
+export async function apiGetMedicalRecords(token: string, petId: number) {
+  const response = await fetch(`${API_URL}/medical-records/${petId}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  return parseResponse<ApiMedicalRecord[]>(response);
+}
+
+export async function apiCreateMedicalRecord(token: string, petId: number, payload: MedicalRecordPayload) {
+  const response = await fetch(`${API_URL}/medical-records/${petId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  return parseResponse<ApiMedicalRecord>(response);
+}
+
+export interface ApiEventRegistration {
+  id: number;
+  eventId: number;
+  petName: string;
+  species: string;
+  breed: string;
+  ownerName: string;
+  ownerPhone: string;
+  procedureType: 'Vacunacion' | 'Castracion';
+  notes: string | null;
+  createdAt: string;
+  event: ApiEvent;
+}
+
+export interface EventRegistrationPayload {
+  eventId: number;
+  petName: string;
+  species: string;
+  breed: string;
+  ownerName: string;
+  ownerPhone: string;
+  procedureType: string;
+  notes?: string;
+}
+
+export async function apiGetEventRegistrations(token: string) {
+  const response = await fetch(`${API_URL}/event-registrations`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  return parseResponse<ApiEventRegistration[]>(response);
+}
+
+export async function apiCreateEventRegistration(payload: EventRegistrationPayload) {
+  const response = await fetch(`${API_URL}/event-registrations`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  return parseResponse<ApiEventRegistration>(response);
+}

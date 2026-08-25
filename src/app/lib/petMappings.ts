@@ -38,3 +38,20 @@ export function statusLabel(value: string) {
 export function statusBadgeClass(value: string) {
   return STATUS_OPTIONS.find(option => option.value === value)?.badgeClass ?? 'bg-[#D9D9D9] text-[#222222]';
 }
+
+export const MEDICAL_RECORD_TYPE_OPTIONS = [
+  { value: 'Consulta', label: 'Consulta' },
+  { value: 'Vacunacion', label: 'Vacunación' },
+  { value: 'Desparasitacion', label: 'Desparasitación' },
+  { value: 'Tratamiento', label: 'Tratamiento' },
+  { value: 'Castracion', label: 'Castración' }
+] as const;
+
+export function medicalRecordTypeLabel(value: string) {
+  return MEDICAL_RECORD_TYPE_OPTIONS.find(option => option.value === value)?.label ?? value;
+}
+
+export const PROCEDURE_TYPE_OPTIONS = [
+  { value: 'Vacunacion', label: 'Vacunación' },
+  { value: 'Castracion', label: 'Castración' }
+] as const;
