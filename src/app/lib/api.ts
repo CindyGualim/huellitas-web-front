@@ -10,6 +10,7 @@ export interface AuthUser {
   role: UserRole;
   isActive: boolean;
   createdAt: string;
+  lastLoginAt: string | null;
 }
 
 interface ApiResponse<T> {
@@ -45,6 +46,32 @@ export async function apiGetMe(token: string) {
   });
 
   return parseResponse<AuthUser>(response);
+}
+
+export async function apiUpdateProfile(token: string, payload: { name: string; phone: string }) {
+  const response = await fetch(`${API_URL}/auth/me`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  return parseResponse<AuthUser>(response);
+}
+
+export async function apiChangePassword(token: string, payload: { currentPassword: string; newPassword: string }) {
+  const response = await fetch(`${API_URL}/auth/change-password`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  return parseResponse<null>(response);
 }
 
 export async function apiForgotPassword(email: string) {
