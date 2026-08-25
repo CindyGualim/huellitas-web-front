@@ -7,7 +7,8 @@ import { apiGetEvents, apiCreateEvent, apiUpdateEvent, apiDeleteEvent, ApiEvent,
 import { eventTypeLabel, eventStatusLabel, eventStatusBadgeClass } from '../../lib/eventMappings';
 
 export function AdminEvents() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  const canManageEvents = user?.role === 'Superadministrador';
   const [events, setEvents] = useState<ApiEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,10 +53,12 @@ export function AdminEvents() {
           <h1 className="text-[#222222] mb-1 text-3xl">Eventos</h1>
           <p className="text-[#222222]/50">Gestiona jornadas y actividades</p>
         </div>
-        <PrimaryButton variant="primary" className="flex items-center gap-2" onClick={() => setModalState({ mode: 'create' })}>
-          <Plus size={18} />
-          Nueva Jornada
-        </PrimaryButton>
+        {canManageEvents && (
+          <PrimaryButton variant="primary" className="flex items-center gap-2" onClick={() => setModalState({ mode: 'create' })}>
+            <Plus size={18} />
+            Nueva Jornada
+          </PrimaryButton>
+        )}
       </div>
 
       {error && (
@@ -74,7 +77,7 @@ export function AdminEvents() {
             <table className="w-full">
               <thead className="bg-[#F8F8F8] border-b border-[#D9D9D9]/50">
                 <tr>
-                  {['Título', 'Tipo', 'Ubicación', 'Fecha', 'Estado', 'Acciones'].map(h => (
+                  {(canManageEvents ? ['Título', 'Tipo', 'Ubicación', 'Fecha', 'Estado', 'Acciones'] : ['Título', 'Tipo', 'Ubicación', 'Fecha', 'Estado']).map(h => (
                     <th key={h} className="px-6 py-4 text-left text-xs font-medium text-[#222222]/50 uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
@@ -105,19 +108,21 @@ export function AdminEvents() {
                         {eventStatusLabel(event.status)}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setModalState({ mode: 'edit', event })}
-                          className="p-2 text-[#20A83E] hover:bg-[#20A83E]/10 rounded-lg transition-all duration-250 cursor-pointer"
-                        >
-                          <Edit2 size={15} />
-                        </button>
-                        <button onClick={() => handleDelete(event)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all duration-250 cursor-pointer">
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </td>
+                    {canManageEvents && (
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setModalState({ mode: 'edit', event })}
+                            className="p-2 text-[#20A83E] hover:bg-[#20A83E]/10 rounded-lg transition-all duration-250 cursor-pointer"
+                          >
+                            <Edit2 size={15} />
+                          </button>
+                          <button onClick={() => handleDelete(event)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all duration-250 cursor-pointer">
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

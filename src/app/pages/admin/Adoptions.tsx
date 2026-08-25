@@ -7,7 +7,8 @@ import { apiGetPets, apiCreatePet, apiUpdatePet, apiDeletePet, ApiPet, PetPayloa
 import { STATUS_OPTIONS, statusLabel, statusBadgeClass } from '../../lib/petMappings';
 
 export function AdminAdoptions() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  const canManagePets = user?.role === 'Superadministrador' || user?.role === 'Operador';
   const [pets, setPets] = useState<ApiPet[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,14 +63,16 @@ export function AdminAdoptions() {
           <h1 className="text-[#222222] mb-1 text-3xl">Adopciones</h1>
           <p className="text-[#222222]/50">Gestiona perritos y gatitos disponibles</p>
         </div>
-        <PrimaryButton
-          variant="primary"
-          className="flex items-center gap-2"
-          onClick={() => setModalState({ mode: 'create' })}
-        >
-          <Plus size={18} />
-          Agregar Mascota
-        </PrimaryButton>
+        {canManagePets && (
+          <PrimaryButton
+            variant="primary"
+            className="flex items-center gap-2"
+            onClick={() => setModalState({ mode: 'create' })}
+          >
+            <Plus size={18} />
+            Agregar Mascota
+          </PrimaryButton>
+        )}
       </div>
 
       {error && (
@@ -97,13 +100,19 @@ export function AdminAdoptions() {
                       Sin imagen
                     </div>
                   )}
-                  <button
-                    onClick={() => cycleStatus(pet)}
-                    title="Click para cambiar el estado"
-                    className={`absolute top-3 right-3 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-250 hover:scale-[1.05] cursor-pointer ${statusBadgeClass(pet.status)}`}
-                  >
-                    {statusLabel(pet.status)}
-                  </button>
+                  {canManagePets ? (
+                    <button
+                      onClick={() => cycleStatus(pet)}
+                      title="Click para cambiar el estado"
+                      className={`absolute top-3 right-3 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-250 hover:scale-[1.05] cursor-pointer ${statusBadgeClass(pet.status)}`}
+                    >
+                      {statusLabel(pet.status)}
+                    </button>
+                  ) : (
+                    <span className={`absolute top-3 right-3 px-3 py-1.5 rounded-full text-xs font-medium ${statusBadgeClass(pet.status)}`}>
+                      {statusLabel(pet.status)}
+                    </span>
+                  )}
                 </div>
                 <div className="p-5">
                   <h3 className="text-[#222222] mb-2 text-lg font-medium">{pet.name}</h3>
@@ -121,19 +130,23 @@ export function AdminAdoptions() {
                       <Eye size={15} />
                       Ver
                     </a>
-                    <button
-                      onClick={() => setModalState({ mode: 'edit', pet })}
-                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[#222222] bg-[#F8F8F8] rounded-lg hover:bg-[#D9D9D9]/40 transition-all duration-250 text-sm border border-[#D9D9D9] cursor-pointer"
-                    >
-                      <Edit2 size={15} />
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => handleDelete(pet)}
-                      className="flex items-center justify-center px-3 py-2 text-red-500 bg-red-50 rounded-lg hover:bg-red-100 transition-all duration-250 text-sm border border-red-100 cursor-pointer"
-                    >
-                      <Trash2 size={15} />
-                    </button>
+                    {canManagePets && (
+                      <>
+                        <button
+                          onClick={() => setModalState({ mode: 'edit', pet })}
+                          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[#222222] bg-[#F8F8F8] rounded-lg hover:bg-[#D9D9D9]/40 transition-all duration-250 text-sm border border-[#D9D9D9] cursor-pointer"
+                        >
+                          <Edit2 size={15} />
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => handleDelete(pet)}
+                          className="flex items-center justify-center px-3 py-2 text-red-500 bg-red-50 rounded-lg hover:bg-red-100 transition-all duration-250 text-sm border border-red-100 cursor-pointer"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
