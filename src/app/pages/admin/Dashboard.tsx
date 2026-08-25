@@ -17,8 +17,8 @@ interface ActivityItem {
 interface DashboardData {
   pets: ApiPet[];
   events: ApiEvent[];
-  donations: ApiDonation[];
-  requests: ApiAdoptionRequest[];
+  donations: ApiDonation[] | null;
+  requests: ApiAdoptionRequest[] | null;
 }
 
 function timeAgo(date: Date) {
@@ -33,11 +33,16 @@ function timeAgo(date: Date) {
 }
 
 export function AdminDashboard() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [data, setData] = useState<DashboardData | null>(null);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Cada rol solo puede consultar lo que el backend le permite — pedir de más
+  // solo produce un 403 y rompe el dashboard entero para ese usuario.
+  const canViewDonations = user?.role === 'Superadministrador';
+  const canViewAdoptionRequests = user?.role === 'Superadministrador' || user?.role === 'Operador';
 
   useEffect(() => {
     if (!token) return;
@@ -45,8 +50,8 @@ export function AdminDashboard() {
     Promise.all([
       apiGetPets(),
       apiGetEvents(),
-      apiGetDonations(token),
-      apiGetAdoptionRequests(token)
+      canViewDonations ? apiGetDonations(token) : Promise.resolve(null),
+      canViewAdoptionRequests ? apiGetAdoptionRequests(token) : Promise.resolve(null)
     ])
       .then(([pets, events, donations, requests]) => {
         setData({ pets, events, donations, requests });
@@ -59,7 +64,7 @@ export function AdminDashboard() {
           date: new Date(e.createdAt)
         }));
 
-        const donationItems: ActivityItem[] = donations.map(d => ({
+        const donationItems: ActivityItem[] = (donations ?? []).map(d => ({
           key: `donation-${d.id}`,
           icon: Gift,
           title: d.donorName,
@@ -67,7 +72,7 @@ export function AdminDashboard() {
           date: new Date(d.donationDate)
         }));
 
-        const requestItems: ActivityItem[] = requests.map(r => ({
+        const requestItems: ActivityItem[] = (requests ?? []).map(r => ({
           key: `request-${r.id}`,
           icon: Heart,
           title: r.adopter.fullName,
@@ -83,14 +88,14 @@ export function AdminDashboard() {
       })
       .catch(err => setError(err instanceof Error ? err.message : 'No se pudieron cargar los datos del dashboard'))
       .finally(() => setIsLoading(false));
-  }, [token]);
+  }, [token, canViewDonations, canViewAdoptionRequests]);
 
   const now = new Date();
   const statCards = data ? [
     { label: 'Mascotas Disponibles', value: String(data.pets.filter(p => p.status === 'Disponible').length), icon: Heart, link: '/admin/adoptions', color: '#20A83E' },
     { label: 'Próximas Jornadas', value: String(data.events.filter(e => e.status === 'Programado').length), icon: Calendar, link: '/admin/events', color: '#146B27' },
-    { label: 'Adopciones Pendientes', value: String(data.requests.filter(r => r.status === 'Pendiente').length), icon: Users, link: '/admin/adoptions', color: '#20A83E' },
-    {
+    ...(data.requests ? [{ label: 'Adopciones Pendientes', value: String(data.requests.filter(r => r.status === 'Pendiente').length), icon: Users, link: '/admin/adoptions', color: '#20A83E' }] : []),
+    ...(data.donations ? [{
       label: 'Donaciones Este Mes',
       value: `Q${data.donations
         .filter(d => {
@@ -102,7 +107,14 @@ export function AdminDashboard() {
       icon: DollarSign,
       link: '/admin/donations',
       color: '#146B27'
-    }
+    }] : [])
+  ] : [];
+
+  const chartSlides = data ? [
+    { title: 'Mascotas por estado', subtitle: 'Distribución actual del refugio', content: <PetsByStatusChart pets={data.pets} /> },
+    { title: 'Mascotas por especie', subtitle: 'Perros vs. gatos disponibles', content: <PetsBySpeciesChart pets={data.pets} /> },
+    ...(data.donations ? [{ title: 'Donaciones', subtitle: 'Total recaudado por mes (últimos 6 meses)', content: <DonationsTrendChart donations={data.donations} /> }] : []),
+    ...(data.requests ? [{ title: 'Solicitudes de adopción', subtitle: 'Distribución por estado', content: <AdoptionRequestsChart requests={data.requests} /> }] : [])
   ] : [];
 
   return (
@@ -141,16 +153,7 @@ export function AdminDashboard() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            {data && (
-              <ChartCarousel
-                slides={[
-                  { title: 'Mascotas por estado', subtitle: 'Distribución actual del refugio', content: <PetsByStatusChart pets={data.pets} /> },
-                  { title: 'Mascotas por especie', subtitle: 'Perros vs. gatos disponibles', content: <PetsBySpeciesChart pets={data.pets} /> },
-                  { title: 'Donaciones', subtitle: 'Total recaudado por mes (últimos 6 meses)', content: <DonationsTrendChart donations={data.donations} /> },
-                  { title: 'Solicitudes de adopción', subtitle: 'Distribución por estado', content: <AdoptionRequestsChart requests={data.requests} /> }
-                ]}
-              />
-            )}
+            {data && <ChartCarousel slides={chartSlides} />}
 
             <div className="bg-white rounded-[16px] p-6 shadow-sm border border-[#D9D9D9]/50">
               <h2 className="text-[#222222] mb-4 text-xl">Actividad Reciente</h2>
