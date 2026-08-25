@@ -1,6 +1,7 @@
 import { useEffect, useState, FormEvent } from 'react';
 import { Plus, X, Shield } from 'lucide-react';
 import { PrimaryButton } from '../../components/PrimaryButton';
+import { RestrictedAccess } from '../../components/admin/RestrictedAccess';
 import { useAuth } from '../../context/AuthContext';
 import { apiGetUsers, apiCreateUser, AuthUser, UserRole } from '../../lib/api';
 
@@ -101,20 +102,23 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
 }
 
 export function AdminUsers() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  const hasAccess = user?.role === 'Superadministrador';
   const [users, setUsers] = useState<AuthUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    if (!token) return;
+    if (!token || !hasAccess) return;
 
     apiGetUsers(token)
       .then(setUsers)
       .catch(err => setError(err instanceof Error ? err.message : 'No se pudieron cargar los usuarios'))
       .finally(() => setIsLoading(false));
-  }, [token]);
+  }, [token, hasAccess]);
+
+  if (!hasAccess) return <RestrictedAccess />;
 
   return (
     <div className="p-8 bg-[#F8F8F8] min-h-screen">

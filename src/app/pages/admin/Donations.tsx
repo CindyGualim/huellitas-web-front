@@ -2,25 +2,29 @@ import { useEffect, useState } from 'react';
 import { Plus, Edit2, Gift } from 'lucide-react';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { DonationFormModal } from '../../components/admin/DonationFormModal';
+import { RestrictedAccess } from '../../components/admin/RestrictedAccess';
 import { useAuth } from '../../context/AuthContext';
 import { apiGetDonations, apiCreateDonation, apiUpdateDonation, ApiDonation, DonationPayload } from '../../lib/api';
 import { paymentMethodLabel } from '../../lib/eventMappings';
 
 export function AdminDonations() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  const hasAccess = user?.role === 'Superadministrador';
   const [donations, setDonations] = useState<ApiDonation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modalState, setModalState] = useState<{ mode: 'create' | 'edit'; donation?: ApiDonation } | null>(null);
 
   useEffect(() => {
-    if (!token) return;
+    if (!token || !hasAccess) return;
 
     apiGetDonations(token)
       .then(setDonations)
       .catch(err => setError(err instanceof Error ? err.message : 'No se pudieron cargar las donaciones'))
       .finally(() => setIsLoading(false));
-  }, [token]);
+  }, [token, hasAccess]);
+
+  if (!hasAccess) return <RestrictedAccess />;
 
   const total = donations.reduce((sum, d) => sum + Number(d.amount), 0);
 
