@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, Calendar, MapPin, ArrowLeft } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { apiGetEvent, ApiEvent } from '../lib/api';
+import { apiGetEvent, apiCreateEventRegistration, ApiEvent } from '../lib/api';
 
 const timeSlots = [
   { time: '8:00 AM', available: true },
@@ -24,7 +24,9 @@ export function EventRegistration() {
 
   const [step, setStep] = useState(1);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [formData, setFormData] = useState({ ownerName: '', phone: '', petName: '', species: 'Perro', age: '' });
+  const [formData, setFormData] = useState({ ownerName: '', phone: '', petName: '', species: 'Perro', breed: '' });
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const id = Number(eventId);
@@ -63,9 +65,28 @@ export function EventRegistration() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    window.location.href = '/castration/confirmation';
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      await apiCreateEventRegistration({
+        eventId: event.id,
+        petName: formData.petName,
+        species: formData.species,
+        breed: formData.breed,
+        ownerName: formData.ownerName,
+        ownerPhone: formData.phone,
+        procedureType: 'Castracion',
+        notes: selectedTime ? `Horario preferido: ${selectedTime}` : undefined
+      });
+      navigate('/castration/confirmation');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo completar la inscripción');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const progressPercentage = (step / 2) * 100;
@@ -148,6 +169,17 @@ export function EventRegistration() {
             {step === 2 && (
               <div>
                 <h2 className="text-[#222222] mb-6 text-2xl font-bold">Ingresa los datos del paciente</h2>
+
+                {error && (
+                  <div className="mb-6 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+                    {error}
+                  </div>
+                )}
+
+                <p className="text-xs text-[#222222]/50 mb-5">
+                  <span className="text-red-500">*</span> Campos obligatorios
+                </p>
+
                 <form onSubmit={handleFormSubmit} className="space-y-5">
                   <div className="grid sm:grid-cols-2 gap-5">
                     {[
@@ -155,7 +187,7 @@ export function EventRegistration() {
                       { id: 'phone', label: 'Número de teléfono', type: 'tel' },
                     ].map(field => (
                       <div key={field.id}>
-                        <label htmlFor={field.id} className="block text-[#222222] mb-2 font-medium text-sm">{field.label}</label>
+                        <label htmlFor={field.id} className="block text-[#222222] mb-2 font-medium text-sm">{field.label} <span className="text-red-500">*</span></label>
                         <input
                           type={field.type} id={field.id} name={field.id} required
                           value={formData[field.id as keyof typeof formData]}
@@ -165,11 +197,11 @@ export function EventRegistration() {
                       </div>
                     ))}
                   </div>
-                  
+
                   <div className="border-t border-[#D9D9D9]/50 pt-5 mt-2">
                     <div className="grid sm:grid-cols-2 gap-5">
                       <div>
-                        <label htmlFor="petName" className="block text-[#222222] mb-2 font-medium text-sm">Nombre de la mascota</label>
+                        <label htmlFor="petName" className="block text-[#222222] mb-2 font-medium text-sm">Nombre de la mascota <span className="text-red-500">*</span></label>
                         <input
                           type="text" id="petName" name="petName" required
                           value={formData.petName}
@@ -179,18 +211,18 @@ export function EventRegistration() {
                       </div>
 
                       <div>
-                        <label htmlFor="age" className="block text-[#222222] mb-2 font-medium text-sm">Edad aproximada</label>
+                        <label htmlFor="breed" className="block text-[#222222] mb-2 font-medium text-sm">Raza <span className="text-red-500">*</span></label>
                         <input
-                          type="text" id="age" name="age" required
-                          value={formData.age} onChange={handleFormChange}
-                          placeholder="ej: 2 años" className={inputClass}
+                          type="text" id="breed" name="breed" required
+                          value={formData.breed} onChange={handleFormChange}
+                          placeholder="ej: Mestizo" className={inputClass}
                         />
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-[#222222] mb-2 font-medium text-sm">Especie</label>
+                    <label className="block text-[#222222] mb-2 font-medium text-sm">Especie <span className="text-red-500">*</span></label>
                     <div className="flex gap-3">
                       {['Perro', 'Gato'].map(s => (
                         <button
@@ -210,7 +242,9 @@ export function EventRegistration() {
 
                   <div className="flex gap-3 pt-6 mt-4">
                     <PrimaryButton type="button" variant="ghost" onClick={() => setStep(1)} className="px-8">Atrás</PrimaryButton>
-                    <PrimaryButton type="submit" variant="primary" fullWidth className="py-4">Confirmar inscripción</PrimaryButton>
+                    <PrimaryButton type="submit" variant="primary" fullWidth className="py-4" disabled={isSubmitting}>
+                      {isSubmitting ? 'Enviando...' : 'Confirmar inscripción'}
+                    </PrimaryButton>
                   </div>
                 </form>
               </div>
