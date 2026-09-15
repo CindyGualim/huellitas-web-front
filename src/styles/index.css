@@ -1,3 +1,11 @@
 @import './fonts.css';
 @import './tailwind.css';
 @import './theme.css';
+
+/* El header (Layout.tsx) encoge al hacer scroll mientras está "sticky", y ese
+   cambio de altura hace que el navegador reancle el scroll (CSS Scroll Anchoring),
+   generando un loop donde el header crece y se encoge sin parar justo al cruzar
+   el umbral de scroll. Se desactiva a nivel de documento para eliminar el loop. */
+html {
+  overflow-anchor: none;
+}

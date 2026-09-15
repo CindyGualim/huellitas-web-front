@@ -1,6 +1,6 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, Instagram } from 'lucide-react';
+import { Menu, X, Instagram, LogIn } from 'lucide-react';
 import logoImg from '../../imports/huellitaslogo.png';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
@@ -70,6 +70,13 @@ export function Layout({ children, showNavbar = true }: LayoutProps) {
               >
                 Quiero Ayudar
               </Link>
+              <Link
+                to="/admin"
+                title="Panel de Administración"
+                className="text-[#222222]/50 hover:text-[#20A83E] transition-colors duration-300"
+              >
+                <LogIn size={20} />
+              </Link>
             </div>
           </div>
 
@@ -103,6 +110,14 @@ export function Layout({ children, showNavbar = true }: LayoutProps) {
                   className="text-[#20A83E] py-3 px-4 rounded-lg hover:bg-[#D9D9D9]/30 transition-all duration-250 text-lg font-medium"
                 >
                   Quiero Ayudar
+                </Link>
+                <Link
+                  to="/admin"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 text-[#222222]/60 py-3 px-4 rounded-lg hover:bg-[#D9D9D9]/30 transition-all duration-250 text-base"
+                >
+                  <LogIn size={18} />
+                  Panel de Administración
                 </Link>
               </div>
             </div>
