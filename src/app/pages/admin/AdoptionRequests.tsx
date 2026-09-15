@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { ChevronDown, ChevronUp, Phone, Mail, MapPin } from 'lucide-react';
 import { RestrictedAccess } from '../../components/admin/RestrictedAccess';
+import { Pagination } from '../../components/admin/Pagination';
 import { useAuth } from '../../context/AuthContext';
-import { apiGetAdoptionRequests, apiUpdateAdoptionRequestStatus, ApiAdoptionRequest, AdoptionRequestStatus } from '../../lib/api';
+import { apiGetAdoptionRequests, apiUpdateAdoptionRequestStatus, ApiAdoptionRequest, AdoptionRequestStatus, ApiPagination } from '../../lib/api';
 import { ADOPTION_REQUEST_STATUS_OPTIONS, adoptionRequestStatusLabel, adoptionRequestStatusBadgeClass } from '../../lib/petMappings';
 
 const YES_NO_QUESTIONS: { key: 'hasChildren' | 'familyAgreement' | 'hasVeterinarian' | 'secureSpace'; question: string }[] = [
@@ -16,6 +17,8 @@ export function AdminAdoptionRequests() {
   const { token, user } = useAuth();
   const hasAccess = user?.role === 'Superadministrador' || user?.role === 'Operador';
   const [requests, setRequests] = useState<ApiAdoptionRequest[]>([]);
+  const [pagination, setPagination] = useState<ApiPagination | null>(null);
+  const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
@@ -24,11 +27,15 @@ export function AdminAdoptionRequests() {
   useEffect(() => {
     if (!token || !hasAccess) return;
 
-    apiGetAdoptionRequests(token)
-      .then(setRequests)
+    setIsLoading(true);
+    apiGetAdoptionRequests(token, { page })
+      .then(({ items, pagination }) => {
+        setRequests(items);
+        setPagination(pagination);
+      })
       .catch(err => setError(err instanceof Error ? err.message : 'No se pudieron cargar las solicitudes'))
       .finally(() => setIsLoading(false));
-  }, [token, hasAccess]);
+  }, [token, hasAccess, page]);
 
   if (!hasAccess) return <RestrictedAccess />;
 
@@ -137,6 +144,8 @@ export function AdminAdoptionRequests() {
           })}
         </div>
       )}
+
+      {pagination && <Pagination pagination={pagination} onPageChange={setPage} />}
     </div>
   );
 }

@@ -37,10 +37,10 @@ export function AdminTracking() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    apiGetPets()
-      .then(allPets => {
-        setPets(allPets);
-        if (allPets.length > 0) setSelectedPet(allPets[0]);
+    apiGetPets({ limit: 100 })
+      .then(({ items }) => {
+        setPets(items);
+        if (items.length > 0) setSelectedPet(items[0]);
       })
       .catch(err => setError(err instanceof Error ? err.message : 'No se pudieron cargar las mascotas'))
       .finally(() => setIsLoadingPets(false));

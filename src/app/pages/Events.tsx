@@ -67,8 +67,8 @@ export function Events() {
   const [activeType, setActiveType] = useState<string | 'Todas'>('Todas');
 
   useEffect(() => {
-    apiGetEvents()
-      .then(allEvents => setEvents(allEvents.filter(e => e.status === 'Programado' || e.status === 'En_curso')))
+    apiGetEvents({ limit: 100 })
+      .then(({ items }) => setEvents(items.filter(e => e.status === 'Programado' || e.status === 'En_curso')))
       .catch(() => setEvents([]))
       .finally(() => setIsLoading(false));
   }, []);

@@ -25,8 +25,8 @@ export function PetProfile() {
     apiGetPet(id)
       .then(fetchedPet => {
         setPet(fetchedPet);
-        return apiGetPets({ availableOnly: true }).then(allPets => {
-          setOtherPets(allPets.filter(p => p.id !== fetchedPet.id && p.species === fetchedPet.species).slice(0, 3));
+        return apiGetPets({ availableOnly: true, limit: 100 }).then(({ items }) => {
+          setOtherPets(items.filter(p => p.id !== fetchedPet.id && p.species === fetchedPet.species).slice(0, 3));
         });
       })
       .catch(() => setNotFound(true))

@@ -2,8 +2,9 @@ import { useEffect, useState, FormEvent } from 'react';
 import { Plus, X, Shield } from 'lucide-react';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { RestrictedAccess } from '../../components/admin/RestrictedAccess';
+import { Pagination } from '../../components/admin/Pagination';
 import { useAuth } from '../../context/AuthContext';
-import { apiGetUsers, apiCreateUser, AuthUser, UserRole } from '../../lib/api';
+import { apiGetUsers, apiCreateUser, AuthUser, UserRole, ApiPagination } from '../../lib/api';
 
 const ROLE_OPTIONS: UserRole[] = ['Superadministrador', 'Voluntario', 'Operador'];
 
@@ -105,6 +106,8 @@ export function AdminUsers() {
   const { token, user } = useAuth();
   const hasAccess = user?.role === 'Superadministrador';
   const [users, setUsers] = useState<AuthUser[]>([]);
+  const [pagination, setPagination] = useState<ApiPagination | null>(null);
+  const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -112,11 +115,15 @@ export function AdminUsers() {
   useEffect(() => {
     if (!token || !hasAccess) return;
 
-    apiGetUsers(token)
-      .then(setUsers)
+    setIsLoading(true);
+    apiGetUsers(token, { page })
+      .then(({ items, pagination }) => {
+        setUsers(items);
+        setPagination(pagination);
+      })
       .catch(err => setError(err instanceof Error ? err.message : 'No se pudieron cargar los usuarios'))
       .finally(() => setIsLoading(false));
-  }, [token, hasAccess]);
+  }, [token, hasAccess, page]);
 
   if (!hasAccess) return <RestrictedAccess />;
 
@@ -168,6 +175,8 @@ export function AdminUsers() {
           </table>
         </div>
       )}
+
+      {pagination && <Pagination pagination={pagination} onPageChange={setPage} />}
 
       {isModalOpen && (
         <CreateUserModal

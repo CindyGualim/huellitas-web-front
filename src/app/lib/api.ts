@@ -20,6 +20,31 @@ interface ApiResponse<T> {
   data: T;
 }
 
+export interface ApiPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface ApiPage<T> {
+  items: T[];
+  pagination: ApiPagination;
+}
+
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+}
+
+function paginationQuery(params?: PaginationParams) {
+  const search = new URLSearchParams();
+  if (params?.page) search.set('page', String(params.page));
+  if (params?.limit) search.set('limit', String(params.limit));
+  const query = search.toString();
+  return query ? `?${query}` : '';
+}
+
 async function parseResponse<T>(response: Response): Promise<T> {
   const body: ApiResponse<T> = await response.json();
 
@@ -102,12 +127,12 @@ export interface UserPayload {
   role: UserRole;
 }
 
-export async function apiGetUsers(token: string) {
-  const response = await fetch(`${API_URL}/users`, {
+export async function apiGetUsers(token: string, params?: PaginationParams) {
+  const response = await fetch(`${API_URL}/users${paginationQuery(params)}`, {
     headers: { Authorization: `Bearer ${token}` }
   });
 
-  return parseResponse<AuthUser[]>(response);
+  return parseResponse<ApiPage<AuthUser>>(response);
 }
 
 export async function apiCreateUser(token: string, payload: UserPayload) {
@@ -164,11 +189,13 @@ export interface PetPayload {
   images?: { imageUrl: string; isCover?: boolean }[];
 }
 
-export async function apiGetPets(options?: { availableOnly?: boolean }) {
-  const query = options?.availableOnly ? '?availableOnly=true' : '';
-  const response = await fetch(`${API_URL}/pets${query}`);
+export async function apiGetPets(options?: { availableOnly?: boolean } & PaginationParams) {
+  const search = new URLSearchParams(paginationQuery(options).slice(1));
+  if (options?.availableOnly) search.set('availableOnly', 'true');
+  const query = search.toString();
+  const response = await fetch(`${API_URL}/pets${query ? `?${query}` : ''}`);
 
-  return parseResponse<ApiPet[]>(response);
+  return parseResponse<ApiPage<ApiPet>>(response);
 }
 
 export async function apiGetPet(id: number) {
@@ -249,10 +276,10 @@ export interface EventPayload {
   status: string;
 }
 
-export async function apiGetEvents() {
-  const response = await fetch(`${API_URL}/events`);
+export async function apiGetEvents(params?: PaginationParams) {
+  const response = await fetch(`${API_URL}/events${paginationQuery(params)}`);
 
-  return parseResponse<ApiEvent[]>(response);
+  return parseResponse<ApiPage<ApiEvent>>(response);
 }
 
 export async function apiGetEvent(id: number) {
@@ -314,12 +341,16 @@ export interface DonationPayload {
   notes?: string;
 }
 
-export async function apiGetDonations(token: string) {
-  const response = await fetch(`${API_URL}/donations`, {
+export interface ApiDonationsPage extends ApiPage<ApiDonation> {
+  totalAmount: number;
+}
+
+export async function apiGetDonations(token: string, params?: PaginationParams) {
+  const response = await fetch(`${API_URL}/donations${paginationQuery(params)}`, {
     headers: { Authorization: `Bearer ${token}` }
   });
 
-  return parseResponse<ApiDonation[]>(response);
+  return parseResponse<ApiDonationsPage>(response);
 }
 
 export async function apiCreateDonation(token: string, payload: DonationPayload) {
@@ -370,12 +401,12 @@ export interface ApiAdoptionRequest {
   pet: ApiPet;
 }
 
-export async function apiGetAdoptionRequests(token: string) {
-  const response = await fetch(`${API_URL}/adoption-requests`, {
+export async function apiGetAdoptionRequests(token: string, params?: PaginationParams) {
+  const response = await fetch(`${API_URL}/adoption-requests${paginationQuery(params)}`, {
     headers: { Authorization: `Bearer ${token}` }
   });
 
-  return parseResponse<ApiAdoptionRequest[]>(response);
+  return parseResponse<ApiPage<ApiAdoptionRequest>>(response);
 }
 
 export async function apiUpdateAdoptionRequestStatus(token: string, id: number, status: AdoptionRequestStatus) {
@@ -480,12 +511,12 @@ export interface EventRegistrationPayload {
   notes?: string;
 }
 
-export async function apiGetEventRegistrations(token: string) {
-  const response = await fetch(`${API_URL}/event-registrations`, {
+export async function apiGetEventRegistrations(token: string, params?: PaginationParams) {
+  const response = await fetch(`${API_URL}/event-registrations${paginationQuery(params)}`, {
     headers: { Authorization: `Bearer ${token}` }
   });
 
-  return parseResponse<ApiEventRegistration[]>(response);
+  return parseResponse<ApiPage<ApiEventRegistration>>(response);
 }
 
 export async function apiCreateEventRegistration(payload: EventRegistrationPayload) {

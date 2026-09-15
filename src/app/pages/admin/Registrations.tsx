@@ -1,24 +1,31 @@
 import { useEffect, useState } from 'react';
 import { Phone, MapPin, Calendar } from 'lucide-react';
 import { RestrictedAccess } from '../../components/admin/RestrictedAccess';
+import { Pagination } from '../../components/admin/Pagination';
 import { useAuth } from '../../context/AuthContext';
-import { apiGetEventRegistrations, ApiEventRegistration } from '../../lib/api';
+import { apiGetEventRegistrations, ApiEventRegistration, ApiPagination } from '../../lib/api';
 
 export function AdminRegistrations() {
   const { token, user } = useAuth();
   const hasAccess = user?.role === 'Superadministrador' || user?.role === 'Operador' || user?.role === 'Voluntario';
   const [registrations, setRegistrations] = useState<ApiEventRegistration[]>([]);
+  const [pagination, setPagination] = useState<ApiPagination | null>(null);
+  const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token || !hasAccess) return;
 
-    apiGetEventRegistrations(token)
-      .then(setRegistrations)
+    setIsLoading(true);
+    apiGetEventRegistrations(token, { page })
+      .then(({ items, pagination }) => {
+        setRegistrations(items);
+        setPagination(pagination);
+      })
       .catch(err => setError(err instanceof Error ? err.message : 'No se pudieron cargar las inscripciones'))
       .finally(() => setIsLoading(false));
-  }, [token, hasAccess]);
+  }, [token, hasAccess, page]);
 
   if (!hasAccess) return <RestrictedAccess />;
 
@@ -86,6 +93,8 @@ export function AdminRegistrations() {
           </div>
         </div>
       )}
+
+      {pagination && <Pagination pagination={pagination} onPageChange={setPage} />}
     </div>
   );
 }

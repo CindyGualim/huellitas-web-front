@@ -2,14 +2,17 @@ import { useEffect, useState } from 'react';
 import { Plus, Edit2, Eye, Trash2 } from 'lucide-react';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { PetFormModal } from '../../components/admin/PetFormModal';
+import { Pagination } from '../../components/admin/Pagination';
 import { useAuth } from '../../context/AuthContext';
-import { apiGetPets, apiCreatePet, apiUpdatePet, apiDeletePet, ApiPet, PetPayload } from '../../lib/api';
+import { apiGetPets, apiCreatePet, apiUpdatePet, apiDeletePet, ApiPet, PetPayload, ApiPagination } from '../../lib/api';
 import { statusLabel, statusBadgeClass, nextValidStatuses } from '../../lib/petMappings';
 
 export function AdminAdoptions() {
   const { token, user } = useAuth();
   const canManagePets = user?.role === 'Superadministrador' || user?.role === 'Operador';
   const [pets, setPets] = useState<ApiPet[]>([]);
+  const [pagination, setPagination] = useState<ApiPagination | null>(null);
+  const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modalState, setModalState] = useState<{ mode: 'create' | 'edit'; pet?: ApiPet } | null>(null);
@@ -17,15 +20,18 @@ export function AdminAdoptions() {
 
   const loadPets = () => {
     setIsLoading(true);
-    apiGetPets()
-      .then(setPets)
+    apiGetPets({ page })
+      .then(({ items, pagination }) => {
+        setPets(items);
+        setPagination(pagination);
+      })
       .catch(err => setError(err instanceof Error ? err.message : 'No se pudieron cargar las mascotas'))
       .finally(() => setIsLoading(false));
   };
 
   useEffect(() => {
     loadPets();
-  }, []);
+  }, [page]);
 
   const changeStatus = async (pet: ApiPet, nextStatus: string) => {
     if (!token) return;
@@ -179,6 +185,8 @@ export function AdminAdoptions() {
           })}
         </div>
       )}
+
+      {pagination && <Pagination pagination={pagination} onPageChange={setPage} />}
 
       {modalState && (
         <PetFormModal

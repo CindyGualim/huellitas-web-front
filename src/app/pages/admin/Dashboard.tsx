@@ -48,12 +48,17 @@ export function AdminDashboard() {
     if (!token) return;
 
     Promise.all([
-      apiGetPets(),
-      apiGetEvents(),
-      canViewDonations ? apiGetDonations(token) : Promise.resolve(null),
-      canViewAdoptionRequests ? apiGetAdoptionRequests(token) : Promise.resolve(null)
+      apiGetPets({ limit: 100 }),
+      apiGetEvents({ limit: 100 }),
+      canViewDonations ? apiGetDonations(token, { limit: 100 }) : Promise.resolve(null),
+      canViewAdoptionRequests ? apiGetAdoptionRequests(token, { limit: 100 }) : Promise.resolve(null)
     ])
-      .then(([pets, events, donations, requests]) => {
+      .then(([petsPage, eventsPage, donationsPage, requestsPage]) => {
+        const pets = petsPage.items;
+        const events = eventsPage.items;
+        const donations = donationsPage?.items ?? null;
+        const requests = requestsPage?.items ?? null;
+
         setData({ pets, events, donations, requests });
 
         const eventItems: ActivityItem[] = events.map(e => ({

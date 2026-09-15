@@ -2,29 +2,35 @@ import { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2, MapPin, Calendar } from 'lucide-react';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { EventFormModal } from '../../components/admin/EventFormModal';
+import { Pagination } from '../../components/admin/Pagination';
 import { useAuth } from '../../context/AuthContext';
-import { apiGetEvents, apiCreateEvent, apiUpdateEvent, apiDeleteEvent, ApiEvent, EventPayload } from '../../lib/api';
+import { apiGetEvents, apiCreateEvent, apiUpdateEvent, apiDeleteEvent, ApiEvent, EventPayload, ApiPagination } from '../../lib/api';
 import { eventTypeLabel, eventStatusLabel, eventStatusBadgeClass } from '../../lib/eventMappings';
 
 export function AdminEvents() {
   const { token, user } = useAuth();
   const canManageEvents = user?.role === 'Superadministrador';
   const [events, setEvents] = useState<ApiEvent[]>([]);
+  const [pagination, setPagination] = useState<ApiPagination | null>(null);
+  const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modalState, setModalState] = useState<{ mode: 'create' | 'edit'; event?: ApiEvent } | null>(null);
 
   const loadEvents = () => {
     setIsLoading(true);
-    apiGetEvents()
-      .then(setEvents)
+    apiGetEvents({ page })
+      .then(({ items, pagination }) => {
+        setEvents(items);
+        setPagination(pagination);
+      })
       .catch(err => setError(err instanceof Error ? err.message : 'No se pudieron cargar los eventos'))
       .finally(() => setIsLoading(false));
   };
 
   useEffect(() => {
     loadEvents();
-  }, []);
+  }, [page]);
 
   const handleDelete = async (event: ApiEvent) => {
     if (!token) return;
@@ -130,6 +136,8 @@ export function AdminEvents() {
           </div>
         </div>
       )}
+
+      {pagination && <Pagination pagination={pagination} onPageChange={setPage} />}
 
       {modalState && (
         <EventFormModal

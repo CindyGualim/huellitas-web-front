@@ -3,14 +3,18 @@ import { Plus, Edit2, Gift } from 'lucide-react';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { DonationFormModal } from '../../components/admin/DonationFormModal';
 import { RestrictedAccess } from '../../components/admin/RestrictedAccess';
+import { Pagination } from '../../components/admin/Pagination';
 import { useAuth } from '../../context/AuthContext';
-import { apiGetDonations, apiCreateDonation, apiUpdateDonation, ApiDonation, DonationPayload } from '../../lib/api';
+import { apiGetDonations, apiCreateDonation, apiUpdateDonation, ApiDonation, DonationPayload, ApiPagination } from '../../lib/api';
 import { paymentMethodLabel } from '../../lib/eventMappings';
 
 export function AdminDonations() {
   const { token, user } = useAuth();
   const hasAccess = user?.role === 'Superadministrador';
   const [donations, setDonations] = useState<ApiDonation[]>([]);
+  const [pagination, setPagination] = useState<ApiPagination | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalAmount, setTotalAmount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modalState, setModalState] = useState<{ mode: 'create' | 'edit'; donation?: ApiDonation } | null>(null);
@@ -18,15 +22,18 @@ export function AdminDonations() {
   useEffect(() => {
     if (!token || !hasAccess) return;
 
-    apiGetDonations(token)
-      .then(setDonations)
+    setIsLoading(true);
+    apiGetDonations(token, { page })
+      .then(({ items, pagination, totalAmount }) => {
+        setDonations(items);
+        setPagination(pagination);
+        setTotalAmount(totalAmount);
+      })
       .catch(err => setError(err instanceof Error ? err.message : 'No se pudieron cargar las donaciones'))
       .finally(() => setIsLoading(false));
-  }, [token, hasAccess]);
+  }, [token, hasAccess, page]);
 
   if (!hasAccess) return <RestrictedAccess />;
-
-  const total = donations.reduce((sum, d) => sum + Number(d.amount), 0);
 
   const handleFormSubmit = async (payload: DonationPayload) => {
     if (!token) throw new Error('No autorizado');
@@ -46,7 +53,7 @@ export function AdminDonations() {
         <div>
           <h1 className="text-[#222222] mb-1 text-3xl">Donaciones</h1>
           <p className="text-[#222222]/50">
-            {donations.length > 0 ? `Q${total.toFixed(2)} recaudados en total` : 'Gestiona las donaciones recibidas'}
+            {totalAmount > 0 ? `Q${totalAmount.toFixed(2)} recaudados en total` : 'Gestiona las donaciones recibidas'}
           </p>
         </div>
         <PrimaryButton variant="primary" className="flex items-center gap-2" onClick={() => setModalState({ mode: 'create' })}>
@@ -114,6 +121,8 @@ export function AdminDonations() {
           </div>
         </div>
       )}
+
+      {pagination && <Pagination pagination={pagination} onPageChange={setPage} />}
 
       {modalState && (
         <DonationFormModal

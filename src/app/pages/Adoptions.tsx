@@ -10,7 +10,7 @@ export function Adoptions() {
   const [pets, setPets] = useState<ApiPet[]>([]);
 
   useEffect(() => {
-    apiGetPets({ availableOnly: true }).then(setPets).catch(() => setPets([]));
+    apiGetPets({ availableOnly: true, limit: 100 }).then(({ items }) => setPets(items)).catch(() => setPets([]));
   }, []);
 
   const countFor = (species: 'Perro' | 'Gato') =>

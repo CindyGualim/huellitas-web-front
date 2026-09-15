@@ -9,9 +9,9 @@ export function Help() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    apiGetPets()
-      .then(allPets => {
-        setCasesNeedingHelp(allPets.filter(pet => pet.status === 'En_tratamiento').slice(0, 3));
+    apiGetPets({ limit: 100 })
+      .then(({ items }) => {
+        setCasesNeedingHelp(items.filter(pet => pet.status === 'En_tratamiento').slice(0, 3));
       })
       .catch(() => setCasesNeedingHelp([]))
       .finally(() => setIsLoading(false));

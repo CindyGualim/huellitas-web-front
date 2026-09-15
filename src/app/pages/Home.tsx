@@ -207,12 +207,12 @@ export function Home() {
   const [upcomingEvents, setUpcomingEvents] = useState<ApiEvent[]>([]);
 
   useEffect(() => {
-    apiGetPets({ availableOnly: true })
-      .then(allPets => setFeaturedPets(allPets.filter(pet => pet.featured)))
+    apiGetPets({ availableOnly: true, limit: 100 })
+      .then(({ items }) => setFeaturedPets(items.filter(pet => pet.featured)))
       .catch(() => setFeaturedPets([]));
 
-    apiGetEvents()
-      .then(events => setUpcomingEvents(events.filter(e => e.status === 'Programado' || e.status === 'En_curso').slice(0, 3)))
+    apiGetEvents({ limit: 100 })
+      .then(({ items }) => setUpcomingEvents(items.filter(e => e.status === 'Programado' || e.status === 'En_curso').slice(0, 3)))
       .catch(() => setUpcomingEvents([]));
   }, []);
 
