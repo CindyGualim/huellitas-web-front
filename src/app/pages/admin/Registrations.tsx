@@ -6,7 +6,7 @@ import { apiGetEventRegistrations, ApiEventRegistration } from '../../lib/api';
 
 export function AdminRegistrations() {
   const { token, user } = useAuth();
-  const hasAccess = user?.role === 'Superadministrador' || user?.role === 'Operador';
+  const hasAccess = user?.role === 'Superadministrador' || user?.role === 'Operador' || user?.role === 'Voluntario';
   const [registrations, setRegistrations] = useState<ApiEventRegistration[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
