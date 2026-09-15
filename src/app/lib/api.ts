@@ -212,6 +212,19 @@ export async function apiDeletePet(token: string, id: number) {
   return parseResponse<null>(response);
 }
 
+export async function apiUploadImage(token: string, file: File) {
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const response = await fetch(`${API_URL}/uploads/image`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData
+  });
+
+  return parseResponse<{ imageUrl: string }>(response);
+}
+
 export interface ApiEvent {
   id: number;
   title: string;

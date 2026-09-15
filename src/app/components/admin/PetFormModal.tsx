@@ -1,8 +1,9 @@
 import { useState, FormEvent } from 'react';
-import { X, Plus, Trash2 } from 'lucide-react';
+import { X, Plus, Trash2, Upload } from 'lucide-react';
 import { PrimaryButton } from '../PrimaryButton';
-import { ApiPet, PetPayload } from '../../lib/api';
+import { ApiPet, PetPayload, apiUploadImage } from '../../lib/api';
 import { SPECIES_OPTIONS, GENDER_OPTIONS, SIZE_OPTIONS, STATUS_OPTIONS } from '../../lib/petMappings';
+import { useAuth } from '../../context/AuthContext';
 
 interface PetFormModalProps {
   mode: 'create' | 'edit';
@@ -29,12 +30,14 @@ function toFormState(pet?: ApiPet) {
 }
 
 export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormModalProps) {
+  const { token } = useAuth();
   const [formData, setFormData] = useState(toFormState(initialData));
   const [imageUrls, setImageUrls] = useState<string[]>(
     initialData?.images?.length ? initialData.images.map(image => image.imageUrl) : ['']
   );
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
 
   const inputClass = "w-full px-4 py-3 bg-[#F8F8F8] rounded-xl text-[#222222] placeholder-[#222222]/30 focus:outline-none focus:ring-2 focus:ring-[#20A83E] border border-[#D9D9D9] transition-all duration-250 text-sm";
   const labelClass = "block text-[#222222] mb-1.5 font-medium text-sm";
@@ -54,6 +57,22 @@ export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormMo
 
   const addImageUrlField = () => setImageUrls([...imageUrls, '']);
   const removeImageUrlField = (index: number) => setImageUrls(imageUrls.filter((_, i) => i !== index));
+
+  const handleFileUpload = async (index: number, file: File | undefined) => {
+    if (!file || !token) return;
+
+    setError(null);
+    setUploadingIndex(index);
+
+    try {
+      const { imageUrl } = await apiUploadImage(token, file);
+      handleImageUrlChange(index, imageUrl);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo subir la imagen');
+    } finally {
+      setUploadingIndex(null);
+    }
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -181,16 +200,30 @@ export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormMo
           </label>
 
           <div>
-            <label className={labelClass}>Imágenes (URL) <span className="text-[#222222]/40 font-normal">(opcional)</span></label>
+            <label className={labelClass}>Imágenes <span className="text-[#222222]/40 font-normal">(opcional, la primera es la portada)</span></label>
             <div className="space-y-2">
               {imageUrls.map((url, index) => (
                 <div key={index} className="flex gap-2">
                   <input
                     value={url}
                     onChange={e => handleImageUrlChange(index, e.target.value)}
-                    placeholder="https://..."
+                    placeholder="https://... o subí un archivo"
                     className={inputClass}
                   />
+                  <label className="px-3 flex items-center rounded-xl border border-[#D9D9D9] text-[#222222]/50 hover:text-[#20A83E] hover:border-[#20A83E]/50 transition-colors cursor-pointer">
+                    {uploadingIndex === index ? (
+                      <span className="text-xs">...</span>
+                    ) : (
+                      <Upload size={16} />
+                    )}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      className="hidden"
+                      disabled={uploadingIndex !== null}
+                      onChange={e => handleFileUpload(index, e.target.files?.[0])}
+                    />
+                  </label>
                   <button
                     type="button"
                     onClick={() => removeImageUrlField(index)}
