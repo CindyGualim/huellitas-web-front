@@ -4,7 +4,7 @@ import { PrimaryButton } from '../../components/PrimaryButton';
 import { PetFormModal } from '../../components/admin/PetFormModal';
 import { useAuth } from '../../context/AuthContext';
 import { apiGetPets, apiCreatePet, apiUpdatePet, apiDeletePet, ApiPet, PetPayload } from '../../lib/api';
-import { STATUS_OPTIONS, statusLabel, statusBadgeClass } from '../../lib/petMappings';
+import { statusLabel, statusBadgeClass, nextValidStatuses } from '../../lib/petMappings';
 
 export function AdminAdoptions() {
   const { token, user } = useAuth();
@@ -13,6 +13,7 @@ export function AdminAdoptions() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modalState, setModalState] = useState<{ mode: 'create' | 'edit'; pet?: ApiPet } | null>(null);
+  const [statusMenuPetId, setStatusMenuPetId] = useState<number | null>(null);
 
   const loadPets = () => {
     setIsLoading(true);
@@ -26,14 +27,16 @@ export function AdminAdoptions() {
     loadPets();
   }, []);
 
-  const cycleStatus = async (pet: ApiPet) => {
+  const changeStatus = async (pet: ApiPet, nextStatus: string) => {
     if (!token) return;
+    setStatusMenuPetId(null);
 
-    const currentIndex = STATUS_OPTIONS.findIndex(option => option.value === pet.status);
-    const nextStatus = STATUS_OPTIONS[(currentIndex + 1) % STATUS_OPTIONS.length].value;
-
-    const updated = await apiUpdatePet(token, pet.id, { status: nextStatus });
-    setPets(pets.map(p => (p.id === pet.id ? updated : p)));
+    try {
+      const updated = await apiUpdatePet(token, pet.id, { status: nextStatus });
+      setPets(pets.map(p => (p.id === pet.id ? updated : p)));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo cambiar el estado de la mascota');
+    }
   };
 
   const handleDelete = async (pet: ApiPet) => {
@@ -101,13 +104,35 @@ export function AdminAdoptions() {
                     </div>
                   )}
                   {canManagePets ? (
-                    <button
-                      onClick={() => cycleStatus(pet)}
-                      title="Click para cambiar el estado"
-                      className={`absolute top-3 right-3 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-250 hover:scale-[1.05] cursor-pointer ${statusBadgeClass(pet.status)}`}
-                    >
-                      {statusLabel(pet.status)}
-                    </button>
+                    <div className="absolute top-3 right-3">
+                      <button
+                        onClick={() => setStatusMenuPetId(statusMenuPetId === pet.id ? null : pet.id)}
+                        title="Click para cambiar el estado"
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-250 hover:scale-[1.05] cursor-pointer ${statusBadgeClass(pet.status)}`}
+                      >
+                        {statusLabel(pet.status)}
+                      </button>
+                      {statusMenuPetId === pet.id && (
+                        <>
+                          <div className="fixed inset-0 z-10" onClick={() => setStatusMenuPetId(null)} />
+                          <div className="absolute right-0 mt-1 w-44 bg-white rounded-xl shadow-lg border border-[#D9D9D9]/50 overflow-hidden z-20">
+                            {nextValidStatuses(pet.status).length === 0 ? (
+                              <p className="px-4 py-2.5 text-xs text-[#222222]/40">Sin transiciones disponibles</p>
+                            ) : (
+                              nextValidStatuses(pet.status).map(nextStatus => (
+                                <button
+                                  key={nextStatus}
+                                  onClick={() => changeStatus(pet, nextStatus)}
+                                  className="w-full text-left px-4 py-2.5 text-sm text-[#222222] hover:bg-[#F8F8F8] transition-colors duration-250 cursor-pointer"
+                                >
+                                  {statusLabel(nextStatus)}
+                                </button>
+                              ))
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
                   ) : (
                     <span className={`absolute top-3 right-3 px-3 py-1.5 rounded-full text-xs font-medium ${statusBadgeClass(pet.status)}`}>
                       {statusLabel(pet.status)}

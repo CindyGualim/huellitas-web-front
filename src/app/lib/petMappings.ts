@@ -39,6 +39,19 @@ export function statusBadgeClass(value: string) {
   return STATUS_OPTIONS.find(option => option.value === value)?.badgeClass ?? 'bg-[#D9D9D9] text-[#222222]';
 }
 
+// Refleja VALID_STATUS_TRANSITIONS en pet.service.js — mantener sincronizado con el backend.
+export const PET_STATUS_TRANSITIONS: Record<string, StatusValue[]> = {
+  Disponible: ['En_tratamiento', 'Reservada', 'No_disponible'],
+  En_tratamiento: ['Disponible', 'No_disponible'],
+  Reservada: ['Adoptada', 'Disponible', 'No_disponible'],
+  Adoptada: ['En_tratamiento', 'No_disponible'],
+  No_disponible: ['Disponible', 'En_tratamiento']
+};
+
+export function nextValidStatuses(current: string) {
+  return PET_STATUS_TRANSITIONS[current] ?? [];
+}
+
 export const MEDICAL_RECORD_TYPE_OPTIONS = [
   { value: 'Consulta', label: 'Consulta' },
   { value: 'Vacunacion', label: 'Vacunación' },
