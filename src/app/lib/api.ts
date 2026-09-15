@@ -497,3 +497,27 @@ export async function apiCreateEventRegistration(payload: EventRegistrationPaylo
 
   return parseResponse<ApiEventRegistration>(response);
 }
+
+export interface ApiSiteSettings {
+  instagramHandle: string;
+  contactEmail: string;
+}
+
+export async function apiGetSiteSettings() {
+  const response = await fetch(`${API_URL}/site-settings`);
+
+  return parseResponse<ApiSiteSettings>(response);
+}
+
+export async function apiUpdateSiteSettings(token: string, payload: ApiSiteSettings) {
+  const response = await fetch(`${API_URL}/site-settings`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  return parseResponse<ApiSiteSettings>(response);
+}

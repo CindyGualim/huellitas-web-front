@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Heart, Users, User, LogOut, Home, UserCog, Gift, Stethoscope, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, Calendar, Heart, Users, User, LogOut, Home, UserCog, Gift, Stethoscope, ClipboardList, Settings } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export function AdminLayout() {
@@ -41,7 +41,8 @@ export function AdminLayout() {
     ...(user?.role === 'Superadministrador'
       ? [
           { path: '/admin/donations', label: 'Donaciones', icon: Gift },
-          { path: '/admin/users', label: 'Usuarios', icon: UserCog }
+          { path: '/admin/users', label: 'Usuarios', icon: UserCog },
+          { path: '/admin/settings', label: 'Configuración', icon: Settings }
         ]
       : [])
   ];

@@ -1,75 +1,52 @@
-import { Bell, Lock, Globe, Palette } from 'lucide-react';
+import { useEffect, useState, FormEvent } from 'react';
+import { Link } from 'react-router-dom';
+import { Lock, Globe } from 'lucide-react';
 import { PrimaryButton } from '../../components/PrimaryButton';
+import { RestrictedAccess } from '../../components/admin/RestrictedAccess';
+import { useAuth } from '../../context/AuthContext';
+import { apiGetSiteSettings, apiUpdateSiteSettings } from '../../lib/api';
+
+const inputClass = "w-full px-4 py-3 bg-[#F8F8F8] rounded-xl text-[#222222] border border-[#D9D9D9] focus:outline-none focus:ring-2 focus:ring-[#20A83E] transition-all duration-250 text-sm";
 
 export function AdminSettings() {
-  const sections = [
-    {
-      icon: Bell,
-      title: 'Notificaciones',
-      subtitle: 'Gestiona tus preferencias de notificación',
-      content: (
-        <div className="space-y-2">
-          {['Nuevas adopciones', 'Inscripciones a jornadas', 'Recordatorios de eventos'].map((label, i) => (
-            <label key={label} className="flex items-center justify-between p-4 bg-[#F8F8F8] rounded-xl border border-transparent hover:border-[#D9D9D9]/50 cursor-pointer transition-all duration-250">
-              <span className="text-[#222222] text-sm">{label}</span>
-              <input type="checkbox" defaultChecked={i < 2} className="w-4 h-4 accent-[#20A83E]" />
-            </label>
-          ))}
-        </div>
-      )
-    },
-    {
-      icon: Lock,
-      title: 'Seguridad',
-      subtitle: 'Opciones de seguridad de la cuenta',
-      content: (
-        <div className="space-y-2">
-          {['Cambiar contraseña', 'Autenticación de dos factores', 'Dispositivos conectados'].map(label => (
-            <button key={label} className="w-full text-left p-4 bg-[#F8F8F8] rounded-xl hover:bg-[#20A83E]/5 transition-all duration-250 text-[#222222] text-sm border border-transparent hover:border-[#20A83E]/20">
-              {label}
-            </button>
-          ))}
-        </div>
-      )
-    },
-    {
-      icon: Globe,
-      title: 'Sitio Web',
-      subtitle: 'Configuración del sitio público',
-      content: (
-        <div className="space-y-4">
-          {[
-            { label: 'Instagram', defaultValue: '@huellitasdelacalleong', type: 'text' },
-            { label: 'Email de contacto', defaultValue: 'contacto@huellitas.org', type: 'email' },
-          ].map(field => (
-            <div key={field.label}>
-              <label className="block text-sm text-[#222222]/60 mb-2">{field.label}</label>
-              <input
-                type={field.type}
-                defaultValue={field.defaultValue}
-                className="w-full px-4 py-3 bg-[#F8F8F8] rounded-xl text-[#222222] border border-[#D9D9D9] focus:outline-none focus:ring-2 focus:ring-[#20A83E] transition-all duration-250 text-sm"
-              />
-            </div>
-          ))}
-        </div>
-      )
-    },
-    {
-      icon: Palette,
-      title: 'Apariencia',
-      subtitle: 'Personaliza la interfaz',
-      content: (
-        <div>
-          <label className="block text-sm text-[#222222]/60 mb-2">Tema</label>
-          <select className="w-full px-4 py-3 bg-[#F8F8F8] rounded-xl text-[#222222] border border-[#D9D9D9] focus:outline-none focus:ring-2 focus:ring-[#20A83E] transition-all duration-250 text-sm">
-            <option>Claro</option>
-            <option>Oscuro</option>
-            <option>Automático</option>
-          </select>
-        </div>
-      )
+  const { token, user } = useAuth();
+  const hasAccess = user?.role === 'Superadministrador';
+  const [instagramHandle, setInstagramHandle] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    apiGetSiteSettings()
+      .then(settings => {
+        setInstagramHandle(settings.instagramHandle);
+        setContactEmail(settings.contactEmail);
+      })
+      .catch(err => setError(err instanceof Error ? err.message : 'No se pudo cargar la configuración'))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  if (!hasAccess) return <RestrictedAccess />;
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!token) return;
+
+    setError(null);
+    setSuccess(false);
+    setIsSubmitting(true);
+
+    try {
+      await apiUpdateSiteSettings(token, { instagramHandle, contactEmail });
+      setSuccess(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo guardar la configuración');
+    } finally {
+      setIsSubmitting(false);
     }
-  ];
+  };
 
   return (
     <div className="p-8 bg-[#F8F8F8] min-h-screen">
@@ -79,24 +56,77 @@ export function AdminSettings() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {sections.map(section => (
-          <div key={section.title} className="bg-white rounded-[16px] p-6 shadow-sm border border-[#D9D9D9]/50">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 bg-[#20A83E]/10 rounded-xl">
-                <section.icon size={22} className="text-[#20A83E]" />
+        <div className="bg-white rounded-[16px] p-6 shadow-sm border border-[#D9D9D9]/50">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 bg-[#20A83E]/10 rounded-xl">
+              <Lock size={22} className="text-[#20A83E]" />
+            </div>
+            <div>
+              <h2 className="text-[#222222] text-lg font-medium">Seguridad</h2>
+              <p className="text-xs text-[#222222]/40">Opciones de seguridad de la cuenta</p>
+            </div>
+          </div>
+          <p className="text-sm text-[#222222]/70 mb-4">
+            El cambio de contraseña y los datos de tu cuenta se gestionan desde tu perfil.
+          </p>
+          <Link
+            to="/admin/profile"
+            className="inline-block px-4 py-2.5 bg-[#F8F8F8] rounded-xl text-[#222222] text-sm border border-[#D9D9D9] hover:bg-[#20A83E]/5 hover:border-[#20A83E]/20 transition-all duration-250"
+          >
+            Ir a mi perfil
+          </Link>
+        </div>
+
+        <div className="bg-white rounded-[16px] p-6 shadow-sm border border-[#D9D9D9]/50">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 bg-[#20A83E]/10 rounded-xl">
+              <Globe size={22} className="text-[#20A83E]" />
+            </div>
+            <div>
+              <h2 className="text-[#222222] text-lg font-medium">Sitio Web</h2>
+              <p className="text-xs text-[#222222]/40">Configuración del sitio público</p>
+            </div>
+          </div>
+
+          {isLoading ? (
+            <p className="text-sm text-[#222222]/50">Cargando...</p>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="px-4 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+                  {error}
+                </div>
+              )}
+              {success && (
+                <div className="px-4 py-2.5 rounded-xl bg-[#20A83E]/10 border border-[#20A83E]/30 text-[#146B27] text-sm">
+                  Configuración guardada correctamente
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm text-[#222222]/60 mb-2">Instagram</label>
+                <input
+                  value={instagramHandle}
+                  onChange={e => setInstagramHandle(e.target.value)}
+                  className={inputClass}
+                />
               </div>
               <div>
-                <h2 className="text-[#222222] text-lg font-medium">{section.title}</h2>
-                <p className="text-xs text-[#222222]/40">{section.subtitle}</p>
+                <label className="block text-sm text-[#222222]/60 mb-2">Email de contacto</label>
+                <input
+                  type="email"
+                  value={contactEmail}
+                  onChange={e => setContactEmail(e.target.value)}
+                  className={inputClass}
+                />
               </div>
-            </div>
-            {section.content}
-          </div>
-        ))}
-      </div>
 
-      <div className="mt-8">
-        <PrimaryButton variant="primary">Guardar Cambios</PrimaryButton>
+              <PrimaryButton type="submit" variant="primary" disabled={isSubmitting}>
+                {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+              </PrimaryButton>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );
