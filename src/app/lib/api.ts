@@ -335,12 +335,26 @@ export async function apiUpdateDonation(token: string, id: number, payload: Part
   return parseResponse<ApiDonation>(response);
 }
 
+export type AdoptionRequestStatus = 'Pendiente' | 'En_revision' | 'Aprobada' | 'Rechazada';
+
 export interface ApiAdoptionRequest {
   id: number;
-  status: 'Pendiente' | 'En_revision' | 'Aprobada' | 'Rechazada';
+  status: AdoptionRequestStatus;
+  reason: string;
+  hasChildren: boolean;
+  familyAgreement: boolean;
+  hasVeterinarian: boolean;
+  secureSpace: boolean;
   submittedAt: string;
-  adopter: { fullName: string };
-  pet: { name: string };
+  adopter: {
+    fullName: string;
+    dpi: string;
+    phone: string;
+    email: string;
+    address: string;
+    municipality: string;
+  };
+  pet: ApiPet;
 }
 
 export async function apiGetAdoptionRequests(token: string) {
@@ -349,6 +363,19 @@ export async function apiGetAdoptionRequests(token: string) {
   });
 
   return parseResponse<ApiAdoptionRequest[]>(response);
+}
+
+export async function apiUpdateAdoptionRequestStatus(token: string, id: number, status: AdoptionRequestStatus) {
+  const response = await fetch(`${API_URL}/adoption-requests/${id}/status`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ status })
+  });
+
+  return parseResponse<ApiAdoptionRequest>(response);
 }
 
 export interface AdoptionRequestPayload {

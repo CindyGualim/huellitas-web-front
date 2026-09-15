@@ -68,3 +68,18 @@ export const PROCEDURE_TYPE_OPTIONS = [
   { value: 'Vacunacion', label: 'Vacunación' },
   { value: 'Castracion', label: 'Castración' }
 ] as const;
+
+export const ADOPTION_REQUEST_STATUS_OPTIONS = [
+  { value: 'Pendiente', label: 'Pendiente', badgeClass: 'bg-[#D9A82E] text-white' },
+  { value: 'En_revision', label: 'En revisión', badgeClass: 'bg-[#146B27] text-white' },
+  { value: 'Aprobada', label: 'Aprobada', badgeClass: 'bg-[#20A83E] text-white' },
+  { value: 'Rechazada', label: 'Rechazada', badgeClass: 'bg-[#222222] text-white' }
+] as const;
+
+export function adoptionRequestStatusLabel(value: string) {
+  return ADOPTION_REQUEST_STATUS_OPTIONS.find(option => option.value === value)?.label ?? value;
+}
+
+export function adoptionRequestStatusBadgeClass(value: string) {
+  return ADOPTION_REQUEST_STATUS_OPTIONS.find(option => option.value === value)?.badgeClass ?? 'bg-[#D9D9D9] text-[#222222]';
+}

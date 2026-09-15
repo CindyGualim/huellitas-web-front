@@ -18,6 +18,7 @@ import { AdminSettings } from './pages/admin/Settings';
 import { AdminUsers } from './pages/admin/Users';
 import { AdminDonations } from './pages/admin/Donations';
 import { AdminTracking } from './pages/admin/Tracking';
+import { AdminAdoptionRequests } from './pages/admin/AdoptionRequests';
 import { AdminLayout } from './components/AdminLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
@@ -58,6 +59,7 @@ export default function App() {
             <Route index element={<AdminDashboard />} />
             <Route path="events" element={<AdminEvents />} />
             <Route path="adoptions" element={<AdminAdoptions />} />
+            <Route path="adoption-requests" element={<AdminAdoptionRequests />} />
             <Route path="registrations" element={<AdminRegistrations />} />
             <Route path="profile" element={<AdminProfile />} />
             <Route path="settings" element={<AdminSettings />} />
