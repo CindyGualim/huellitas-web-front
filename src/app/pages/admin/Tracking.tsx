@@ -30,6 +30,9 @@ interface TimelineItem {
   subtitle: string;
   description?: string;
   date: Date;
+  // Los campos que son solo fecha (sin hora) se guardan como medianoche UTC;
+  // hay que formatearlos con timeZone: 'UTC' para no correrlos un día.
+  dateOnly?: boolean;
 }
 
 export function AdminTracking() {
@@ -92,7 +95,8 @@ export function AdminTracking() {
       title: medicalRecordTypeLabel(record.recordType),
       subtitle: record.treatment,
       description: record.observations,
-      date: new Date(record.consultationDate)
+      date: new Date(record.consultationDate),
+      dateOnly: true
     })),
     ...statusHistory.map(change => ({
       key: `status-${change.id}`,
@@ -107,7 +111,8 @@ export function AdminTracking() {
       icon: Home,
       title: 'Ingreso al refugio',
       subtitle: `${selectedPet.breed} · ${sizeLabel(selectedPet.size)}`,
-      date: new Date(selectedPet.createdAt)
+      date: new Date(selectedPet.intakeDate),
+      dateOnly: true
     }
   ].sort((a, b) => b.date.getTime() - a.date.getTime()) : [];
 
@@ -205,7 +210,7 @@ export function AdminTracking() {
                             <div className="flex items-center justify-between mb-1">
                               <span className="font-medium text-[#222222] text-sm">{item.title}</span>
                               <span className="text-[#222222]/40 text-xs">
-                                {item.date.toLocaleDateString('es-GT', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                {item.date.toLocaleDateString('es-GT', { day: 'numeric', month: 'short', year: 'numeric', ...(item.dateOnly ? { timeZone: 'UTC' } : {}) })}
                               </span>
                             </div>
                             <p className="text-[#222222]/70 text-sm">{item.subtitle}</p>

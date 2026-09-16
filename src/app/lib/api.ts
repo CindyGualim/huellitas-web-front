@@ -169,6 +169,7 @@ export interface ApiPet {
   status: 'Disponible' | 'En_tratamiento' | 'Reservada' | 'Adoptada' | 'No_disponible';
   featured: boolean;
   isActive: boolean;
+  intakeDate: string;
   createdAt: string;
   images: ApiPetImage[];
 }
@@ -185,6 +186,7 @@ export interface PetPayload {
   description: string;
   rescueStory: string;
   status: string;
+  intakeDate?: string;
   featured?: boolean;
   images?: { imageUrl: string; isCover?: boolean }[];
 }
@@ -338,6 +340,7 @@ export interface DonationPayload {
   donorEmail: string;
   amount: number;
   paymentMethod: string;
+  donationDate?: string;
   notes?: string;
 }
 

@@ -7,6 +7,7 @@ import { Pagination } from '../../components/admin/Pagination';
 import { useAuth } from '../../context/AuthContext';
 import { apiGetDonations, apiCreateDonation, apiUpdateDonation, ApiDonation, DonationPayload, ApiPagination } from '../../lib/api';
 import { paymentMethodLabel } from '../../lib/eventMappings';
+import { formatDateOnly } from '../../lib/dateUtils';
 
 export function AdminDonations() {
   const { token, user } = useAuth();
@@ -104,7 +105,7 @@ export function AdminDonations() {
                       <span className="text-[#222222]/70 text-sm">{paymentMethodLabel(donation.paymentMethod)}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-[#222222] text-sm">{new Date(donation.donationDate).toLocaleDateString('es-GT')}</span>
+                      <span className="text-[#222222] text-sm">{formatDateOnly(donation.donationDate, {})}</span>
                     </td>
                     <td className="px-6 py-4">
                       <button

@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { PrimaryButton } from '../PrimaryButton';
 import { MedicalRecordPayload } from '../../lib/api';
 import { MEDICAL_RECORD_TYPE_OPTIONS } from '../../lib/petMappings';
+import { todayDateInputValue } from '../../lib/dateUtils';
 
 interface MedicalRecordFormModalProps {
   petName: string;
@@ -12,7 +13,7 @@ interface MedicalRecordFormModalProps {
 
 export function MedicalRecordFormModal({ petName, onSubmit, onClose }: MedicalRecordFormModalProps) {
   const [formData, setFormData] = useState({
-    consultationDate: new Date().toISOString().slice(0, 10),
+    consultationDate: todayDateInputValue(),
     recordType: MEDICAL_RECORD_TYPE_OPTIONS[0].value as string,
     description: '',
     treatment: '',

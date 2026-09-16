@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { PrimaryButton } from '../PrimaryButton';
 import { ApiDonation, DonationPayload } from '../../lib/api';
 import { PAYMENT_METHOD_OPTIONS } from '../../lib/eventMappings';
+import { todayDateInputValue } from '../../lib/dateUtils';
 
 interface DonationFormModalProps {
   mode: 'create' | 'edit';
@@ -17,6 +18,7 @@ function toFormState(donation?: ApiDonation) {
     donorEmail: donation?.donorEmail ?? '',
     amount: donation?.amount?.toString() ?? '',
     paymentMethod: donation?.paymentMethod ?? PAYMENT_METHOD_OPTIONS[0].value,
+    donationDate: donation?.donationDate ? donation.donationDate.slice(0, 10) : todayDateInputValue(),
     notes: donation?.notes ?? ''
   };
 }
@@ -98,6 +100,20 @@ export function DonationFormModal({ mode, initialData, onSubmit, onClose }: Dona
                 ))}
               </select>
             </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>Fecha de la donación <span className="text-red-500">*</span></label>
+            <input
+              name="donationDate"
+              type="date"
+              required
+              max={todayDateInputValue()}
+              value={formData.donationDate}
+              onChange={handleChange}
+              className={inputClass}
+            />
+            <p className="text-xs text-[#222222]/40 mt-1">Usá la fecha real en que se recibió la donación, aunque la estés registrando después.</p>
           </div>
 
           <div>

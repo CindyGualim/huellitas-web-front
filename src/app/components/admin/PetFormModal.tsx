@@ -3,6 +3,7 @@ import { X, Plus, Trash2, Upload } from 'lucide-react';
 import { PrimaryButton } from '../PrimaryButton';
 import { ApiPet, PetPayload, apiUploadImage } from '../../lib/api';
 import { SPECIES_OPTIONS, GENDER_OPTIONS, SIZE_OPTIONS, STATUS_OPTIONS } from '../../lib/petMappings';
+import { todayDateInputValue } from '../../lib/dateUtils';
 import { useAuth } from '../../context/AuthContext';
 
 interface PetFormModalProps {
@@ -25,6 +26,7 @@ function toFormState(pet?: ApiPet) {
     description: pet?.description ?? '',
     rescueStory: pet?.rescueStory ?? '',
     status: pet?.status ?? STATUS_OPTIONS[0].value,
+    intakeDate: pet?.intakeDate ? pet.intakeDate.slice(0, 10) : todayDateInputValue(),
     featured: pet?.featured ?? false
   };
 }
@@ -181,6 +183,20 @@ export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormMo
                   <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
               </select>
+            </div>
+
+            <div className="col-span-2">
+              <label className={labelClass}>Fecha de ingreso al refugio {required}</label>
+              <input
+                name="intakeDate"
+                type="date"
+                required
+                max={todayDateInputValue()}
+                value={formData.intakeDate}
+                onChange={handleChange}
+                className={inputClass}
+              />
+              <p className="text-xs text-[#222222]/40 mt-1">Usá la fecha real en que la mascota llegó al refugio, aunque la estés registrando después.</p>
             </div>
           </div>
 
