@@ -493,6 +493,7 @@ export interface ApiPetStatusHistory {
   newStatus: string;
   note: string | null;
   changedAt: string;
+  changedBy: { id: number; name: string };
 }
 
 export async function apiGetPetStatusHistory(token: string, petId: number) {

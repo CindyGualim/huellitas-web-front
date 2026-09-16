@@ -99,7 +99,7 @@ export function AdminTracking() {
       icon: STATUS_ICONS[change.newStatus] ?? CheckCircle2,
       title: statusLabel(change.newStatus),
       subtitle: change.previousStatus ? `Antes: ${statusLabel(change.previousStatus)}` : 'Cambio de estado',
-      description: change.note ?? undefined,
+      description: [change.note, `Por ${change.changedBy.name}`].filter(Boolean).join(' · '),
       date: new Date(change.changedAt)
     })),
     {
