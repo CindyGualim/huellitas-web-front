@@ -72,10 +72,11 @@ export function Layout({ children, showNavbar = true }: LayoutProps) {
               </Link>
               <Link
                 to="/admin"
-                title="Panel de Administración"
-                className="text-[#222222]/50 hover:text-[#20A83E] transition-colors duration-300"
+                title="Acceso exclusivo para el personal de Huellitas"
+                className="flex items-center gap-1.5 text-[#222222]/50 hover:text-[#20A83E] transition-colors duration-300 text-sm font-medium"
               >
-                <LogIn size={20} />
+                <LogIn size={17} />
+                Personal
               </Link>
             </div>
           </div>
