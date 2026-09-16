@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Plus, Home, Stethoscope, Syringe, Pill, Activity, Scissors, Search } from 'lucide-react';
+import { Plus, Home, Stethoscope, Syringe, Pill, Activity, Scissors, Search, HeartPulse, Bookmark, PartyPopper, Ban, CheckCircle2 } from 'lucide-react';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { MedicalRecordFormModal } from '../../components/admin/MedicalRecordFormModal';
 import { RestrictedAccess } from '../../components/admin/RestrictedAccess';
 import { useAuth } from '../../context/AuthContext';
-import { apiGetPets, apiGetMedicalRecords, apiCreateMedicalRecord, ApiPet, ApiMedicalRecord, MedicalRecordPayload } from '../../lib/api';
-import { medicalRecordTypeLabel, sizeLabel } from '../../lib/petMappings';
+import { apiGetPets, apiGetMedicalRecords, apiCreateMedicalRecord, apiGetPetStatusHistory, ApiPet, ApiMedicalRecord, ApiPetStatusHistory, MedicalRecordPayload } from '../../lib/api';
+import { medicalRecordTypeLabel, sizeLabel, statusLabel } from '../../lib/petMappings';
 
 const RECORD_ICONS: Record<string, typeof Stethoscope> = {
   Consulta: Stethoscope,
@@ -13,6 +13,14 @@ const RECORD_ICONS: Record<string, typeof Stethoscope> = {
   Desparasitacion: Pill,
   Tratamiento: Activity,
   Castracion: Scissors
+};
+
+const STATUS_ICONS: Record<string, typeof Stethoscope> = {
+  Disponible: CheckCircle2,
+  En_tratamiento: HeartPulse,
+  Reservada: Bookmark,
+  Adoptada: PartyPopper,
+  No_disponible: Ban
 };
 
 interface TimelineItem {
@@ -31,6 +39,7 @@ export function AdminTracking() {
   const [search, setSearch] = useState('');
   const [selectedPet, setSelectedPet] = useState<ApiPet | null>(null);
   const [records, setRecords] = useState<ApiMedicalRecord[]>([]);
+  const [statusHistory, setStatusHistory] = useState<ApiPetStatusHistory[]>([]);
   const [isLoadingPets, setIsLoadingPets] = useState(true);
   const [isLoadingTimeline, setIsLoadingTimeline] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,9 +59,18 @@ export function AdminTracking() {
     if (!token || !selectedPet) return;
 
     setIsLoadingTimeline(true);
-    apiGetMedicalRecords(token, selectedPet.id)
-      .then(setRecords)
-      .catch(() => setRecords([]))
+    Promise.all([
+      apiGetMedicalRecords(token, selectedPet.id),
+      apiGetPetStatusHistory(token, selectedPet.id)
+    ])
+      .then(([recordsResult, statusHistoryResult]) => {
+        setRecords(recordsResult);
+        setStatusHistory(statusHistoryResult);
+      })
+      .catch(() => {
+        setRecords([]);
+        setStatusHistory([]);
+      })
       .finally(() => setIsLoadingTimeline(false));
   }, [token, selectedPet]);
 
@@ -75,6 +93,14 @@ export function AdminTracking() {
       subtitle: record.treatment,
       description: record.observations,
       date: new Date(record.consultationDate)
+    })),
+    ...statusHistory.map(change => ({
+      key: `status-${change.id}`,
+      icon: STATUS_ICONS[change.newStatus] ?? CheckCircle2,
+      title: statusLabel(change.newStatus),
+      subtitle: change.previousStatus ? `Antes: ${statusLabel(change.previousStatus)}` : 'Cambio de estado',
+      description: change.note ?? undefined,
+      date: new Date(change.changedAt)
     })),
     {
       key: 'intake',

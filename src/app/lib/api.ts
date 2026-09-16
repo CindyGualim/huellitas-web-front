@@ -486,6 +486,23 @@ export async function apiCreateMedicalRecord(token: string, petId: number, paylo
   return parseResponse<ApiMedicalRecord>(response);
 }
 
+export interface ApiPetStatusHistory {
+  id: number;
+  petId: number;
+  previousStatus: string | null;
+  newStatus: string;
+  note: string | null;
+  changedAt: string;
+}
+
+export async function apiGetPetStatusHistory(token: string, petId: number) {
+  const response = await fetch(`${API_URL}/pets/${petId}/status-history`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  return parseResponse<ApiPetStatusHistory[]>(response);
+}
+
 export interface ApiEventRegistration {
   id: number;
   eventId: number;
