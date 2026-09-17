@@ -1,7 +1,7 @@
 import { useState, FormEvent } from 'react';
-import { X } from 'lucide-react';
+import { X, Plus, Trash2 } from 'lucide-react';
 import { PrimaryButton } from '../PrimaryButton';
-import { ApiEvent, EventPayload } from '../../lib/api';
+import { ApiEvent, ApiEventTimeSlot, EventPayload } from '../../lib/api';
 import { EVENT_TYPE_OPTIONS, EVENT_STATUS_OPTIONS } from '../../lib/eventMappings';
 
 interface EventFormModalProps {
@@ -28,10 +28,27 @@ function toFormState(event?: ApiEvent) {
   };
 }
 
+type TimeSlotDraft = { id?: number; startTime: string; capacity: string };
+
+function toTimeSlotDrafts(timeSlots?: ApiEventTimeSlot[]): TimeSlotDraft[] {
+  if (!timeSlots?.length) return [];
+  return timeSlots.map(slot => ({ id: slot.id, startTime: slot.startTime, capacity: String(slot.capacity) }));
+}
+
 export function EventFormModal({ mode, initialData, onSubmit, onClose }: EventFormModalProps) {
   const [formData, setFormData] = useState(toFormState(initialData));
+  const [timeSlots, setTimeSlots] = useState<TimeSlotDraft[]>(toTimeSlotDrafts(initialData?.timeSlots));
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const showTimeSlots = formData.type === 'Jornada_castracion';
+  const totalCapacity = timeSlots.reduce((sum, slot) => sum + (Number(slot.capacity) || 0), 0);
+
+  const addTimeSlot = () => setTimeSlots([...timeSlots, { startTime: '', capacity: '' }]);
+  const removeTimeSlot = (index: number) => setTimeSlots(timeSlots.filter((_, i) => i !== index));
+  const updateTimeSlot = (index: number, field: 'startTime' | 'capacity', value: string) => {
+    setTimeSlots(timeSlots.map((slot, i) => (i === index ? { ...slot, [field]: value } : slot)));
+  };
 
   const inputClass = "w-full px-4 py-3 bg-[#F8F8F8] rounded-xl text-[#222222] placeholder-[#222222]/30 focus:outline-none focus:ring-2 focus:ring-[#20A83E] border border-[#D9D9D9] transition-all duration-250 text-sm";
   const labelClass = "block text-[#222222] mb-1.5 font-medium text-sm";
@@ -45,11 +62,20 @@ export function EventFormModal({ mode, initialData, onSubmit, onClose }: EventFo
     setError(null);
     setIsSubmitting(true);
 
+    if (showTimeSlots && timeSlots.some(slot => !slot.startTime.trim() || !Number(slot.capacity))) {
+      setError('Cada horario necesita una hora y un cupo mayor a cero');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       await onSubmit({
         ...formData,
         startDate: new Date(formData.startDate).toISOString(),
-        endDate: new Date(formData.endDate).toISOString()
+        endDate: new Date(formData.endDate).toISOString(),
+        timeSlots: showTimeSlots
+          ? timeSlots.map(slot => ({ ...(slot.id ? { id: slot.id } : {}), startTime: slot.startTime, capacity: Number(slot.capacity) }))
+          : undefined
       });
       onClose();
     } catch (err) {
@@ -123,6 +149,50 @@ export function EventFormModal({ mode, initialData, onSubmit, onClose }: EventFo
               <input name="endDate" type="datetime-local" required value={formData.endDate} onChange={handleChange} className={inputClass} />
             </div>
           </div>
+
+          {showTimeSlots && (
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className={labelClass + ' mb-0'}>Horarios y cupos <span className="text-red-500">*</span></label>
+                <span className="text-xs text-[#222222]/50">Cupo total: {totalCapacity}</span>
+              </div>
+              <div className="space-y-2">
+                {timeSlots.map((slot, index) => (
+                  <div key={index} className="flex gap-2">
+                    <input
+                      placeholder="Ej: 9:00 AM"
+                      value={slot.startTime}
+                      onChange={e => updateTimeSlot(index, 'startTime', e.target.value)}
+                      className={inputClass}
+                    />
+                    <input
+                      type="number"
+                      min="1"
+                      placeholder="Cupo"
+                      value={slot.capacity}
+                      onChange={e => updateTimeSlot(index, 'capacity', e.target.value)}
+                      className={inputClass + ' w-28'}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeTimeSlot(index)}
+                      className="px-3 rounded-xl border border-[#D9D9D9] text-[#222222]/50 hover:text-red-500 hover:border-red-300 transition-colors cursor-pointer"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={addTimeSlot}
+                className="mt-2 flex items-center gap-1.5 text-[#20A83E] text-sm font-medium hover:text-[#146B27] transition-colors cursor-pointer"
+              >
+                <Plus size={16} /> Agregar horario
+              </button>
+              <p className="text-xs text-[#222222]/40 mt-1">Un horario con inscritos no se puede eliminar, solo editar su cupo.</p>
+            </div>
+          )}
 
           <div>
             <label className={labelClass}>Descripción <span className="text-red-500">*</span></label>

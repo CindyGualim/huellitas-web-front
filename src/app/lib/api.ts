@@ -254,6 +254,15 @@ export async function apiUploadImage(token: string, file: File) {
   return parseResponse<{ imageUrl: string }>(response);
 }
 
+export interface ApiEventTimeSlot {
+  id: number;
+  eventId: number;
+  startTime: string;
+  capacity: number;
+  registered: number;
+  available: number;
+}
+
 export interface ApiEvent {
   id: number;
   title: string;
@@ -266,6 +275,7 @@ export interface ApiEvent {
   createdBy: number;
   isActive: boolean;
   createdAt: string;
+  timeSlots: ApiEventTimeSlot[];
 }
 
 export interface EventPayload {
@@ -276,6 +286,23 @@ export interface EventPayload {
   startDate: string;
   endDate: string;
   status: string;
+  timeSlots?: { id?: number; startTime: string; capacity: number }[];
+}
+
+export interface JornadaDashboard {
+  event: ApiEvent;
+  timeSlots: ApiEventTimeSlot[];
+  totalCapacity: number;
+  totalRegistered: number;
+  statusSummary: Record<string, number>;
+}
+
+export async function apiGetJornadaDashboard(token: string, eventId: number) {
+  const response = await fetch(`${API_URL}/events/${eventId}/dashboard`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  return parseResponse<JornadaDashboard>(response);
 }
 
 export async function apiGetEvents(params?: PaginationParams) {
@@ -507,37 +534,87 @@ export async function apiGetPetStatusHistory(token: string, petId: number) {
   return parseResponse<ApiPetStatusHistory[]>(response);
 }
 
+export type CastrationPatientStatus =
+  | 'Inscrito'
+  | 'Evaluado'
+  | 'Aprobado'
+  | 'Rechazado'
+  | 'Pagado'
+  | 'Castrado'
+  | 'En_seguimiento'
+  | 'Seguimiento_finalizado';
+
 export interface ApiEventRegistration {
   id: number;
   eventId: number;
+  timeSlotId: number;
   petName: string;
   species: string;
+  gender: 'Macho' | 'Hembra';
   breed: string;
+  birthDate: string;
+  lastDewormingDate: string;
+  lastVaccinationDate: string;
   ownerName: string;
   ownerPhone: string;
+  ownerEmail: string;
   procedureType: 'Vacunacion' | 'Castracion';
+  status: CastrationPatientStatus;
+  surgeryDate: string | null;
+  antibioticStatus: 'Pendiente' | 'Finalizado' | null;
+  stitchRemovalStatus: 'Pendiente' | 'Finalizado' | null;
+  followUpCompleted: boolean;
+  observations: string | null;
   notes: string | null;
   createdAt: string;
   event: ApiEvent;
+  timeSlot: ApiEventTimeSlot;
 }
 
 export interface EventRegistrationPayload {
   eventId: number;
+  timeSlotId: number;
   petName: string;
   species: string;
+  gender: string;
   breed: string;
+  birthDate: string;
+  lastDewormingDate: string;
+  lastVaccinationDate: string;
   ownerName: string;
   ownerPhone: string;
+  ownerEmail: string;
   procedureType: string;
   notes?: string;
 }
 
-export async function apiGetEventRegistrations(token: string, params?: PaginationParams) {
-  const response = await fetch(`${API_URL}/event-registrations${paginationQuery(params)}`, {
+export interface PatientRecordPayload {
+  status?: CastrationPatientStatus;
+  surgeryDate?: string | null;
+  antibioticStatus?: 'Pendiente' | 'Finalizado' | null;
+  stitchRemovalStatus?: 'Pendiente' | 'Finalizado' | null;
+  followUpCompleted?: boolean;
+  observations?: string | null;
+}
+
+export async function apiGetEventRegistrations(token: string, params?: PaginationParams & { eventId?: number; status?: string }) {
+  const search = new URLSearchParams(paginationQuery(params).slice(1));
+  if (params?.eventId) search.set('eventId', String(params.eventId));
+  if (params?.status) search.set('status', params.status);
+  const query = search.toString();
+  const response = await fetch(`${API_URL}/event-registrations${query ? `?${query}` : ''}`, {
     headers: { Authorization: `Bearer ${token}` }
   });
 
   return parseResponse<ApiPage<ApiEventRegistration>>(response);
+}
+
+export async function apiGetEventRegistration(token: string, id: number) {
+  const response = await fetch(`${API_URL}/event-registrations/${id}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  return parseResponse<ApiEventRegistration>(response);
 }
 
 export async function apiCreateEventRegistration(payload: EventRegistrationPayload) {
@@ -548,6 +625,32 @@ export async function apiCreateEventRegistration(payload: EventRegistrationPaylo
   });
 
   return parseResponse<ApiEventRegistration>(response);
+}
+
+export async function apiUpdatePatientRecord(token: string, id: number, payload: PatientRecordPayload) {
+  const response = await fetch(`${API_URL}/event-registrations/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  return parseResponse<ApiEventRegistration>(response);
+}
+
+export async function apiSendReminder(token: string, id: number, type: 'pre' | 'post') {
+  const response = await fetch(`${API_URL}/event-registrations/${id}/send-reminder`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ type })
+  });
+
+  return parseResponse<null>(response);
 }
 
 export interface ApiSiteSettings {

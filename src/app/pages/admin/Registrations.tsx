@@ -2,15 +2,19 @@ import { useEffect, useState } from 'react';
 import { Phone, MapPin, Calendar } from 'lucide-react';
 import { RestrictedAccess } from '../../components/admin/RestrictedAccess';
 import { Pagination } from '../../components/admin/Pagination';
+import { PatientDetailModal } from '../../components/admin/PatientDetailModal';
 import { useAuth } from '../../context/AuthContext';
 import { apiGetEventRegistrations, ApiEventRegistration, ApiPagination } from '../../lib/api';
+import { patientStatusLabel, patientStatusBadgeClass } from '../../lib/eventMappings';
 
 export function AdminRegistrations() {
   const { token, user } = useAuth();
   const hasAccess = user?.role === 'Superadministrador' || user?.role === 'Operador' || user?.role === 'Voluntario';
+  const canManagePatients = user?.role === 'Superadministrador' || user?.role === 'Operador';
   const [registrations, setRegistrations] = useState<ApiEventRegistration[]>([]);
   const [pagination, setPagination] = useState<ApiPagination | null>(null);
   const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState<ApiEventRegistration | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,6 +32,10 @@ export function AdminRegistrations() {
   }, [token, hasAccess, page]);
 
   if (!hasAccess) return <RestrictedAccess />;
+
+  const handlePatientUpdated = (updated: ApiEventRegistration) => {
+    setRegistrations(registrations.map(r => (r.id === updated.id ? updated : r)));
+  };
 
   return (
     <div className="p-8 bg-[#F8F8F8] min-h-screen">
@@ -52,14 +60,18 @@ export function AdminRegistrations() {
             <table className="w-full">
               <thead className="bg-[#F8F8F8] border-b border-[#D9D9D9]/50">
                 <tr>
-                  {['Dueño', 'Contacto', 'Mascota', 'Jornada', 'Fecha'].map(h => (
+                  {['Dueño', 'Contacto', 'Mascota', 'Jornada', 'Fecha', 'Estado'].map(h => (
                     <th key={h} className="px-6 py-4 text-left text-xs font-medium text-[#222222]/50 uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#D9D9D9]/30">
                 {registrations.map(reg => (
-                  <tr key={reg.id} className="hover:bg-[#F8F8F8]/60 transition-colors duration-250">
+                  <tr
+                    key={reg.id}
+                    onClick={() => canManagePatients && setSelected(reg)}
+                    className={`transition-colors duration-250 ${canManagePatients ? 'hover:bg-[#F8F8F8]/60 cursor-pointer' : ''}`}
+                  >
                     <td className="px-6 py-4">
                       <div className="font-medium text-[#222222] text-sm">{reg.ownerName}</div>
                     </td>
@@ -86,6 +98,11 @@ export function AdminRegistrations() {
                         <span className="text-[#222222] text-sm">{new Date(reg.event.startDate).toLocaleDateString('es-GT')}</span>
                       </div>
                     </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${patientStatusBadgeClass(reg.status)}`}>
+                        {patientStatusLabel(reg.status)}
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -95,6 +112,14 @@ export function AdminRegistrations() {
       )}
 
       {pagination && <Pagination pagination={pagination} onPageChange={setPage} />}
+
+      {selected && (
+        <PatientDetailModal
+          registration={selected}
+          onClose={() => setSelected(null)}
+          onUpdated={handlePatientUpdated}
+        />
+      )}
     </div>
   );
 }

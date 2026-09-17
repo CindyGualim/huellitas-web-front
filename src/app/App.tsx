@@ -11,6 +11,7 @@ import { EventRegistration } from './pages/EventRegistration';
 import { CastrationConfirmation } from './pages/CastrationConfirmation';
 import { AdminDashboard } from './pages/admin/Dashboard';
 import { AdminEvents } from './pages/admin/Events';
+import { AdminJornadaDashboard } from './pages/admin/JornadaDashboard';
 import { AdminAdoptions } from './pages/admin/Adoptions';
 import { AdminRegistrations } from './pages/admin/Registrations';
 import { AdminProfile } from './pages/admin/Profile';
@@ -58,6 +59,7 @@ export default function App() {
           >
             <Route index element={<AdminDashboard />} />
             <Route path="events" element={<AdminEvents />} />
+            <Route path="events/:id" element={<AdminJornadaDashboard />} />
             <Route path="adoptions" element={<AdminAdoptions />} />
             <Route path="adoption-requests" element={<AdminAdoptionRequests />} />
             <Route path="registrations" element={<AdminRegistrations />} />

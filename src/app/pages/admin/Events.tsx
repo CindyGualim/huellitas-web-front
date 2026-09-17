@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Plus, Edit2, Trash2, MapPin, Calendar } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Plus, Edit2, Trash2, MapPin, Calendar, ClipboardList } from 'lucide-react';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { EventFormModal } from '../../components/admin/EventFormModal';
 import { Pagination } from '../../components/admin/Pagination';
@@ -83,7 +84,7 @@ export function AdminEvents() {
             <table className="w-full">
               <thead className="bg-[#F8F8F8] border-b border-[#D9D9D9]/50">
                 <tr>
-                  {(canManageEvents ? ['Título', 'Tipo', 'Ubicación', 'Fecha', 'Estado', 'Acciones'] : ['Título', 'Tipo', 'Ubicación', 'Fecha', 'Estado']).map(h => (
+                  {(canManageEvents ? ['Título', 'Tipo', 'Ubicación', 'Fecha', 'Estado', 'Detalle', 'Acciones'] : ['Título', 'Tipo', 'Ubicación', 'Fecha', 'Estado', 'Detalle']).map(h => (
                     <th key={h} className="px-6 py-4 text-left text-xs font-medium text-[#222222]/50 uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
@@ -113,6 +114,14 @@ export function AdminEvents() {
                       <span className={`px-3 py-1.5 rounded-full text-xs font-medium ${eventStatusBadgeClass(event.status)}`}>
                         {eventStatusLabel(event.status)}
                       </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Link
+                        to={`/admin/events/${event.id}`}
+                        className="flex items-center gap-1.5 text-[#20A83E] hover:text-[#146B27] text-sm font-medium transition-colors duration-250"
+                      >
+                        <ClipboardList size={14} /> Ver detalle
+                      </Link>
                     </td>
                     {canManageEvents && (
                       <td className="px-6 py-4">
