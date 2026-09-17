@@ -33,19 +33,19 @@ export function Layout({ children, showNavbar = true }: LayoutProps) {
     <div className="min-h-screen bg-white">
       {showNavbar && (
         <nav className={`sticky top-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-md ${isScrolled ? 'shadow-md border-b border-[#D9D9D9]' : 'shadow-sm border-b border-[#D9D9D9]'}`}>
-          <div className={`mx-auto max-w-7xl px-4 sm:px-6 transition-all duration-300 flex items-center justify-between ${isScrolled ? 'py-2 flex-row' : 'py-4 flex-col md:flex-row gap-6 relative'}`}>
-            
-            <Link to="/home" className={`flex items-center transition-all duration-300 ${isScrolled ? 'flex-row gap-3' : 'flex-col gap-2'}`}>
-              <img 
-                src={logoImg} 
-                alt="Huellitas de la Calle" 
-                className={`object-contain transition-all duration-300 ease-in-out ${isScrolled ? 'h-10 w-10 sm:h-12 sm:w-12' : 'h-28 w-28 sm:h-36 sm:w-36'}`} 
+          <div className={`mx-auto max-w-7xl px-4 sm:px-6 transition-all duration-300 flex items-center justify-between gap-4 ${isScrolled ? 'py-2' : 'py-2.5'}`}>
+
+            <Link to="/home" className="flex items-center flex-row gap-2.5">
+              <img
+                src={logoImg}
+                alt="Huellitas de la Calle"
+                className={`object-contain transition-all duration-300 ease-in-out ${isScrolled ? 'h-9 w-9 sm:h-10 sm:w-10' : 'h-11 w-11 sm:h-14 sm:w-14'}`}
               />
-              <div className={`flex flex-col transition-all duration-300 ${isScrolled ? 'items-start' : 'items-center'}`}>
-                <div className={`text-[#222222] font-bold transition-all duration-300 ${isScrolled ? 'text-lg sm:text-xl text-left' : 'text-2xl sm:text-3xl text-center'}`} style={{ fontFamily: 'Fredoka, sans-serif' }}>
+              <div className="flex flex-col items-start">
+                <div className={`text-[#222222] font-bold transition-all duration-300 text-left ${isScrolled ? 'text-base sm:text-lg' : 'text-lg sm:text-xl'}`} style={{ fontFamily: 'Fredoka, sans-serif' }}>
                   Huellitas de la Calle
                 </div>
-                <div className={`text-[#146B27] font-medium transition-all duration-300 overflow-hidden ${isScrolled ? 'max-h-0 opacity-0 mt-0 text-[0px]' : 'max-h-12 opacity-100 mt-1 text-sm sm:text-base text-center'}`}>
+                <div className={`text-[#146B27] font-medium transition-all duration-300 overflow-hidden ${isScrolled ? 'max-h-0 opacity-0 mt-0 text-[0px]' : 'max-h-6 opacity-100 text-xs sm:text-sm'}`}>
                   El respeto animal es nuestra pasión
                 </div>
               </div>
@@ -53,27 +53,27 @@ export function Layout({ children, showNavbar = true }: LayoutProps) {
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`text-[#222222] p-2 hover:bg-[#D9D9D9]/40 rounded-lg md:hidden transition-all duration-300 active:scale-95 ${isScrolled ? 'block' : 'absolute right-4 top-6'}`}
+              className="text-[#222222] p-2 hover:bg-[#D9D9D9]/40 rounded-lg md:hidden transition-all duration-300 active:scale-95"
             >
-              {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+              {mobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
             </button>
 
-            <div className="hidden md:flex items-center gap-8">
-              <Link to="/home" className={`text-[#222222]/80 hover:text-[#20A83E] transition-all duration-300 font-medium ${isScrolled ? 'text-base' : 'text-lg'}`}>
+            <div className="hidden md:flex items-center gap-6">
+              <Link to="/home" className="text-[#222222]/80 hover:text-[#20A83E] transition-all duration-300 font-medium text-sm">
                 Inicio
               </Link>
-              <Link to="/about" className={`text-[#222222]/80 hover:text-[#20A83E] transition-all duration-300 font-medium ${isScrolled ? 'text-base' : 'text-lg'}`}>
+              <Link to="/about" className="text-[#222222]/80 hover:text-[#20A83E] transition-all duration-300 font-medium text-sm">
                 Nosotros
               </Link>
-              <Link to="/adoptions" className={`text-[#222222]/80 hover:text-[#20A83E] transition-all duration-300 font-medium ${isScrolled ? 'text-base' : 'text-lg'}`}>
+              <Link to="/adoptions" className="text-[#222222]/80 hover:text-[#20A83E] transition-all duration-300 font-medium text-sm">
                 Adopciones
               </Link>
-              <Link to="/events" className={`text-[#222222]/80 hover:text-[#20A83E] transition-all duration-300 font-medium ${isScrolled ? 'text-base' : 'text-lg'}`}>
+              <Link to="/events" className="text-[#222222]/80 hover:text-[#20A83E] transition-all duration-300 font-medium text-sm">
                 Eventos
               </Link>
               <Link
                 to="/help"
-                className={`bg-[#20A83E] text-white rounded-full font-medium hover:bg-[#146B27] transition-all duration-300 active:scale-95 ${isScrolled ? 'px-5 py-2 text-sm' : 'px-6 py-2.5 text-lg'}`}
+                className="bg-[#20A83E] text-white rounded-full font-medium hover:bg-[#146B27] transition-all duration-300 active:scale-95 px-4 py-1.5 text-sm"
               >
                 Quiero Ayudar
               </Link>
