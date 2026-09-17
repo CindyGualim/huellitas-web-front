@@ -5,6 +5,7 @@ import { PrimaryButton } from '../../components/PrimaryButton';
 import { RestrictedAccess } from '../../components/admin/RestrictedAccess';
 import { useAuth } from '../../context/AuthContext';
 import { apiGetSiteSettings, apiUpdateSiteSettings, ApiSiteSettings } from '../../lib/api';
+import { setSiteSettingsCache } from '../../lib/useSiteSettings';
 
 const inputClass = "w-full px-4 py-3 bg-[#F8F8F8] rounded-xl text-[#222222] border border-[#D9D9D9] focus:outline-none focus:ring-2 focus:ring-[#20A83E] transition-all duration-250 text-sm";
 const labelClass = "block text-sm text-[#222222]/60 mb-2";
@@ -67,6 +68,7 @@ export function AdminSettings() {
     try {
       const saved = await apiUpdateSiteSettings(token, settings);
       setSettings(saved);
+      setSiteSettingsCache(saved);
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo guardar la configuración');

@@ -3,6 +3,7 @@ import { apiGetSiteSettings, ApiSiteSettings } from './api';
 
 let cached: ApiSiteSettings | null = null;
 let pending: Promise<ApiSiteSettings> | null = null;
+const listeners = new Set<(settings: ApiSiteSettings) => void>();
 
 function loadSiteSettings() {
   if (cached) return Promise.resolve(cached);
@@ -15,17 +16,25 @@ function loadSiteSettings() {
   return pending;
 }
 
+export function setSiteSettingsCache(settings: ApiSiteSettings) {
+  cached = settings;
+  pending = null;
+  listeners.forEach(listener => listener(settings));
+}
+
 export function useSiteSettings() {
   const [settings, setSettings] = useState<ApiSiteSettings | null>(cached);
 
   useEffect(() => {
-    if (settings) return;
-    let cancelled = false;
-    loadSiteSettings().then(result => {
-      if (!cancelled) setSettings(result);
-    });
+    listeners.add(setSettings);
+    if (!settings) {
+      let cancelled = false;
+      loadSiteSettings().then(result => {
+        if (!cancelled) setSettings(result);
+      });
+    }
     return () => {
-      cancelled = true;
+      listeners.delete(setSettings);
     };
   }, [settings]);
 
