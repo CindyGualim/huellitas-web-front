@@ -282,8 +282,8 @@ export function Home() {
           )}
         </div>
 
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 mt-16 md:mt-20">
-          <div className="mb-16 md:mb-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="mt-16 md:mt-20 mb-16 md:mb-20 bg-[#20A83E]/[0.06] rounded-[32px] p-8 md:p-12 border border-[#20A83E]/15">
             <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-8 gap-4">
               <div>
                 <h2 className="text-[#222222] text-3xl md:text-4xl font-semibold mb-2">Rescatados buscando hogar</h2>
@@ -299,11 +299,9 @@ export function Home() {
               ))}
             </div>
           </div>
-        </div>
 
-        {/* Próximos Eventos Section */}
-        <div className="bg-[#F8F8F8] border-y border-[#D9D9D9]/50 py-16 md:py-20">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          {/* Próximos Eventos Section */}
+          <div className="mb-16 md:mb-20 bg-[#F8F8F8] rounded-[32px] p-8 md:p-12 border border-[#D9D9D9]/50">
             <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-10 gap-4">
               <div>
                 <h2 className="text-[#222222] text-3xl md:text-4xl font-semibold mb-2">Próximos Eventos</h2>
@@ -353,46 +351,46 @@ export function Home() {
               ))}
             </div>
           </div>
-        </div>
 
-        {urgentCases.length > 0 && (
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 mt-16 md:mt-20">
-            <div className="flex items-center gap-3 mb-8">
-              <ShieldAlert className="text-[#20A83E]" size={28} />
-              <div>
-                <h2 className="text-[#222222] text-3xl md:text-4xl font-semibold mb-1">Casos que necesitan tu ayuda</h2>
-                <p className="text-[#222222]/60 text-lg">Están en tratamiento veterinario activo ahora mismo</p>
+          {urgentCases.length > 0 && (
+            <div className="mb-16 md:mb-20 bg-[#FFF7ED] rounded-[32px] p-8 md:p-12 border border-[#F3DCB8]">
+              <div className="flex items-center gap-3 mb-8">
+                <ShieldAlert className="text-[#C2751A]" size={28} />
+                <div>
+                  <h2 className="text-[#222222] text-3xl md:text-4xl font-semibold mb-1">Casos que necesitan tu ayuda</h2>
+                  <p className="text-[#222222]/60 text-lg">Están en tratamiento veterinario activo ahora mismo</p>
+                </div>
               </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {urgentCases.map(pet => {
-                const cover = pet.images.find(img => img.isCover) ?? pet.images[0];
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {urgentCases.map(pet => {
+                  const cover = pet.images.find(img => img.isCover) ?? pet.images[0];
 
-                return (
-                  <div key={pet.id} className="bg-white rounded-2xl overflow-hidden border border-[#D9D9D9]/60 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col">
-                    <div className="h-48 relative">
-                      <ImageWithFallback src={cover?.imageUrl} alt={pet.name} className="absolute inset-0 w-full h-full object-cover" />
-                      <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-[#146B27]">
-                        {pet.species}
+                  return (
+                    <div key={pet.id} className="bg-white rounded-2xl overflow-hidden border border-[#D9D9D9]/60 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col">
+                      <div className="h-48 relative">
+                        <ImageWithFallback src={cover?.imageUrl} alt={pet.name} className="absolute inset-0 w-full h-full object-cover" />
+                        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-[#146B27]">
+                          {pet.species}
+                        </div>
+                      </div>
+                      <div className="p-5 flex-1 flex flex-col">
+                        <h3 className="text-xl font-bold text-[#222222] mb-2">{pet.name}</h3>
+                        <p className="text-[#222222]/70 text-sm line-clamp-3">{pet.rescueStory}</p>
                       </div>
                     </div>
-                    <div className="p-5 flex-1 flex flex-col">
-                      <h3 className="text-xl font-bold text-[#222222] mb-2">{pet.name}</h3>
-                      <p className="text-[#222222]/70 text-sm line-clamp-3">{pet.rescueStory}</p>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+              <div className="text-center">
+                <Link to="/help">
+                  <PrimaryButton variant="primary" className="min-w-[240px]">
+                    Quiero Ayudar
+                  </PrimaryButton>
+                </Link>
+              </div>
             </div>
-            <div className="text-center">
-              <Link to="/help">
-                <PrimaryButton variant="primary" className="min-w-[240px]">
-                  Quiero Ayudar
-                </PrimaryButton>
-              </Link>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </Layout>
   );
