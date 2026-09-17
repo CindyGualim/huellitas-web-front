@@ -15,7 +15,7 @@ export function Help() {
   useEffect(() => {
     apiGetPets({ limit: 100 })
       .then(({ items }) => {
-        setCasesNeedingHelp(items.filter(pet => pet.status === 'En_tratamiento').slice(0, 3));
+        setCasesNeedingHelp(items.filter(pet => pet.status === 'En_tratamiento').slice(0, 5));
       })
       .catch(() => setCasesNeedingHelp([]))
       .finally(() => setIsLoading(false));
@@ -108,13 +108,13 @@ export function Help() {
             ) : casesNeedingHelp.length === 0 ? (
               <p className="text-[#222222]/50 text-sm">Por el momento no hay casos en tratamiento activo. ¡Gracias a tu apoyo!</p>
             ) : (
-              <div className="grid md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                 {casesNeedingHelp.map(pet => {
                   const cover = pet.images.find(img => img.isCover) ?? pet.images[0];
 
                   return (
                     <div key={pet.id} className="bg-white rounded-[16px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-250 border border-[#D9D9D9]/50 transform hover:-translate-y-1 flex flex-col">
-                      <div className="relative overflow-hidden h-44 md:h-48 shrink-0 bg-[#F8F8F8]">
+                      <div className="relative overflow-hidden h-64 md:h-72 shrink-0 bg-[#F8F8F8]">
                         {cover && (
                           <ImageWithFallback
                             src={cover.imageUrl}

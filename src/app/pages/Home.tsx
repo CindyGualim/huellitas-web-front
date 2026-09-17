@@ -175,7 +175,7 @@ function FeaturedPetCard({ pet }: { pet: ApiPet }) {
   return (
     <Link to={`/adoptions/pet-profile/${pet.id}`} className="group block h-full">
       <div className="bg-white rounded-[16px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-250 border border-[#D9D9D9]/50 transform hover:-translate-y-1 h-full flex flex-col">
-        <div className="relative overflow-hidden h-44 md:h-48 shrink-0 bg-[#F8F8F8]">
+        <div className="relative overflow-hidden h-64 md:h-72 shrink-0 bg-[#F8F8F8]">
           {coverImage && (
             <ImageWithFallback
               src={coverImage.imageUrl}
@@ -237,7 +237,7 @@ export function Home() {
       .catch(() => setFeaturedPets([]));
 
     apiGetPets({ limit: 100 })
-      .then(({ items }) => setUrgentCases(items.filter(pet => pet.status === 'En_tratamiento').slice(0, 3)))
+      .then(({ items }) => setUrgentCases(items.filter(pet => pet.status === 'En_tratamiento').slice(0, 5)))
       .catch(() => setUrgentCases([]));
 
     apiGetEvents({ limit: 100 })
@@ -361,13 +361,13 @@ export function Home() {
                   <p className="text-[#222222]/60 text-sm md:text-base">Están en tratamiento veterinario activo ahora mismo</p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-5">
                 {urgentCases.map(pet => {
                   const cover = pet.images.find(img => img.isCover) ?? pet.images[0];
 
                   return (
                     <div key={pet.id} className="bg-white rounded-[16px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-250 border border-[#D9D9D9]/50 transform hover:-translate-y-1 flex flex-col">
-                      <div className="relative overflow-hidden h-44 md:h-48 shrink-0 bg-[#F8F8F8]">
+                      <div className="relative overflow-hidden h-64 md:h-72 shrink-0 bg-[#F8F8F8]">
                         {cover && (
                           <ImageWithFallback
                             src={cover.imageUrl}
