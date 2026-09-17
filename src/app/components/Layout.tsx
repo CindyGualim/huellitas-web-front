@@ -1,6 +1,6 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, Instagram, LogIn } from 'lucide-react';
+import { Menu, X, Instagram } from 'lucide-react';
 import logoImg from '../../imports/huellitaslogo.png';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useSiteSettings } from '../lib/useSiteSettings';
@@ -59,6 +59,9 @@ export function Layout({ children, showNavbar = true }: LayoutProps) {
             </button>
 
             <div className="hidden md:flex items-center gap-8">
+              <Link to="/home" className={`text-[#222222]/80 hover:text-[#20A83E] transition-all duration-300 font-medium ${isScrolled ? 'text-base' : 'text-lg'}`}>
+                Inicio
+              </Link>
               <Link to="/about" className={`text-[#222222]/80 hover:text-[#20A83E] transition-all duration-300 font-medium ${isScrolled ? 'text-base' : 'text-lg'}`}>
                 Nosotros
               </Link>
@@ -74,20 +77,19 @@ export function Layout({ children, showNavbar = true }: LayoutProps) {
               >
                 Quiero Ayudar
               </Link>
-              <Link
-                to="/admin"
-                title="Acceso exclusivo para el personal de Huellitas"
-                className="flex items-center gap-1.5 text-[#222222]/50 hover:text-[#20A83E] transition-colors duration-300 text-sm font-medium"
-              >
-                <LogIn size={17} />
-                Personal
-              </Link>
             </div>
           </div>
 
           {mobileMenuOpen && (
             <div className="md:hidden bg-white border-t border-[#D9D9D9] shadow-inner absolute w-full left-0">
               <div className="flex flex-col px-4 py-3 gap-1">
+                <Link
+                  to="/home"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-[#222222] py-3 px-4 rounded-lg hover:bg-[#D9D9D9]/30 transition-all duration-250 text-lg font-medium"
+                >
+                  Inicio
+                </Link>
                 <Link
                   to="/about"
                   onClick={() => setMobileMenuOpen(false)}
@@ -115,14 +117,6 @@ export function Layout({ children, showNavbar = true }: LayoutProps) {
                   className="text-[#20A83E] py-3 px-4 rounded-lg hover:bg-[#D9D9D9]/30 transition-all duration-250 text-lg font-medium"
                 >
                   Quiero Ayudar
-                </Link>
-                <Link
-                  to="/admin"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 text-[#222222]/60 py-3 px-4 rounded-lg hover:bg-[#D9D9D9]/30 transition-all duration-250 text-base"
-                >
-                  <LogIn size={18} />
-                  Panel de Administración
                 </Link>
               </div>
             </div>
