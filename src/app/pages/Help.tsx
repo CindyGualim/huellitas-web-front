@@ -26,7 +26,7 @@ export function Help() {
       <div className="bg-[#F8F8F8] min-h-screen pb-12">
         {/* Header */}
         <div className="bg-[#146B27] px-6 py-8 md:py-10">
-          <div className="mx-auto max-w-5xl">
+          <div className="mx-auto max-w-6xl">
             <h1 className="text-white mb-2 text-2xl md:text-3xl font-bold">Quiero Ayudar</h1>
             <p className="text-white/80 text-sm md:text-base max-w-2xl">
               Tu apoyo transforma la vida de animales rescatados. Únete a nuestra comunidad y sé parte del cambio.
@@ -34,7 +34,7 @@ export function Help() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-5xl px-4 py-8 space-y-8">
+        <div className="mx-auto max-w-6xl px-4 py-8 space-y-8">
 
           {/* Section 1: ¿Cómo puedes ayudar? */}
           <section>

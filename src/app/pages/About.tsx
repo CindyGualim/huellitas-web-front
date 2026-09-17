@@ -9,13 +9,13 @@ export function About() {
     <Layout>
       <div className="bg-white min-h-screen">
         <div className="bg-[#146B27] px-6 py-8 md:py-10">
-          <div className="mx-auto max-w-4xl">
+          <div className="mx-auto max-w-6xl">
             <h1 className="text-white mb-1 text-2xl md:text-3xl font-bold">Nuestra Historia</h1>
             <p className="text-white/70 text-sm md:text-base">Rescatando vidas, creando familias</p>
           </div>
         </div>
 
-        <div className="mx-auto max-w-4xl px-4 py-8 pb-10">
+        <div className="mx-auto max-w-6xl px-4 py-8 pb-10">
           <div className="bg-white rounded-[16px] p-6 mb-4 shadow-sm border border-[#D9D9D9]/50">
             <div className="flex items-start gap-4 mb-3">
               <div className="bg-[#20A83E]/10 p-2.5 rounded-xl shrink-0">
