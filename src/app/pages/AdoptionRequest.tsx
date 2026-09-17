@@ -116,19 +116,19 @@ export function AdoptionRequest() {
   if (submitted) {
     return (
       <Layout>
-        <div className="mx-auto max-w-2xl px-4 py-20">
-          <div className="bg-white rounded-[20px] p-12 text-center shadow-sm border border-[#D9D9D9]/50">
-            <div className="flex justify-center mb-6">
-              <div className="bg-[#20A83E]/10 p-6 rounded-full">
-                <CheckCircle size={56} className="text-[#20A83E]" />
+        <div className="mx-auto max-w-2xl px-4 py-12">
+          <div className="bg-white rounded-[16px] p-7 text-center shadow-sm border border-[#D9D9D9]/50">
+            <div className="flex justify-center mb-4">
+              <div className="bg-[#20A83E]/10 p-4 rounded-full">
+                <CheckCircle size={40} className="text-[#20A83E]" />
               </div>
             </div>
-            <h1 className="text-[#222222] mb-4 text-3xl">¡Solicitud enviada!</h1>
-            <p className="text-[#222222]/60 mb-8 max-w-md mx-auto leading-relaxed">
+            <h1 className="text-[#222222] mb-2 text-2xl font-bold">¡Solicitud enviada!</h1>
+            <p className="text-[#222222]/60 text-sm mb-5 max-w-md mx-auto leading-relaxed">
               Hemos recibido tu solicitud para adoptar a {pet.name}. Nos pondremos en contacto contigo
               en las próximas 48 horas para coordinar una visita.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+            <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
               <Link to="/adoptions" className="flex-1">
                 <PrimaryButton variant="primary" fullWidth>Ver más perritos</PrimaryButton>
               </Link>
@@ -157,7 +157,7 @@ export function AdoptionRequest() {
         </div>
 
         <div className="mx-auto max-w-2xl px-4 py-8 pb-16">
-          <div className="bg-white rounded-[18px] p-6 md:p-8 shadow-sm border border-[#D9D9D9]/50">
+          <div className="bg-white rounded-[16px] p-6 md:p-8 shadow-sm border border-[#D9D9D9]/50">
             {error && (
               <div className="mb-6 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
                 {error}

@@ -151,7 +151,7 @@ export function EventRegistration() {
   };
 
   const progressPercentage = (step / 2) * 100;
-  const inputClass = "w-full px-5 py-4 bg-[#F8F8F8] rounded-[14px] text-[#222222] focus:outline-none focus:ring-2 focus:ring-[#20A83E]/50 border border-[#D9D9D9] transition-all duration-250 hover:border-[#20A83E]/50";
+  const inputClass = "w-full px-5 py-4 bg-[#F8F8F8] rounded-[12px] text-[#222222] focus:outline-none focus:ring-2 focus:ring-[#20A83E]/50 border border-[#D9D9D9] transition-all duration-250 hover:border-[#20A83E]/50";
   const labelClass = "block text-[#222222] mb-2 font-medium text-sm";
   const required = <span className="text-red-500">*</span>;
 
@@ -185,7 +185,7 @@ export function EventRegistration() {
         </div>
 
         <div className="mx-auto max-w-3xl px-4 py-8 pb-16 -mt-6 relative z-10">
-          <div className="bg-white rounded-[20px] shadow-lg border border-[#D9D9D9]/50 p-5 md:p-8">
+          <div className="bg-white rounded-[16px] shadow-lg border border-[#D9D9D9]/50 p-5 md:p-8">
             <div className="mb-8">
               <p className="text-[#222222]/60 text-sm mb-3">Paso {step} de 2</p>
               <div className="bg-[#D9D9D9]/30 rounded-full h-1.5 overflow-hidden">
@@ -294,7 +294,7 @@ export function EventRegistration() {
                             <button
                               key={s} type="button"
                               onClick={() => setFormData({ ...formData, species: s })}
-                              className={`flex-1 py-3 rounded-[14px] transition-all duration-250 font-medium border text-sm ${
+                              className={`flex-1 py-3 rounded-[12px] transition-all duration-250 font-medium border text-sm ${
                                 formData.species === s ? 'bg-[#20A83E]/10 text-[#20A83E] border-[#20A83E]' : 'bg-white text-[#222222] border-[#D9D9D9] hover:border-[#20A83E]/50'
                               }`}
                             >
@@ -311,7 +311,7 @@ export function EventRegistration() {
                             <button
                               key={g} type="button"
                               onClick={() => setFormData({ ...formData, gender: g })}
-                              className={`flex-1 py-3 rounded-[14px] transition-all duration-250 font-medium border text-sm ${
+                              className={`flex-1 py-3 rounded-[12px] transition-all duration-250 font-medium border text-sm ${
                                 formData.gender === g ? 'bg-[#20A83E]/10 text-[#20A83E] border-[#20A83E]' : 'bg-white text-[#222222] border-[#D9D9D9] hover:border-[#20A83E]/50'
                               }`}
                             >

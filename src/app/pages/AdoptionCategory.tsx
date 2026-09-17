@@ -124,7 +124,7 @@ export function AdoptionCategory() {
 
         <div className="mx-auto max-w-6xl px-4 py-8 pb-16">
           {/* Filters */}
-          <div className="mb-6 bg-[#F8F8F8] p-4 rounded-[18px] border border-[#D9D9D9]/50">
+          <div className="mb-6 bg-[#F8F8F8] p-4 rounded-[16px] border border-[#D9D9D9]/50">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#222222]/40" size={18} />
@@ -133,7 +133,7 @@ export function AdoptionCategory() {
                   placeholder="Buscar por nombre..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-11 pr-4 py-2.5 text-sm bg-white rounded-[14px] text-[#222222] placeholder-[#222222]/40 focus:outline-none focus:ring-2 focus:ring-[#20A83E]/50 shadow-sm border border-[#D9D9D9] transition-all duration-250 hover:border-[#20A83E]/30"
+                  className="w-full pl-11 pr-4 py-2.5 text-sm bg-white rounded-[12px] text-[#222222] placeholder-[#222222]/40 focus:outline-none focus:ring-2 focus:ring-[#20A83E]/50 shadow-sm border border-[#D9D9D9] transition-all duration-250 hover:border-[#20A83E]/30"
                 />
               </div>
 
@@ -161,7 +161,7 @@ export function AdoptionCategory() {
               {filteredPets.map(pet => <PetCard key={pet.id} pet={pet} />)}
             </div>
           ) : (
-            <div className="text-center py-16 bg-[#F8F8F8] rounded-[18px] border border-[#D9D9D9]/50">
+            <div className="text-center py-16 bg-[#F8F8F8] rounded-[16px] border border-[#D9D9D9]/50">
               <div className="text-4xl mb-3 opacity-50">🐾</div>
               <h3 className="text-[#222222] mb-1.5 text-lg font-medium">No encontramos {categoryInfo.species.toLowerCase()}s</h3>
               <p className="text-[#222222]/60 text-sm">Intenta ajustar los filtros de búsqueda</p>

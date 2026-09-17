@@ -102,7 +102,7 @@ export function PetProfile() {
                 </div>
               )}
 
-              <div className="bg-white rounded-[18px] p-5 lg:p-6 border border-[#D9D9D9]/60 shadow-sm">
+              <div className="bg-white rounded-[16px] p-5 lg:p-6 border border-[#D9D9D9]/60 shadow-sm">
                 <h2 className="text-[#222222] text-base font-bold mb-2 flex items-center gap-2">
                   <Sparkles size={18} className="text-[#20A83E]" />
                   Historia de rescate
@@ -148,7 +148,7 @@ export function PetProfile() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-[18px] p-5 lg:p-6 mb-4 border border-[#D9D9D9]/60 shadow-sm">
+              <div className="bg-white rounded-[16px] p-5 lg:p-6 mb-4 border border-[#D9D9D9]/60 shadow-sm">
                 <h2 className="text-[#222222] text-base font-bold mb-2">Sobre {pet.name.split(' ')[0]}</h2>
                 <p className="text-[#222222]/70 text-sm leading-relaxed mb-3">{pet.description}</p>
                 <div className="flex flex-wrap gap-2">
@@ -204,7 +204,7 @@ export function PetProfile() {
                   const pCover = p.images.find(image => image.isCover) ?? p.images[0];
                   return (
                     <Link key={p.id} to={`/adoptions/pet-profile/${p.id}`} className="group block">
-                      <div className="bg-white rounded-[18px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-[#D9D9D9]/50 transform hover:-translate-y-1">
+                      <div className="bg-white rounded-[16px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-[#D9D9D9]/50 transform hover:-translate-y-1">
                         <div className="relative h-40 overflow-hidden bg-[#F8F8F8]">
                           {pCover && <img src={pCover.imageUrl} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />

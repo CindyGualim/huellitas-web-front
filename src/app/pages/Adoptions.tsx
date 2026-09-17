@@ -52,7 +52,7 @@ export function Adoptions() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {categories.map((cat) => (
               <Link key={cat.id} to={`/adoptions/${cat.id}`} className="group block">
-                <div className="bg-white rounded-[18px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-[#D9D9D9]/50 transform hover:-translate-y-1.5 flex flex-col h-full">
+                <div className="bg-white rounded-[16px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-[#D9D9D9]/50 transform hover:-translate-y-1.5 flex flex-col h-full">
                   <div className="relative h-40 md:h-48 overflow-hidden shrink-0">
                     <img
                       src={cat.image}

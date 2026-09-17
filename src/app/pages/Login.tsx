@@ -37,7 +37,7 @@ export function Login() {
 
   return (
     <div className="min-h-screen bg-[#F8F8F8] flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-white rounded-[20px] p-8 md:p-10 shadow-sm border border-[#D9D9D9]/50">
+      <div className="w-full max-w-md bg-white rounded-[16px] p-8 md:p-10 shadow-sm border border-[#D9D9D9]/50">
         <div className="flex flex-col items-center mb-8">
           <img src={logoImg} alt="Huellitas" className="h-16 w-16 object-contain mb-4" />
           <h1 className="text-[#222222] text-2xl">Panel de Administración</h1>

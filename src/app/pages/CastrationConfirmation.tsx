@@ -28,7 +28,7 @@ export function CastrationConfirmation() {
         </div>
 
         <div className="mx-auto max-w-lg px-4 py-8 pb-16">
-          <div className="bg-white rounded-[18px] p-7 mb-5 shadow-sm border border-[#D9D9D9]/50 text-center">
+          <div className="bg-white rounded-[16px] p-7 mb-5 shadow-sm border border-[#D9D9D9]/50 text-center">
             <div className="flex justify-center mb-5">
               <div className="bg-[#20A83E]/10 p-4 rounded-full">
                 <CheckCircle size={40} className="text-[#20A83E]" />
@@ -37,7 +37,7 @@ export function CastrationConfirmation() {
             <h2 className="text-[#222222] mb-1.5 text-xl font-bold">¡Inscripción exitosa!</h2>
             <p className="text-[#222222]/50 text-sm mb-5">Tu cita ha sido confirmada</p>
 
-            <div className="bg-[#F8F8F8] rounded-[14px] p-5 text-left mb-5 border border-[#D9D9D9]/50">
+            <div className="bg-[#F8F8F8] rounded-[12px] p-5 text-left mb-5 border border-[#D9D9D9]/50">
               <div className="space-y-3">
                 {[
                   { label: 'Municipio', value: confirmationData.municipality },

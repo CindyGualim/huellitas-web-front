@@ -35,7 +35,7 @@ export function ResetPassword() {
   if (!token) {
     return (
       <div className="min-h-screen bg-[#F8F8F8] flex items-center justify-center px-4">
-        <div className="w-full max-w-md bg-white rounded-[20px] p-8 md:p-10 shadow-sm border border-[#D9D9D9]/50 text-center">
+        <div className="w-full max-w-md bg-white rounded-[16px] p-8 md:p-10 shadow-sm border border-[#D9D9D9]/50 text-center">
           <p className="text-[#222222] mb-6">El enlace de recuperación no es válido.</p>
           <Link to="/forgot-password" className="text-[#20A83E] hover:text-[#146B27] font-medium">
             Solicitar un nuevo enlace
@@ -47,7 +47,7 @@ export function ResetPassword() {
 
   return (
     <div className="min-h-screen bg-[#F8F8F8] flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-white rounded-[20px] p-8 md:p-10 shadow-sm border border-[#D9D9D9]/50">
+      <div className="w-full max-w-md bg-white rounded-[16px] p-8 md:p-10 shadow-sm border border-[#D9D9D9]/50">
         <div className="flex flex-col items-center mb-8">
           <img src={logoImg} alt="Huellitas" className="h-16 w-16 object-contain mb-4" />
           <h1 className="text-[#222222] text-2xl">Nueva contraseña</h1>

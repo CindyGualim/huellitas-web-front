@@ -256,7 +256,7 @@ export function Home() {
           <HeroCarousel slides={heroSlides} />
 
           {impactStats && (
-            <div className="mt-4 md:mt-5 bg-[#146B27] rounded-[20px] py-5 md:py-6 px-4 sm:px-6 grid grid-cols-3 text-center divide-x divide-white/20">
+            <div className="mt-4 md:mt-5 bg-[#146B27] rounded-[24px] py-5 md:py-6 px-4 sm:px-6 grid grid-cols-3 text-center divide-x divide-white/20">
               <div>
                 <div className="flex items-center justify-center gap-2 text-white text-xl md:text-3xl font-bold mb-1">
                   <PawPrint size={20} className="text-[#20A83E] hidden sm:block" />
@@ -314,7 +314,7 @@ export function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {upcomingEvents.map(event => (
-                <div key={event.id} className="bg-white rounded-[18px] p-4 border border-[#D9D9D9]/60 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col transform hover:-translate-y-1">
+                <div key={event.id} className="bg-white rounded-[16px] p-4 border border-[#D9D9D9]/60 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col transform hover:-translate-y-1">
                   <div className="mb-3">
                     <span className={`px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm ${
                       event.type === 'Jornada_castracion' ? 'bg-[#20A83E] text-white' :

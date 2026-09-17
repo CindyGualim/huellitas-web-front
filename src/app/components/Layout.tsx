@@ -125,49 +125,46 @@ export function Layout({ children, showNavbar = true }: LayoutProps) {
       )}
       {children}
 
-      <footer className="bg-[#146B27] mt-auto py-16 px-4">
+      <footer className="bg-[#146B27] mt-auto py-8 px-4">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="grid md:grid-cols-4 gap-12 mb-12">
-            <div className="md:col-span-1">
-              <div className="bg-white inline-flex p-3 rounded-2xl mb-4">
-                <ImageWithFallback src={logoImg} alt="Huellitas" className="h-16 w-16 object-contain" />
+          <div className="grid sm:grid-cols-3 gap-6 mb-6 pb-6 border-b border-white/15">
+            <div className="flex items-center gap-3 sm:col-span-1">
+              <div className="bg-white inline-flex p-1.5 rounded-xl shrink-0">
+                <ImageWithFallback src={logoImg} alt="Huellitas" className="h-9 w-9 object-contain" />
               </div>
-              <div className="text-white text-xl font-bold mb-1">Huellitas de la Calle</div>
-              <p className="text-white/80 text-sm">El respeto animal es nuestra pasión</p>
-            </div>
-            <div>
-              <h3 className="mb-4 text-white font-semibold tracking-wider">Explora</h3>
-              <div className="flex flex-col gap-3">
-                <Link to="/about" className="text-white/80 hover:text-white transition-colors duration-250">Nosotros</Link>
-                <Link to="/adoptions" className="text-white/80 hover:text-white transition-colors duration-250">Adopciones</Link>
-                <Link to="/events" className="text-white/80 hover:text-white transition-colors duration-250">Eventos</Link>
-                <Link to="/help" className="text-white/80 hover:text-white transition-colors duration-250">Quiero Ayudar</Link>
+              <div>
+                <div className="text-white text-sm font-bold">Huellitas de la Calle</div>
+                <p className="text-white/70 text-xs">El respeto animal es nuestra pasión</p>
               </div>
             </div>
-            <div>
-              <h3 className="mb-4 text-white font-semibold tracking-wider">Síguenos</h3>
+
+            <div className="flex flex-wrap gap-x-5 gap-y-2 sm:justify-center sm:items-center text-sm">
+              <Link to="/about" className="text-white/80 hover:text-white transition-colors duration-250">Nosotros</Link>
+              <Link to="/adoptions" className="text-white/80 hover:text-white transition-colors duration-250">Adopciones</Link>
+              <Link to="/events" className="text-white/80 hover:text-white transition-colors duration-250">Eventos</Link>
+              <Link to="/help" className="text-white/80 hover:text-white transition-colors duration-250">Quiero Ayudar</Link>
+            </div>
+
+            <div className="flex flex-wrap gap-x-5 gap-y-2 sm:justify-end sm:items-center text-sm">
               <a
                 href={instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 text-white/80 hover:text-white transition-colors duration-250"
+                className="flex items-center gap-1.5 text-white/80 hover:text-white transition-colors duration-250"
               >
-                <Instagram size={20} />
+                <Instagram size={16} />
                 {settings?.instagramHandle ?? '@huellitasdelacalleong'}
               </a>
-            </div>
-            <div>
-              <h3 className="mb-4 text-white font-semibold tracking-wider">Contacto</h3>
-              <a href={`https://wa.me/${whatsappNumber}`} className="text-white/80 hover:text-white transition-colors duration-250 block mb-6">
+              <a href={`https://wa.me/${whatsappNumber}`} className="text-white/80 hover:text-white transition-colors duration-250">
                 +{whatsappNumber}
               </a>
-              <Link to="/admin" className="text-white/40 hover:text-white/60 text-sm transition-colors duration-250">
-                Panel de Administración
-              </Link>
             </div>
           </div>
-          <div className="text-center text-white/50 text-sm border-t border-white/20 pt-8">
-            © 2026 Huellitas de la Calle Guatemala
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-white/50 text-xs">
+            <span>© 2026 Huellitas de la Calle Guatemala</span>
+            <Link to="/admin" className="hover:text-white/70 transition-colors duration-250">
+              Panel de Administración
+            </Link>
           </div>
         </div>
       </footer>

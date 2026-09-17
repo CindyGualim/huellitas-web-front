@@ -20,7 +20,7 @@ function EventCard({ event }: { event: ApiEvent }) {
   const isCastration = event.type === 'Jornada_castracion';
 
   return (
-    <div className="bg-white rounded-[18px] p-4 border border-[#D9D9D9]/60 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col h-full transform hover:-translate-y-1">
+    <div className="bg-white rounded-[16px] p-4 border border-[#D9D9D9]/60 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col h-full transform hover:-translate-y-1">
       <div className="flex justify-between items-start mb-3 gap-2">
         <span className={`px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm ${eventBadgeClass(event.type)}`}>
           {eventTypeLabel(event.type)}
@@ -117,7 +117,7 @@ export function Events() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-14 bg-[#F8F8F8] rounded-[18px] border border-[#D9D9D9]/50">
+            <div className="text-center py-14 bg-[#F8F8F8] rounded-[16px] border border-[#D9D9D9]/50">
               <div className="text-4xl mb-3 opacity-50">📅</div>
               <h3 className="text-[#222222] mb-1.5 text-lg font-medium">No hay eventos programados</h3>
               <p className="text-[#222222]/60 text-sm">Pronto anunciaremos nuevas fechas para esta categoría.</p>
