@@ -93,13 +93,19 @@ function HeroCarousel({ slides }: { slides: HeroSlideView[] }) {
       {slides.map((s, i) => (
         <div
           key={s.id}
-          className="absolute inset-0 transition-opacity duration-700"
+          className="absolute inset-0 transition-opacity duration-700 bg-[#146B27]"
           style={{ opacity: i === current && !transitioning ? 1 : 0, zIndex: i === current ? 1 : 0 }}
         >
           <ImageWithFallback
             src={s.image}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-50"
+          />
+          <ImageWithFallback
+            src={s.image}
             alt={s.theme}
-            className="w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-contain"
             style={{ objectPosition: s.focusPosition }}
           />
         </div>
