@@ -1,24 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Calendar, MapPin, ArrowRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, MapPin, ArrowRight, PawPrint, HeartHandshake, Syringe, ShieldAlert } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { apiGetPets, apiGetEvents, ApiPet, ApiEvent } from '../lib/api';
+import { apiGetPets, apiGetEvents, apiGetImpactStats, ApiPet, ApiEvent, ApiImpactStats } from '../lib/api';
 import { eventTypeLabel } from '../lib/eventMappings';
 import { useSiteSettings } from '../lib/useSiteSettings';
-import logoImg from '../../imports/huellitaslogo.png';
 
 // Carousel photos
 import photoHero1 from '../../imports/WhatsApp_Image_2026-06-16_at_3.21.02_PM__1_.jpeg';
 import photoHero2 from '../../imports/WhatsApp_Image_2026-06-16_at_3.21.02_PM.jpeg';
 import photoHero3 from '../../imports/WhatsApp_Image_2026-06-16_at_3.21.02_PM__3_.jpeg';
 import photoHero4 from '../../imports/WhatsApp_Image_2026-06-16_at_3.21.02_PM__2_-1.jpeg';
-
-// Info cards photos
-import photoAbout from '../../imports/WhatsApp_Image_2026-06-16_at_3.01.12_PM-1.jpeg';
-import photoEvents from '../../imports/WhatsApp_Image_2026-06-16_at_3.21.02_PM__2_.jpeg';
-import photoDonate from '../../imports/WhatsApp_Image_2026-06-16_at_3.01.12_PM__1_.jpeg';
 
 type HeroSlideView = {
   id: string;
@@ -222,6 +216,8 @@ function FeaturedPetCard({ pet }: { pet: ApiPet }) {
 export function Home() {
   const [featuredPets, setFeaturedPets] = useState<ApiPet[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<ApiEvent[]>([]);
+  const [urgentCases, setUrgentCases] = useState<ApiPet[]>([]);
+  const [impactStats, setImpactStats] = useState<ApiImpactStats | null>(null);
   const settings = useSiteSettings();
 
   const heroSlides: HeroSlideView[] = settings?.heroSlides.length
@@ -240,15 +236,51 @@ export function Home() {
       .then(({ items }) => setFeaturedPets(items.filter(pet => pet.featured)))
       .catch(() => setFeaturedPets([]));
 
+    apiGetPets({ limit: 100 })
+      .then(({ items }) => setUrgentCases(items.filter(pet => pet.status === 'En_tratamiento').slice(0, 3)))
+      .catch(() => setUrgentCases([]));
+
     apiGetEvents({ limit: 100 })
       .then(({ items }) => setUpcomingEvents(items.filter(e => e.status === 'Programado' || e.status === 'En_curso').slice(0, 3)))
       .catch(() => setUpcomingEvents([]));
+
+    apiGetImpactStats()
+      .then(setImpactStats)
+      .catch(() => setImpactStats(null));
   }, []);
 
   return (
     <Layout>
       <div className="pb-16 bg-white">
         <HeroCarousel slides={heroSlides} />
+
+        {impactStats && (
+          <div className="bg-[#146B27]">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 grid grid-cols-3 gap-4 text-center">
+              <div>
+                <div className="flex items-center justify-center gap-2 text-white text-3xl md:text-5xl font-bold mb-1">
+                  <PawPrint size={28} className="text-[#20A83E] hidden sm:block" />
+                  {impactStats.rescatados}
+                </div>
+                <p className="text-white/70 text-sm md:text-base">Animales rescatados</p>
+              </div>
+              <div>
+                <div className="flex items-center justify-center gap-2 text-white text-3xl md:text-5xl font-bold mb-1">
+                  <HeartHandshake size={28} className="text-[#20A83E] hidden sm:block" />
+                  {impactStats.adoptados}
+                </div>
+                <p className="text-white/70 text-sm md:text-base">Adopciones exitosas</p>
+              </div>
+              <div>
+                <div className="flex items-center justify-center gap-2 text-white text-3xl md:text-5xl font-bold mb-1">
+                  <Syringe size={28} className="text-[#20A83E] hidden sm:block" />
+                  {impactStats.castrados}
+                </div>
+                <p className="text-white/70 text-sm md:text-base">Castraciones realizadas</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 mt-16">
           <div className="mb-20">
@@ -320,27 +352,44 @@ export function Home() {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 mb-20">
-            {[
-              { to: '/about', img: photoAbout, label: 'Nosotros', desc: 'Conoce nuestra misión y equipo', btn: 'Nuestra historia' },
-              { to: '/events', img: photoEvents, label: 'Eventos', desc: 'Jornadas de salud en tu municipio', btn: 'Ver calendario' },
-              { to: '/help', img: photoDonate, label: 'Quiero Ayudar', desc: 'Ayúdanos a seguir rescatando', btn: 'Cómo apoyar' },
-            ].map(({ to, img, label, desc, btn }) => (
-              <Link key={label} to={to} className="group block">
-                <div className="relative bg-white rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 h-[320px] transform hover:-translate-y-1">
-                  <ImageWithFallback src={img} alt={label} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute inset-0 p-8 flex flex-col justify-end">
-                    <h3 className="text-white text-3xl font-semibold mb-2">{label}</h3>
-                    <p className="text-white/80 mb-6">{desc}</p>
-                    <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-5 py-2.5 rounded-full text-sm font-medium w-fit border border-white/20 group-hover:bg-white group-hover:text-[#146B27] transition-all duration-300">
-                      {btn} <span className="transform group-hover:translate-x-1 transition-transform">→</span>
-                    </div>
-                  </div>
+          {urgentCases.length > 0 && (
+            <div className="mb-20">
+              <div className="flex items-center gap-3 mb-8">
+                <ShieldAlert className="text-[#20A83E]" size={28} />
+                <div>
+                  <h2 className="text-[#222222] text-3xl md:text-4xl font-semibold mb-1">Casos que necesitan tu ayuda</h2>
+                  <p className="text-[#222222]/60 text-lg">Están en tratamiento veterinario activo ahora mismo</p>
                 </div>
-              </Link>
-            ))}
-          </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {urgentCases.map(pet => {
+                  const cover = pet.images.find(img => img.isCover) ?? pet.images[0];
+
+                  return (
+                    <div key={pet.id} className="bg-[#F8F8F8] rounded-2xl overflow-hidden border border-[#D9D9D9]/50 flex flex-col">
+                      <div className="h-48 relative">
+                        <ImageWithFallback src={cover?.imageUrl} alt={pet.name} className="absolute inset-0 w-full h-full object-cover" />
+                        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-[#146B27]">
+                          {pet.species}
+                        </div>
+                      </div>
+                      <div className="p-5 flex-1 flex flex-col">
+                        <h3 className="text-xl font-bold text-[#222222] mb-2">{pet.name}</h3>
+                        <p className="text-[#222222]/70 text-sm line-clamp-3">{pet.rescueStory}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="text-center">
+                <Link to="/help">
+                  <PrimaryButton variant="primary" className="min-w-[240px]">
+                    Quiero Ayudar
+                  </PrimaryButton>
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
 
       </div>

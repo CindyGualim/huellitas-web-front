@@ -700,3 +700,15 @@ export async function apiUpdateSiteSettings(token: string, payload: ApiSiteSetti
 
   return parseResponse<ApiSiteSettings>(response);
 }
+
+export interface ApiImpactStats {
+  rescatados: number;
+  adoptados: number;
+  castrados: number;
+}
+
+export async function apiGetImpactStats() {
+  const response = await fetch(`${API_URL}/stats/impact`);
+
+  return parseResponse<ApiImpactStats>(response);
+}
