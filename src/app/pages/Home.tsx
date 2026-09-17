@@ -6,6 +6,7 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { apiGetPets, apiGetEvents, ApiPet, ApiEvent } from '../lib/api';
 import { eventTypeLabel } from '../lib/eventMappings';
+import { useSiteSettings } from '../lib/useSiteSettings';
 import logoImg from '../../imports/huellitaslogo.png';
 
 // Carousel photos
@@ -19,7 +20,16 @@ import photoAbout from '../../imports/WhatsApp_Image_2026-06-16_at_3.01.12_PM-1.
 import photoEvents from '../../imports/WhatsApp_Image_2026-06-16_at_3.21.02_PM__2_.jpeg';
 import photoDonate from '../../imports/WhatsApp_Image_2026-06-16_at_3.01.12_PM__1_.jpeg';
 
-const heroSlides = [
+type HeroSlideView = {
+  id: string;
+  image: string;
+  theme: string;
+  headline: string;
+  headlineLine2: string;
+  focusPosition: string;
+};
+
+const defaultHeroSlides: HeroSlideView[] = [
   {
     id: 'slide-1',
     image: photoHero1,
@@ -54,7 +64,7 @@ const heroSlides = [
   },
 ];
 
-function HeroCarousel() {
+function HeroCarousel({ slides }: { slides: HeroSlideView[] }) {
   const [current, setCurrent] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
 
@@ -67,19 +77,26 @@ function HeroCarousel() {
     }, 300);
   }, [transitioning]);
 
-  const next = useCallback(() => goTo((current + 1) % heroSlides.length), [current, goTo]);
-  const prev = useCallback(() => goTo((current - 1 + heroSlides.length) % heroSlides.length), [current, goTo]);
+  const next = useCallback(() => goTo((current + 1) % slides.length), [current, goTo, slides.length]);
+  const prev = useCallback(() => goTo((current - 1 + slides.length) % slides.length), [current, goTo, slides.length]);
 
   useEffect(() => {
+    if (slides.length <= 1) return;
     const timer = setInterval(next, 5000);
     return () => clearInterval(timer);
-  }, [next]);
+  }, [next, slides.length]);
 
-  const slide = heroSlides[current];
+  useEffect(() => {
+    if (current >= slides.length) setCurrent(0);
+  }, [slides.length, current]);
+
+  const slide = slides[current] ?? slides[0];
+
+  if (!slide) return null;
 
   return (
     <div className="relative w-full h-[540px] md:h-[700px] overflow-hidden">
-      {heroSlides.map((s, i) => (
+      {slides.map((s, i) => (
         <div
           key={s.id}
           className="absolute inset-0 transition-opacity duration-700"
@@ -139,7 +156,7 @@ function HeroCarousel() {
       </button>
 
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2">
-        {heroSlides.map((_, i) => (
+        {slides.map((_, i) => (
           <button
             key={i}
             onClick={() => goTo(i)}
@@ -152,7 +169,7 @@ function HeroCarousel() {
       </div>
 
       <div className="absolute bottom-6 right-6 z-30 text-white/40 text-xs tabular-nums">
-        {String(current + 1).padStart(2, '0')} / {String(heroSlides.length).padStart(2, '0')}
+        {String(current + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}
       </div>
     </div>
   );
@@ -205,6 +222,18 @@ function FeaturedPetCard({ pet }: { pet: ApiPet }) {
 export function Home() {
   const [featuredPets, setFeaturedPets] = useState<ApiPet[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<ApiEvent[]>([]);
+  const settings = useSiteSettings();
+
+  const heroSlides: HeroSlideView[] = settings?.heroSlides.length
+    ? settings.heroSlides.map((s, i) => ({
+        id: `admin-slide-${i}`,
+        image: s.imageUrl,
+        theme: s.theme,
+        headline: s.headline,
+        headlineLine2: s.headlineLine2,
+        focusPosition: 'center center'
+      }))
+    : defaultHeroSlides;
 
   useEffect(() => {
     apiGetPets({ availableOnly: true, limit: 100 })
@@ -219,7 +248,7 @@ export function Home() {
   return (
     <Layout>
       <div className="pb-16 bg-white">
-        <HeroCarousel />
+        <HeroCarousel slides={heroSlides} />
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 mt-16">
           <div className="mb-20">

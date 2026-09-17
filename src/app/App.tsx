@@ -16,6 +16,7 @@ import { AdminAdoptions } from './pages/admin/Adoptions';
 import { AdminRegistrations } from './pages/admin/Registrations';
 import { AdminProfile } from './pages/admin/Profile';
 import { AdminSettings } from './pages/admin/Settings';
+import { AdminSiteContent } from './pages/admin/SiteContent';
 import { AdminUsers } from './pages/admin/Users';
 import { AdminDonations } from './pages/admin/Donations';
 import { AdminTracking } from './pages/admin/Tracking';
@@ -65,6 +66,7 @@ export default function App() {
             <Route path="registrations" element={<AdminRegistrations />} />
             <Route path="profile" element={<AdminProfile />} />
             <Route path="settings" element={<AdminSettings />} />
+            <Route path="content" element={<AdminSiteContent />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="donations" element={<AdminDonations />} />
             <Route path="tracking" element={<AdminTracking />} />

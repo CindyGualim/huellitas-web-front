@@ -653,6 +653,18 @@ export async function apiSendReminder(token: string, id: number, type: 'pre' | '
   return parseResponse<null>(response);
 }
 
+export interface ApiTimelineEntry {
+  year: string;
+  text: string;
+}
+
+export interface ApiHeroSlide {
+  imageUrl: string;
+  theme: string;
+  headline: string;
+  headlineLine2: string;
+}
+
 export interface ApiSiteSettings {
   instagramHandle: string;
   contactEmail: string;
@@ -664,6 +676,10 @@ export interface ApiSiteSettings {
   donationDropoffAddress: string;
   donationDropoffHours: string;
   neededSupplies: string[];
+  mission: string;
+  vision: string;
+  timeline: ApiTimelineEntry[];
+  heroSlides: ApiHeroSlide[];
 }
 
 export async function apiGetSiteSettings() {

@@ -171,7 +171,7 @@ export function EventFormModal({ mode, initialData, onSubmit, onClose }: EventFo
                       placeholder="Cupo"
                       value={slot.capacity}
                       onChange={e => updateTimeSlot(index, 'capacity', e.target.value)}
-                      className={inputClass + ' w-28'}
+                      className={inputClass + ' w-28! shrink-0'}
                     />
                     <button
                       type="button"
