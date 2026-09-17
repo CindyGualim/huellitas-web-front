@@ -656,6 +656,14 @@ export async function apiSendReminder(token: string, id: number, type: 'pre' | '
 export interface ApiSiteSettings {
   instagramHandle: string;
   contactEmail: string;
+  whatsappNumber: string;
+  bankName: string;
+  bankAccountType: string;
+  bankAccountNumber: string;
+  bankAccountHolder: string;
+  donationDropoffAddress: string;
+  donationDropoffHours: string;
+  neededSupplies: string[];
 }
 
 export async function apiGetSiteSettings() {

@@ -5,9 +5,12 @@ import { Layout } from '../components/Layout';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { apiGetPet, apiGetPets, ApiPet } from '../lib/api';
 import { sizeLabel, statusLabel } from '../lib/petMappings';
+import { useSiteSettings } from '../lib/useSiteSettings';
 
 export function PetProfile() {
   const { petId } = useParams<{ petId: string }>();
+  const settings = useSiteSettings();
+  const instagramUrl = `https://www.instagram.com/${(settings?.instagramHandle ?? '@huellitasdelacalleong').replace(/^@/, '')}/`;
   const [pet, setPet] = useState<ApiPet | null>(null);
   const [otherPets, setOtherPets] = useState<ApiPet[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -167,7 +170,7 @@ export function PetProfile() {
                       <Share2 size={18} />
                       Compartir
                     </button>
-                    <a href="https://www.instagram.com/huellitasdelacalleong/" target="_blank" rel="noopener noreferrer" className="flex-1">
+                    <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
                       <button className="w-full bg-white hover:bg-[#F8F8F8] text-[#222222] border border-[#D9D9D9] py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors">
                         <Instagram size={18} />
                         Instagram

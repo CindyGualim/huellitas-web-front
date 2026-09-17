@@ -2,11 +2,15 @@ import { useEffect, useState } from 'react';
 import { Heart, Package, Banknote, ShieldAlert, Info, HelpCircle } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { DonationAccountModal } from '../components/DonationAccountModal';
 import { apiGetPets, ApiPet } from '../lib/api';
+import { useSiteSettings } from '../lib/useSiteSettings';
 
 export function Help() {
   const [casesNeedingHelp, setCasesNeedingHelp] = useState<ApiPet[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAccountModal, setShowAccountModal] = useState(false);
+  const settings = useSiteSettings();
 
   useEffect(() => {
     apiGetPets({ limit: 100 })
@@ -54,12 +58,18 @@ export function Help() {
                 </p>
                 <div className="space-y-3 mb-8">
                   <div className="bg-[#F8F8F8] p-4 rounded-xl border border-[#D9D9D9]/50">
-                    <p className="text-sm text-[#222222]/60 mb-1">Cuenta Monetaria - Banco Industrial</p>
-                    <p className="text-[#222222] font-semibold text-lg tracking-wide">123-456789-0</p>
-                    <p className="text-sm text-[#222222]/80 mt-1">A nombre de: Asociación Huellitas de la Calle</p>
+                    <p className="text-sm text-[#222222]/60 mb-1">
+                      {settings ? `${settings.bankAccountType} - ${settings.bankName}` : 'Cargando datos bancarios...'}
+                    </p>
+                    <p className="text-[#222222] font-semibold text-lg tracking-wide">{settings?.bankAccountNumber ?? '—'}</p>
+                    <p className="text-sm text-[#222222]/80 mt-1">A nombre de: {settings?.bankAccountHolder ?? '—'}</p>
                   </div>
                 </div>
-                <button className="w-full bg-[#20A83E] text-white py-3.5 rounded-xl font-semibold hover:bg-[#146B27] transition-colors shadow-sm">
+                <button
+                  onClick={() => setShowAccountModal(true)}
+                  disabled={!settings}
+                  className="w-full bg-[#20A83E] text-white py-3.5 rounded-xl font-semibold hover:bg-[#146B27] transition-colors shadow-sm disabled:opacity-60"
+                >
                   Quiero Ayudar
                 </button>
               </div>
@@ -75,16 +85,7 @@ export function Help() {
                 </p>
                 <h4 className="font-semibold text-[#222222] mb-3">Insumos más necesitados:</h4>
                 <ul className="grid grid-cols-2 gap-y-3 gap-x-4">
-                  {[
-                    'Concentrado para perros',
-                    'Concentrado para gatos',
-                    'Medicamentos',
-                    'Camas y Cobijas',
-                    'Correas',
-                    'Transportadoras',
-                    'Arena para gatos',
-                    'Productos de limpieza'
-                  ].map((item, i) => (
+                  {(settings?.neededSupplies ?? []).map((item, i) => (
                     <li key={i} className="flex items-center gap-2 text-[#222222]/80 text-sm">
                       <div className="w-1.5 h-1.5 rounded-full bg-[#20A83E]" />
                       {item}
@@ -153,7 +154,7 @@ export function Help() {
                   ¿Cómo puedo realizar una donación?
                 </h3>
                 <p className="text-[#222222]/70">
-                  Puedes realizar transferencias directas a nuestra cuenta bancaria en Banco Industrial. Para donaciones desde el extranjero o uso de tarjeta, contáctanos a nuestro WhatsApp para enviarte un enlace de pago seguro.
+                  Puedes realizar transferencias directas a nuestra cuenta bancaria en {settings?.bankName ?? 'nuestro banco'}. Para donaciones desde el extranjero o uso de tarjeta, contáctanos a nuestro WhatsApp para enviarte un enlace de pago seguro.
                 </p>
               </div>
               
@@ -163,7 +164,7 @@ export function Help() {
                   ¿Dónde puedo entregar mis donaciones en especie?
                 </h3>
                 <p className="text-[#222222]/70">
-                  Recibimos donaciones físicas en nuestro centro de acopio principal ubicado en la Zona 10 de la Ciudad de Guatemala, de lunes a sábado de 9:00 AM a 4:00 PM. Por favor, comunícate con nosotros para coordinar tu visita.
+                  Recibimos donaciones físicas en nuestro centro de acopio principal ubicado en {settings?.donationDropoffAddress ?? 'nuestro centro de acopio'}, {settings?.donationDropoffHours ?? 'en el horario habitual'}. Por favor, comunícate con nosotros para coordinar tu visita.
                 </p>
               </div>
 
@@ -187,7 +188,11 @@ export function Help() {
               <p className="text-white/80 text-lg mb-8 max-w-2xl mx-auto">
                 Tu aporte, sin importar el tamaño, significa una nueva oportunidad de vida para un animal rescatado.
               </p>
-              <button className="bg-white text-[#146B27] px-10 py-4 rounded-xl font-bold text-lg hover:bg-[#F8F8F8] hover:scale-105 transition-all shadow-lg inline-flex items-center gap-2">
+              <button
+                onClick={() => setShowAccountModal(true)}
+                disabled={!settings}
+                className="bg-white text-[#146B27] px-10 py-4 rounded-xl font-bold text-lg hover:bg-[#F8F8F8] hover:scale-105 transition-all shadow-lg inline-flex items-center gap-2 disabled:opacity-60"
+              >
                 <Heart size={20} className="fill-[#146B27]" />
                 Quiero Ayudar
               </button>
@@ -196,6 +201,10 @@ export function Help() {
 
         </div>
       </div>
+
+      {showAccountModal && settings && (
+        <DonationAccountModal settings={settings} onClose={() => setShowAccountModal(false)} />
+      )}
     </Layout>
   );
 }

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Menu, X, Instagram, LogIn } from 'lucide-react';
 import logoImg from '../../imports/huellitaslogo.png';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import { useSiteSettings } from '../lib/useSiteSettings';
 
 interface LayoutProps {
   children: ReactNode;
@@ -12,6 +13,9 @@ interface LayoutProps {
 export function Layout({ children, showNavbar = true }: LayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const settings = useSiteSettings();
+  const instagramUrl = `https://www.instagram.com/${(settings?.instagramHandle ?? '@huellitasdelacalleong').replace(/^@/, '')}/`;
+  const whatsappNumber = settings?.whatsappNumber ?? '50212345678';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -149,19 +153,19 @@ export function Layout({ children, showNavbar = true }: LayoutProps) {
             <div>
               <h3 className="mb-4 text-white font-semibold tracking-wider">Síguenos</h3>
               <a
-                href="https://www.instagram.com/huellitasdelacalleong/"
+                href={instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 text-white/80 hover:text-white transition-colors duration-250"
               >
                 <Instagram size={20} />
-                @huellitasdelacalleong
+                {settings?.instagramHandle ?? '@huellitasdelacalleong'}
               </a>
             </div>
             <div>
               <h3 className="mb-4 text-white font-semibold tracking-wider">Contacto</h3>
-              <a href="https://wa.me/50212345678" className="text-white/80 hover:text-white transition-colors duration-250 block mb-6">
-                +502 1234-5678
+              <a href={`https://wa.me/${whatsappNumber}`} className="text-white/80 hover:text-white transition-colors duration-250 block mb-6">
+                +{whatsappNumber}
               </a>
               <Link to="/admin" className="text-white/40 hover:text-white/60 text-sm transition-colors duration-250">
                 Panel de Administración
