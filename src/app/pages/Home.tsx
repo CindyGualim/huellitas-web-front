@@ -254,38 +254,36 @@ export function Home() {
       <div className="pb-16 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-6 md:pt-8">
           <HeroCarousel slides={heroSlides} />
-        </div>
 
-        {impactStats && (
-          <div className="bg-[#146B27] mt-10 md:mt-14">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 grid grid-cols-3 gap-4 text-center">
+          {impactStats && (
+            <div className="mt-4 md:mt-6 bg-[#146B27] rounded-[24px] py-7 md:py-9 px-4 sm:px-6 grid grid-cols-3 gap-4 text-center">
               <div>
-                <div className="flex items-center justify-center gap-2 text-white text-3xl md:text-5xl font-bold mb-1">
-                  <PawPrint size={28} className="text-[#20A83E] hidden sm:block" />
+                <div className="flex items-center justify-center gap-2 text-white text-2xl md:text-4xl font-bold mb-1">
+                  <PawPrint size={24} className="text-[#20A83E] hidden sm:block" />
                   {impactStats.rescatados}
                 </div>
-                <p className="text-white/70 text-sm md:text-base">Animales rescatados</p>
+                <p className="text-white/70 text-xs md:text-base">Animales rescatados</p>
               </div>
               <div>
-                <div className="flex items-center justify-center gap-2 text-white text-3xl md:text-5xl font-bold mb-1">
-                  <HeartHandshake size={28} className="text-[#20A83E] hidden sm:block" />
+                <div className="flex items-center justify-center gap-2 text-white text-2xl md:text-4xl font-bold mb-1">
+                  <HeartHandshake size={24} className="text-[#20A83E] hidden sm:block" />
                   {impactStats.adoptados}
                 </div>
-                <p className="text-white/70 text-sm md:text-base">Adopciones exitosas</p>
+                <p className="text-white/70 text-xs md:text-base">Adopciones exitosas</p>
               </div>
               <div>
-                <div className="flex items-center justify-center gap-2 text-white text-3xl md:text-5xl font-bold mb-1">
-                  <Syringe size={28} className="text-[#20A83E] hidden sm:block" />
+                <div className="flex items-center justify-center gap-2 text-white text-2xl md:text-4xl font-bold mb-1">
+                  <Syringe size={24} className="text-[#20A83E] hidden sm:block" />
                   {impactStats.castrados}
                 </div>
-                <p className="text-white/70 text-sm md:text-base">Castraciones realizadas</p>
+                <p className="text-white/70 text-xs md:text-base">Castraciones realizadas</p>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 mt-16">
-          <div className="mb-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 mt-16 md:mt-20">
+          <div className="mb-16 md:mb-20">
             <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-8 gap-4">
               <div>
                 <h2 className="text-[#222222] text-3xl md:text-4xl font-semibold mb-2">Rescatados buscando hogar</h2>
@@ -301,9 +299,11 @@ export function Home() {
               ))}
             </div>
           </div>
+        </div>
 
-          {/* Próximos Eventos Section */}
-          <div className="mb-20 bg-[#F8F8F8] rounded-[32px] p-8 md:p-12 border border-[#D9D9D9]/50">
+        {/* Próximos Eventos Section */}
+        <div className="bg-[#F8F8F8] border-y border-[#D9D9D9]/50 py-16 md:py-20">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-10 gap-4">
               <div>
                 <h2 className="text-[#222222] text-3xl md:text-4xl font-semibold mb-2">Próximos Eventos</h2>
@@ -313,7 +313,7 @@ export function Home() {
                 Ver calendario completo <span className="text-xl">→</span>
               </Link>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {upcomingEvents.map(event => (
                 <div key={event.id} className="bg-white rounded-[24px] p-6 border border-[#D9D9D9]/60 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col transform hover:-translate-y-1">
@@ -353,47 +353,46 @@ export function Home() {
               ))}
             </div>
           </div>
-
-          {urgentCases.length > 0 && (
-            <div className="mb-20">
-              <div className="flex items-center gap-3 mb-8">
-                <ShieldAlert className="text-[#20A83E]" size={28} />
-                <div>
-                  <h2 className="text-[#222222] text-3xl md:text-4xl font-semibold mb-1">Casos que necesitan tu ayuda</h2>
-                  <p className="text-[#222222]/60 text-lg">Están en tratamiento veterinario activo ahora mismo</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                {urgentCases.map(pet => {
-                  const cover = pet.images.find(img => img.isCover) ?? pet.images[0];
-
-                  return (
-                    <div key={pet.id} className="bg-[#F8F8F8] rounded-2xl overflow-hidden border border-[#D9D9D9]/50 flex flex-col">
-                      <div className="h-48 relative">
-                        <ImageWithFallback src={cover?.imageUrl} alt={pet.name} className="absolute inset-0 w-full h-full object-cover" />
-                        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-[#146B27]">
-                          {pet.species}
-                        </div>
-                      </div>
-                      <div className="p-5 flex-1 flex flex-col">
-                        <h3 className="text-xl font-bold text-[#222222] mb-2">{pet.name}</h3>
-                        <p className="text-[#222222]/70 text-sm line-clamp-3">{pet.rescueStory}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="text-center">
-                <Link to="/help">
-                  <PrimaryButton variant="primary" className="min-w-[240px]">
-                    Quiero Ayudar
-                  </PrimaryButton>
-                </Link>
-              </div>
-            </div>
-          )}
         </div>
 
+        {urgentCases.length > 0 && (
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 mt-16 md:mt-20">
+            <div className="flex items-center gap-3 mb-8">
+              <ShieldAlert className="text-[#20A83E]" size={28} />
+              <div>
+                <h2 className="text-[#222222] text-3xl md:text-4xl font-semibold mb-1">Casos que necesitan tu ayuda</h2>
+                <p className="text-[#222222]/60 text-lg">Están en tratamiento veterinario activo ahora mismo</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {urgentCases.map(pet => {
+                const cover = pet.images.find(img => img.isCover) ?? pet.images[0];
+
+                return (
+                  <div key={pet.id} className="bg-white rounded-2xl overflow-hidden border border-[#D9D9D9]/60 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col">
+                    <div className="h-48 relative">
+                      <ImageWithFallback src={cover?.imageUrl} alt={pet.name} className="absolute inset-0 w-full h-full object-cover" />
+                      <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-[#146B27]">
+                        {pet.species}
+                      </div>
+                    </div>
+                    <div className="p-5 flex-1 flex flex-col">
+                      <h3 className="text-xl font-bold text-[#222222] mb-2">{pet.name}</h3>
+                      <p className="text-[#222222]/70 text-sm line-clamp-3">{pet.rescueStory}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="text-center">
+              <Link to="/help">
+                <PrimaryButton variant="primary" className="min-w-[240px]">
+                  Quiero Ayudar
+                </PrimaryButton>
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
