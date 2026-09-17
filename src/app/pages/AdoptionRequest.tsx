@@ -145,19 +145,19 @@ export function AdoptionRequest() {
   return (
     <Layout>
       <div className="bg-white min-h-screen">
-        <div className="bg-[#146B27] px-6 py-14">
+        <div className="bg-[#146B27] px-6 py-8">
           <div className="mx-auto max-w-2xl">
-            <Link to={`/adoptions/pet-profile/${pet.id}`} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors duration-250 mb-4">
-              <ArrowLeft size={18} />
+            <Link to={`/adoptions/pet-profile/${pet.id}`} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors duration-250 mb-3">
+              <ArrowLeft size={16} />
               <span className="text-sm">Volver</span>
             </Link>
-            <h1 className="text-white text-3xl">Solicitud de adopción de {pet.name}</h1>
-            <p className="text-white/60 mt-1">Completa la información a continuación</p>
+            <h1 className="text-white text-2xl font-bold">Solicitud de adopción de {pet.name}</h1>
+            <p className="text-white/60 text-sm mt-1">Completa la información a continuación</p>
           </div>
         </div>
 
-        <div className="mx-auto max-w-2xl px-4 py-10 pb-16">
-          <div className="bg-white rounded-[20px] p-8 md:p-10 shadow-sm border border-[#D9D9D9]/50">
+        <div className="mx-auto max-w-2xl px-4 py-8 pb-16">
+          <div className="bg-white rounded-[18px] p-6 md:p-8 shadow-sm border border-[#D9D9D9]/50">
             {error && (
               <div className="mb-6 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
                 {error}

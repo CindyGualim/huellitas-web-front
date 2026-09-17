@@ -158,34 +158,34 @@ export function EventRegistration() {
   return (
     <Layout>
       <div className="bg-white min-h-screen">
-        <div className="bg-[#146B27] px-4 md:px-8 py-5">
+        <div className="bg-[#146B27] px-4 md:px-8 py-4">
           <div className="max-w-3xl mx-auto flex items-center gap-2">
             <button onClick={() => navigate('/events')} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors duration-250">
-              <ArrowLeft size={18} />
+              <ArrowLeft size={16} />
               <span className="text-sm">Volver a eventos</span>
             </button>
           </div>
         </div>
 
-        <div className="bg-[#146B27] px-6 pb-12 pt-6">
+        <div className="bg-[#146B27] px-6 pb-8 pt-4">
           <div className="mx-auto max-w-3xl">
-            <span className="bg-[#20A83E] text-white px-3 py-1 rounded-full text-xs font-medium mb-3 inline-block">Inscripción</span>
-            <h1 className="text-white text-3xl md:text-4xl mb-3 font-bold">{event.title}</h1>
-            <div className="flex flex-wrap gap-4 text-white/80">
+            <span className="bg-[#20A83E] text-white px-3 py-1 rounded-full text-xs font-medium mb-2 inline-block">Inscripción</span>
+            <h1 className="text-white text-2xl md:text-3xl mb-2 font-bold">{event.title}</h1>
+            <div className="flex flex-wrap gap-4 text-white/80 text-sm">
               <div className="flex items-center gap-2">
-                <MapPin size={18} />
+                <MapPin size={16} />
                 <span>{event.location}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Calendar size={18} />
+                <Calendar size={16} />
                 <span>{eventDate.toLocaleDateString('es-GT', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="mx-auto max-w-3xl px-4 py-10 pb-20 -mt-8 relative z-10">
-          <div className="bg-white rounded-[24px] shadow-lg border border-[#D9D9D9]/50 p-6 md:p-10">
+        <div className="mx-auto max-w-3xl px-4 py-8 pb-16 -mt-6 relative z-10">
+          <div className="bg-white rounded-[20px] shadow-lg border border-[#D9D9D9]/50 p-5 md:p-8">
             <div className="mb-8">
               <p className="text-[#222222]/60 text-sm mb-3">Paso {step} de 2</p>
               <div className="bg-[#D9D9D9]/30 rounded-full h-1.5 overflow-hidden">

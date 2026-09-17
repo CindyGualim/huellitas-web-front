@@ -20,27 +20,27 @@ function EventCard({ event }: { event: ApiEvent }) {
   const isCastration = event.type === 'Jornada_castracion';
 
   return (
-    <div className="bg-white rounded-[24px] p-6 border border-[#D9D9D9]/60 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col h-full transform hover:-translate-y-1">
-      <div className="flex justify-between items-start mb-4 gap-2">
-        <span className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm ${eventBadgeClass(event.type)}`}>
+    <div className="bg-white rounded-[18px] p-4 border border-[#D9D9D9]/60 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col h-full transform hover:-translate-y-1">
+      <div className="flex justify-between items-start mb-3 gap-2">
+        <span className={`px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm ${eventBadgeClass(event.type)}`}>
           {eventTypeLabel(event.type)}
         </span>
       </div>
 
-      <h3 className="text-[#222222] text-xl font-bold mb-3">{event.title}</h3>
+      <h3 className="text-[#222222] text-base font-bold mb-2">{event.title}</h3>
 
-      <div className="flex flex-col gap-2 mb-4">
+      <div className="flex flex-col gap-1.5 mb-3">
         <div className="flex items-center gap-2 text-[#222222]/70 text-sm">
-          <Calendar size={16} className="text-[#20A83E]" />
+          <Calendar size={14} className="text-[#20A83E]" />
           <span>{formatEventDate(event.startDate)}</span>
         </div>
         <div className="flex items-center gap-2 text-[#222222]/70 text-sm">
-          <MapPin size={16} className="text-[#20A83E]" />
+          <MapPin size={14} className="text-[#20A83E]" />
           <span>{event.location}</span>
         </div>
       </div>
 
-      <p className="text-[#222222]/70 text-sm mb-6 flex-1 line-clamp-3">
+      <p className="text-[#222222]/70 text-sm mb-4 flex-1 line-clamp-2">
         {event.description}
       </p>
 
@@ -52,8 +52,8 @@ function EventCard({ event }: { event: ApiEvent }) {
             </PrimaryButton>
           </Link>
         ) : (
-          <button className="w-full bg-[#F8F8F8] text-[#222222] py-3 rounded-xl font-medium border border-[#D9D9D9] hover:border-[#20A83E]/50 transition-colors flex items-center justify-center gap-2">
-            Ver detalles <ArrowRight size={16} />
+          <button className="w-full bg-[#F8F8F8] text-[#222222] py-2.5 text-sm rounded-xl font-medium border border-[#D9D9D9] hover:border-[#20A83E]/50 transition-colors flex items-center justify-center gap-2">
+            Ver detalles <ArrowRight size={14} />
           </button>
         )}
       </div>
@@ -79,24 +79,24 @@ export function Events() {
   return (
     <Layout>
       <div className="bg-white min-h-screen">
-        <div className="bg-[#146B27] px-6 py-16 md:py-20 relative overflow-hidden">
+        <div className="bg-[#146B27] px-6 py-8 md:py-10 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-96 h-96 bg-[#20A83E]/20 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/2" />
           <div className="mx-auto max-w-6xl relative z-10 text-center md:text-left">
-            <h1 className="text-white text-4xl md:text-5xl font-bold mb-4">Próximos Eventos</h1>
-            <p className="text-white/80 text-lg max-w-2xl">
+            <h1 className="text-white text-2xl md:text-3xl font-bold mb-2">Próximos Eventos</h1>
+            <p className="text-white/80 text-sm md:text-base max-w-2xl">
               Únete a nosotros en nuestras jornadas de salud, castración y adopción en distintos municipios. Tu participación hace la diferencia.
             </p>
           </div>
         </div>
 
-        <div className="mx-auto max-w-6xl px-4 py-12 pb-24">
+        <div className="mx-auto max-w-6xl px-4 py-8 pb-16">
           {availableTypes.length > 1 && (
-            <div className="flex gap-3 overflow-x-auto pb-6 scrollbar-hide mb-6">
+            <div className="flex gap-2.5 overflow-x-auto pb-4 scrollbar-hide mb-5">
               {(['Todas', ...availableTypes.map(t => t.value)] as const).map(type => (
                 <button
                   key={type}
                   onClick={() => setActiveType(type)}
-                  className={`px-5 py-2.5 rounded-xl transition-all duration-250 cursor-pointer text-sm font-medium whitespace-nowrap transform hover:scale-[1.02] active:scale-95 ${
+                  className={`px-4 py-2 rounded-xl transition-all duration-250 cursor-pointer text-sm font-medium whitespace-nowrap transform hover:scale-[1.02] active:scale-95 ${
                     activeType === type
                       ? 'bg-[#20A83E] text-white shadow-md'
                       : 'bg-[#F8F8F8] text-[#222222] hover:bg-[#D9D9D9]/50 border border-[#D9D9D9]/80'
@@ -109,18 +109,18 @@ export function Events() {
           )}
 
           {isLoading ? (
-            <p className="text-center text-[#222222]/50 py-20">Cargando...</p>
+            <p className="text-center text-[#222222]/50 py-16 text-sm">Cargando...</p>
           ) : filteredEvents.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredEvents.map(event => (
                 <EventCard key={event.id} event={event} />
               ))}
             </div>
           ) : (
-            <div className="text-center py-20 bg-[#F8F8F8] rounded-[24px] border border-[#D9D9D9]/50">
-              <div className="text-6xl mb-4 opacity-50">📅</div>
-              <h3 className="text-[#222222] mb-2 text-xl font-medium">No hay eventos programados</h3>
-              <p className="text-[#222222]/60">Pronto anunciaremos nuevas fechas para esta categoría.</p>
+            <div className="text-center py-14 bg-[#F8F8F8] rounded-[18px] border border-[#D9D9D9]/50">
+              <div className="text-4xl mb-3 opacity-50">📅</div>
+              <h3 className="text-[#222222] mb-1.5 text-lg font-medium">No hay eventos programados</h3>
+              <p className="text-[#222222]/60 text-sm">Pronto anunciaremos nuevas fechas para esta categoría.</p>
             </div>
           )}
         </div>

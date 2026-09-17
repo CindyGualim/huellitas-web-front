@@ -12,8 +12,8 @@ function PetCard({ pet }: { pet: ApiPet }) {
   const coverImage = pet.images.find(image => image.isCover) ?? pet.images[0];
 
   return (
-    <div className="bg-white rounded-[20px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-250 border border-[#D9D9D9]/50 transform hover:-translate-y-1 h-full flex flex-col group">
-      <div className="relative overflow-hidden h-64 shrink-0 bg-[#F8F8F8]">
+    <div className="bg-white rounded-[16px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-250 border border-[#D9D9D9]/50 transform hover:-translate-y-1 h-full flex flex-col group">
+      <div className="relative overflow-hidden h-44 shrink-0 bg-[#F8F8F8]">
         {coverImage && (
           <img
             src={coverImage.imageUrl}
@@ -21,28 +21,28 @@ function PetCard({ pet }: { pet: ApiPet }) {
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
         )}
-        <div className="absolute top-3 right-3">
-          <span className={`px-3 py-1.5 rounded-full text-xs font-medium shadow-sm ${statusBadgeClass(pet.status)}`}>
+        <div className="absolute top-2.5 right-2.5">
+          <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium shadow-sm ${statusBadgeClass(pet.status)}`}>
             {statusLabel(pet.status)}
           </span>
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-4">
-          <h3 className="text-white text-xl font-medium">{pet.name}</h3>
-          <div className="flex items-center gap-1.5 text-white/80 text-sm mt-1">
-            <Scale size={14} />
+        <div className="absolute bottom-0 left-0 right-0 p-3">
+          <h3 className="text-white text-base font-medium">{pet.name}</h3>
+          <div className="flex items-center gap-1.5 text-white/80 text-xs mt-0.5">
+            <Scale size={12} />
             <span>{pet.weight} kg · {pet.estimatedAge}</span>
           </div>
         </div>
       </div>
-      <div className="p-5 flex-1 flex flex-col justify-between">
-        <div className="flex flex-wrap gap-2 mb-6">
-          <span className="bg-[#F8F8F8] text-[#222222] px-3 py-1.5 rounded-md text-xs border border-[#D9D9D9]">{pet.gender}</span>
-          <span className="bg-[#F8F8F8] text-[#222222] px-3 py-1.5 rounded-md text-xs border border-[#D9D9D9]">{sizeLabel(pet.size)}</span>
-          <span className="bg-[#F8F8F8] text-[#222222] px-3 py-1.5 rounded-md text-xs border border-[#D9D9D9]">{pet.breed}</span>
+      <div className="p-3.5 flex-1 flex flex-col justify-between">
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          <span className="bg-[#F8F8F8] text-[#222222] px-2.5 py-1 rounded-md text-xs border border-[#D9D9D9]">{pet.gender}</span>
+          <span className="bg-[#F8F8F8] text-[#222222] px-2.5 py-1 rounded-md text-xs border border-[#D9D9D9]">{sizeLabel(pet.size)}</span>
+          <span className="bg-[#F8F8F8] text-[#222222] px-2.5 py-1 rounded-md text-xs border border-[#D9D9D9]">{pet.breed}</span>
         </div>
         <Link to={`/adoptions/pet-profile/${pet.id}`}>
-          <PrimaryButton variant="primary" fullWidth className="font-medium">Ver perfil de {pet.name.split(' ')[0]}</PrimaryButton>
+          <PrimaryButton variant="primary" fullWidth className="font-medium text-sm">Ver perfil de {pet.name.split(' ')[0]}</PrimaryButton>
         </Link>
       </div>
     </div>
@@ -98,7 +98,7 @@ export function AdoptionCategory() {
   });
 
   const filterChipClasses = (isActive: boolean) =>
-    `px-5 py-2.5 rounded-xl transition-all duration-250 cursor-pointer text-sm font-medium transform hover:scale-[1.02] active:scale-95 ${
+    `px-4 py-2 rounded-xl transition-all duration-250 cursor-pointer text-sm font-medium transform hover:scale-[1.02] active:scale-95 ${
       isActive
         ? 'bg-[#20A83E] text-white shadow-md'
         : 'bg-white text-[#222222] hover:bg-[#F8F8F8] border border-[#D9D9D9]/80'
@@ -108,42 +108,42 @@ export function AdoptionCategory() {
     <Layout>
       <div className="bg-white min-h-screen">
         {/* Category Hero */}
-        <div className="relative h-[300px] md:h-[400px] overflow-hidden">
+        <div className="relative h-[220px] md:h-[280px] overflow-hidden">
           <img src={categoryInfo.hero} alt={categoryInfo.title} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-          <div className="absolute inset-0 flex flex-col justify-end px-6 py-12">
+          <div className="absolute inset-0 flex flex-col justify-end px-6 py-6">
             <div className="mx-auto max-w-6xl w-full">
-              <Link to="/adoptions" className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors duration-250 mb-6 bg-black/20 px-4 py-2 rounded-full backdrop-blur-sm border border-white/10 w-fit text-sm">
-                <ArrowLeft size={16} /> Volver a categorías
+              <Link to="/adoptions" className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors duration-250 mb-3 bg-black/20 px-3 py-1.5 rounded-full backdrop-blur-sm border border-white/10 w-fit text-xs">
+                <ArrowLeft size={14} /> Volver a categorías
               </Link>
-              <h1 className="text-white text-4xl md:text-5xl font-bold mb-2">{categoryInfo.title}</h1>
-              <p className="text-white/80 text-lg">{categoryInfo.subtitle}</p>
+              <h1 className="text-white text-2xl md:text-3xl font-bold mb-1">{categoryInfo.title}</h1>
+              <p className="text-white/80 text-sm md:text-base">{categoryInfo.subtitle}</p>
             </div>
           </div>
         </div>
 
-        <div className="mx-auto max-w-6xl px-4 py-12 pb-24">
+        <div className="mx-auto max-w-6xl px-4 py-8 pb-16">
           {/* Filters */}
-          <div className="mb-10 bg-[#F8F8F8] p-6 rounded-[24px] border border-[#D9D9D9]/50">
-            <div className="flex flex-col md:flex-row gap-6">
+          <div className="mb-6 bg-[#F8F8F8] p-4 rounded-[18px] border border-[#D9D9D9]/50">
+            <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
-                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-[#222222]/40" size={20} />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#222222]/40" size={18} />
                 <input
                   type="text"
                   placeholder="Buscar por nombre..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-14 pr-4 py-3.5 bg-white rounded-[16px] text-[#222222] placeholder-[#222222]/40 focus:outline-none focus:ring-2 focus:ring-[#20A83E]/50 shadow-sm border border-[#D9D9D9] transition-all duration-250 hover:border-[#20A83E]/30"
+                  className="w-full pl-11 pr-4 py-2.5 text-sm bg-white rounded-[14px] text-[#222222] placeholder-[#222222]/40 focus:outline-none focus:ring-2 focus:ring-[#20A83E]/50 shadow-sm border border-[#D9D9D9] transition-all duration-250 hover:border-[#20A83E]/30"
                 />
               </div>
 
-              <div className="flex gap-3 overflow-x-auto pb-2 md:pb-0 scrollbar-hide shrink-0 items-center">
+              <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide shrink-0 items-center">
                 {SIZE_OPTIONS.map(size => (
                   <button key={size.value} onClick={() => setSizeFilter(sizeFilter === size.value ? null : size.value)} className={filterChipClasses(sizeFilter === size.value)}>
                     {size.label}
                   </button>
                 ))}
-                <div className="w-px h-8 bg-[#D9D9D9] mx-1 hidden md:block" />
+                <div className="w-px h-6 bg-[#D9D9D9] mx-1 hidden md:block" />
                 {GENDER_OPTIONS.map(gender => (
                   <button key={gender.value} onClick={() => setGenderFilter(genderFilter === gender.value ? null : gender.value)} className={filterChipClasses(genderFilter === gender.value)}>
                     {gender.label}
@@ -155,19 +155,19 @@ export function AdoptionCategory() {
 
           {/* Results */}
           {isLoading ? (
-            <p className="text-center text-[#222222]/50 py-24">Cargando...</p>
+            <p className="text-center text-[#222222]/50 py-16 text-sm">Cargando...</p>
           ) : filteredPets.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredPets.map(pet => <PetCard key={pet.id} pet={pet} />)}
             </div>
           ) : (
-            <div className="text-center py-24 bg-[#F8F8F8] rounded-[24px] border border-[#D9D9D9]/50">
-              <div className="text-6xl mb-4 opacity-50">🐾</div>
-              <h3 className="text-[#222222] mb-2 text-xl font-medium">No encontramos {categoryInfo.species.toLowerCase()}s</h3>
-              <p className="text-[#222222]/60">Intenta ajustar los filtros de búsqueda</p>
+            <div className="text-center py-16 bg-[#F8F8F8] rounded-[18px] border border-[#D9D9D9]/50">
+              <div className="text-4xl mb-3 opacity-50">🐾</div>
+              <h3 className="text-[#222222] mb-1.5 text-lg font-medium">No encontramos {categoryInfo.species.toLowerCase()}s</h3>
+              <p className="text-[#222222]/60 text-sm">Intenta ajustar los filtros de búsqueda</p>
               <button
                 onClick={() => { setSearchTerm(''); setSizeFilter(null); setGenderFilter(null); }}
-                className="mt-6 text-[#20A83E] font-medium hover:text-[#146B27] transition-colors"
+                className="mt-4 text-[#20A83E] text-sm font-medium hover:text-[#146B27] transition-colors"
               >
                 Limpiar filtros
               </button>

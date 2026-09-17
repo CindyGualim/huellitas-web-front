@@ -21,23 +21,23 @@ export function CastrationConfirmation() {
   return (
     <Layout>
       <div className="bg-white min-h-screen">
-        <div className="bg-[#146B27] px-6 py-14">
+        <div className="bg-[#146B27] px-6 py-8">
           <div className="mx-auto max-w-3xl text-center">
-            <h1 className="text-white text-3xl">Jornadas de Castración</h1>
+            <h1 className="text-white text-2xl font-bold">Jornadas de Castración</h1>
           </div>
         </div>
 
-        <div className="mx-auto max-w-lg px-4 py-12 pb-16">
-          <div className="bg-white rounded-[20px] p-10 mb-6 shadow-sm border border-[#D9D9D9]/50 text-center">
-            <div className="flex justify-center mb-6">
-              <div className="bg-[#20A83E]/10 p-6 rounded-full">
-                <CheckCircle size={52} className="text-[#20A83E]" />
+        <div className="mx-auto max-w-lg px-4 py-8 pb-16">
+          <div className="bg-white rounded-[18px] p-7 mb-5 shadow-sm border border-[#D9D9D9]/50 text-center">
+            <div className="flex justify-center mb-5">
+              <div className="bg-[#20A83E]/10 p-4 rounded-full">
+                <CheckCircle size={40} className="text-[#20A83E]" />
               </div>
             </div>
-            <h2 className="text-[#222222] mb-2 text-3xl">¡Inscripción exitosa!</h2>
-            <p className="text-[#222222]/50 mb-8">Tu cita ha sido confirmada</p>
+            <h2 className="text-[#222222] mb-1.5 text-xl font-bold">¡Inscripción exitosa!</h2>
+            <p className="text-[#222222]/50 text-sm mb-5">Tu cita ha sido confirmada</p>
 
-            <div className="bg-[#F8F8F8] rounded-[14px] p-6 text-left mb-8 border border-[#D9D9D9]/50">
+            <div className="bg-[#F8F8F8] rounded-[14px] p-5 text-left mb-5 border border-[#D9D9D9]/50">
               <div className="space-y-3">
                 {[
                   { label: 'Municipio', value: confirmationData.municipality },
@@ -70,7 +70,7 @@ export function CastrationConfirmation() {
               </Link>
             </div>
 
-            <p className="text-[#222222]/40 text-sm mt-8 bg-[#F8F8F8] border border-[#D9D9D9]/50 rounded-xl p-4">
+            <p className="text-[#222222]/40 text-sm mt-5 bg-[#F8F8F8] border border-[#D9D9D9]/50 rounded-xl p-4">
               Recibirás un recordatorio antes de tu cita
             </p>
           </div>

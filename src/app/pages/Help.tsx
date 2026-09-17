@@ -23,68 +23,68 @@ export function Help() {
 
   return (
     <Layout>
-      <div className="bg-[#F8F8F8] min-h-screen pb-20">
+      <div className="bg-[#F8F8F8] min-h-screen pb-12">
         {/* Header */}
-        <div className="bg-[#146B27] px-6 py-16">
+        <div className="bg-[#146B27] px-6 py-8 md:py-10">
           <div className="mx-auto max-w-5xl">
-            <h1 className="text-white mb-3 text-4xl md:text-5xl font-bold">Quiero Ayudar</h1>
-            <p className="text-white/80 text-xl max-w-2xl">
+            <h1 className="text-white mb-2 text-2xl md:text-3xl font-bold">Quiero Ayudar</h1>
+            <p className="text-white/80 text-sm md:text-base max-w-2xl">
               Tu apoyo transforma la vida de animales rescatados. Únete a nuestra comunidad y sé parte del cambio.
             </p>
           </div>
         </div>
 
-        <div className="mx-auto max-w-5xl px-4 py-12 space-y-12">
-          
+        <div className="mx-auto max-w-5xl px-4 py-8 space-y-8">
+
           {/* Section 1: ¿Cómo puedes ayudar? */}
           <section>
-            <div className="flex items-center gap-3 mb-6">
-              <Heart className="text-[#20A83E]" size={28} />
-              <h2 className="text-[#222222] text-2xl font-bold">¿Cómo puedes ayudar?</h2>
+            <div className="flex items-center gap-2.5 mb-4">
+              <Heart className="text-[#20A83E]" size={22} />
+              <h2 className="text-[#222222] text-xl font-bold">¿Cómo puedes ayudar?</h2>
             </div>
-            <p className="text-[#222222]/70 text-lg mb-8 leading-relaxed">
+            <p className="text-[#222222]/70 text-sm mb-5 leading-relaxed">
               Existen múltiples maneras de sumarte a nuestra causa. Desde aportes económicos que nos permiten costear cirugías y tratamientos, hasta donaciones en especie y la apertura de tu hogar como casa cuna temporal. Cada pequeña acción suma en la rehabilitación de nuestros rescatados.
             </p>
-            
-            <div className="grid md:grid-cols-2 gap-6">
+
+            <div className="grid md:grid-cols-2 gap-5">
               {/* Section 2: Donaciones Monetarias */}
-              <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#D9D9D9]/50">
-                <div className="bg-[#20A83E]/10 w-14 h-14 rounded-xl flex items-center justify-center mb-6">
-                  <Banknote className="text-[#20A83E]" size={28} />
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-[#D9D9D9]/50">
+                <div className="bg-[#20A83E]/10 w-11 h-11 rounded-xl flex items-center justify-center mb-4">
+                  <Banknote className="text-[#20A83E]" size={22} />
                 </div>
-                <h3 className="text-[#222222] text-xl font-bold mb-4">Donaciones Monetarias</h3>
-                <p className="text-[#222222]/70 leading-relaxed mb-6">
+                <h3 className="text-[#222222] text-base font-bold mb-2.5">Donaciones Monetarias</h3>
+                <p className="text-[#222222]/70 text-sm leading-relaxed mb-4">
                   Tus contribuciones financieras son el pilar de nuestra operación. Nos permiten cubrir rescates de emergencia, rehabilitación física, cuidados veterinarios especializados, cirugías, y la alimentación diaria de todos los animales en recuperación.
                 </p>
-                <div className="space-y-3 mb-8">
-                  <div className="bg-[#F8F8F8] p-4 rounded-xl border border-[#D9D9D9]/50">
-                    <p className="text-sm text-[#222222]/60 mb-1">
+                <div className="space-y-3 mb-5">
+                  <div className="bg-[#F8F8F8] p-3.5 rounded-xl border border-[#D9D9D9]/50">
+                    <p className="text-xs text-[#222222]/60 mb-1">
                       {settings ? `${settings.bankAccountType} - ${settings.bankName}` : 'Cargando datos bancarios...'}
                     </p>
-                    <p className="text-[#222222] font-semibold text-lg tracking-wide">{settings?.bankAccountNumber ?? '—'}</p>
-                    <p className="text-sm text-[#222222]/80 mt-1">A nombre de: {settings?.bankAccountHolder ?? '—'}</p>
+                    <p className="text-[#222222] font-semibold text-base tracking-wide">{settings?.bankAccountNumber ?? '—'}</p>
+                    <p className="text-xs text-[#222222]/80 mt-1">A nombre de: {settings?.bankAccountHolder ?? '—'}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowAccountModal(true)}
                   disabled={!settings}
-                  className="w-full bg-[#20A83E] text-white py-3.5 rounded-xl font-semibold hover:bg-[#146B27] transition-colors shadow-sm disabled:opacity-60"
+                  className="w-full bg-[#20A83E] text-white py-2.5 text-sm rounded-xl font-semibold hover:bg-[#146B27] transition-colors shadow-sm disabled:opacity-60"
                 >
                   Quiero Ayudar
                 </button>
               </div>
 
               {/* Section 3: Donaciones en Especie */}
-              <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#D9D9D9]/50">
-                <div className="bg-[#20A83E]/10 w-14 h-14 rounded-xl flex items-center justify-center mb-6">
-                  <Package className="text-[#20A83E]" size={28} />
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-[#D9D9D9]/50">
+                <div className="bg-[#20A83E]/10 w-11 h-11 rounded-xl flex items-center justify-center mb-4">
+                  <Package className="text-[#20A83E]" size={22} />
                 </div>
-                <h3 className="text-[#222222] text-xl font-bold mb-4">Donaciones en Especie</h3>
-                <p className="text-[#222222]/70 leading-relaxed mb-6">
+                <h3 className="text-[#222222] text-base font-bold mb-2.5">Donaciones en Especie</h3>
+                <p className="text-[#222222]/70 text-sm leading-relaxed mb-4">
                   Recibimos constantemente insumos que son vitales para el día a día de la organización. Puedes entregarlos en nuestro centro de acopio principal.
                 </p>
-                <h4 className="font-semibold text-[#222222] mb-3">Insumos más necesitados:</h4>
-                <ul className="grid grid-cols-2 gap-y-3 gap-x-4">
+                <h4 className="text-sm font-semibold text-[#222222] mb-2">Insumos más necesitados:</h4>
+                <ul className="grid grid-cols-2 gap-y-2 gap-x-4">
                   {(settings?.neededSupplies ?? []).map((item, i) => (
                     <li key={i} className="flex items-center gap-2 text-[#222222]/80 text-sm">
                       <div className="w-1.5 h-1.5 rounded-full bg-[#20A83E]" />
@@ -97,39 +97,39 @@ export function Help() {
           </section>
 
           {/* Section 4: Casos que Necesitan Ayuda */}
-          <section className="bg-white rounded-3xl p-8 shadow-sm border border-[#D9D9D9]/50">
-            <div className="flex items-center gap-3 mb-8">
-              <ShieldAlert className="text-[#20A83E]" size={28} />
-              <h2 className="text-[#222222] text-2xl font-bold">Casos que Necesitan Ayuda</h2>
+          <section className="bg-white rounded-2xl p-6 shadow-sm border border-[#D9D9D9]/50">
+            <div className="flex items-center gap-2.5 mb-5">
+              <ShieldAlert className="text-[#20A83E]" size={22} />
+              <h2 className="text-[#222222] text-xl font-bold">Casos que Necesitan Ayuda</h2>
             </div>
-            
+
             {isLoading ? (
               <p className="text-[#222222]/50 text-sm">Cargando casos...</p>
             ) : casesNeedingHelp.length === 0 ? (
               <p className="text-[#222222]/50 text-sm">Por el momento no hay casos en tratamiento activo. ¡Gracias a tu apoyo!</p>
             ) : (
-              <div className="grid md:grid-cols-3 gap-6">
+              <div className="grid md:grid-cols-3 gap-4">
                 {casesNeedingHelp.map(pet => {
                   const cover = pet.images.find(img => img.isCover) ?? pet.images[0];
 
                   return (
-                    <div key={pet.id} className="bg-[#F8F8F8] rounded-2xl overflow-hidden border border-[#D9D9D9]/50 flex flex-col">
-                      <div className="h-48 relative">
+                    <div key={pet.id} className="bg-[#F8F8F8] rounded-xl overflow-hidden border border-[#D9D9D9]/50 flex flex-col">
+                      <div className="h-36 relative">
                         <ImageWithFallback src={cover?.imageUrl} alt={pet.name} className="absolute inset-0 w-full h-full object-cover" />
-                        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-[#146B27]">
+                        <div className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-xs font-semibold text-[#146B27]">
                           {pet.species}
                         </div>
                       </div>
-                      <div className="p-5 flex-1 flex flex-col">
-                        <h3 className="text-xl font-bold text-[#222222] mb-2">{pet.name}</h3>
-                        <p className="text-[#222222]/70 text-sm mb-4 line-clamp-3">
+                      <div className="p-4 flex-1 flex flex-col">
+                        <h3 className="text-base font-bold text-[#222222] mb-1.5">{pet.name}</h3>
+                        <p className="text-[#222222]/70 text-sm mb-3 line-clamp-2">
                           {pet.rescueStory}
                         </p>
 
                         <div className="mt-auto">
-                          <div className="bg-[#20A83E]/10 rounded-xl p-3">
-                            <h4 className="text-xs font-semibold uppercase text-[#146B27] mb-2 tracking-wider">En Recuperación</h4>
-                            <p className="text-sm text-[#222222]/80 leading-tight">{pet.breed} · Actualmente bajo tratamiento veterinario</p>
+                          <div className="bg-[#20A83E]/10 rounded-xl p-2.5">
+                            <h4 className="text-xs font-semibold uppercase text-[#146B27] mb-1 tracking-wider">En Recuperación</h4>
+                            <p className="text-xs text-[#222222]/80 leading-tight">{pet.breed} · Actualmente bajo tratamiento veterinario</p>
                           </div>
                         </div>
                       </div>
@@ -142,38 +142,38 @@ export function Help() {
 
           {/* Section 5: Preguntas Frecuentes */}
           <section>
-            <div className="flex items-center gap-3 mb-6">
-              <HelpCircle className="text-[#20A83E]" size={28} />
-              <h2 className="text-[#222222] text-2xl font-bold">Preguntas Frecuentes</h2>
+            <div className="flex items-center gap-2.5 mb-4">
+              <HelpCircle className="text-[#20A83E]" size={22} />
+              <h2 className="text-[#222222] text-xl font-bold">Preguntas Frecuentes</h2>
             </div>
-            
-            <div className="space-y-4">
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#D9D9D9]/50">
-                <h3 className="text-[#222222] font-semibold text-lg mb-2 flex items-center gap-2">
-                  <Info size={18} className="text-[#20A83E]" />
+
+            <div className="space-y-3">
+              <div className="bg-white rounded-xl p-5 shadow-sm border border-[#D9D9D9]/50">
+                <h3 className="text-[#222222] font-semibold text-sm mb-1.5 flex items-center gap-2">
+                  <Info size={16} className="text-[#20A83E]" />
                   ¿Cómo puedo realizar una donación?
                 </h3>
-                <p className="text-[#222222]/70">
+                <p className="text-[#222222]/70 text-sm">
                   Puedes realizar transferencias directas a nuestra cuenta bancaria en {settings?.bankName ?? 'nuestro banco'}. Para donaciones desde el extranjero o uso de tarjeta, contáctanos a nuestro WhatsApp para enviarte un enlace de pago seguro.
                 </p>
               </div>
-              
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#D9D9D9]/50">
-                <h3 className="text-[#222222] font-semibold text-lg mb-2 flex items-center gap-2">
-                  <Info size={18} className="text-[#20A83E]" />
+
+              <div className="bg-white rounded-xl p-5 shadow-sm border border-[#D9D9D9]/50">
+                <h3 className="text-[#222222] font-semibold text-sm mb-1.5 flex items-center gap-2">
+                  <Info size={16} className="text-[#20A83E]" />
                   ¿Dónde puedo entregar mis donaciones en especie?
                 </h3>
-                <p className="text-[#222222]/70">
+                <p className="text-[#222222]/70 text-sm">
                   Recibimos donaciones físicas en nuestro centro de acopio principal ubicado en {settings?.donationDropoffAddress ?? 'nuestro centro de acopio'}, {settings?.donationDropoffHours ?? 'en el horario habitual'}. Por favor, comunícate con nosotros para coordinar tu visita.
                 </p>
               </div>
 
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#D9D9D9]/50">
-                <h3 className="text-[#222222] font-semibold text-lg mb-2 flex items-center gap-2">
-                  <Info size={18} className="text-[#20A83E]" />
+              <div className="bg-white rounded-xl p-5 shadow-sm border border-[#D9D9D9]/50">
+                <h3 className="text-[#222222] font-semibold text-sm mb-1.5 flex items-center gap-2">
+                  <Info size={16} className="text-[#20A83E]" />
                   ¿Cómo se utilizan las donaciones?
                 </h3>
-                <p className="text-[#222222]/70">
+                <p className="text-[#222222]/70 text-sm">
                   El 100% de las donaciones se destina directamente al bienestar animal. Los fondos cubren facturas veterinarias, cirugías de emergencia, medicamentos, alimentos, y gastos de refugios temporales. Publicamos reportes de transparencia trimestrales en nuestra plataforma.
                 </p>
               </div>
@@ -181,19 +181,19 @@ export function Help() {
           </section>
 
           {/* Bottom CTA */}
-          <section className="bg-[#146B27] rounded-3xl p-10 text-center relative overflow-hidden">
+          <section className="bg-[#146B27] rounded-2xl p-6 md:p-8 text-center relative overflow-hidden">
             <div className="absolute inset-0 bg-[#20A83E] opacity-20 transform -skew-y-3 origin-bottom-left" />
             <div className="relative z-10">
-              <h2 className="text-white text-3xl font-bold mb-4">¿Listo para hacer la diferencia?</h2>
-              <p className="text-white/80 text-lg mb-8 max-w-2xl mx-auto">
+              <h2 className="text-white text-xl md:text-2xl font-bold mb-2">¿Listo para hacer la diferencia?</h2>
+              <p className="text-white/80 text-sm mb-5 max-w-2xl mx-auto">
                 Tu aporte, sin importar el tamaño, significa una nueva oportunidad de vida para un animal rescatado.
               </p>
               <button
                 onClick={() => setShowAccountModal(true)}
                 disabled={!settings}
-                className="bg-white text-[#146B27] px-10 py-4 rounded-xl font-bold text-lg hover:bg-[#F8F8F8] hover:scale-105 transition-all shadow-lg inline-flex items-center gap-2 disabled:opacity-60"
+                className="bg-white text-[#146B27] px-7 py-3 rounded-xl font-bold text-sm hover:bg-[#F8F8F8] hover:scale-105 transition-all shadow-lg inline-flex items-center gap-2 disabled:opacity-60"
               >
-                <Heart size={20} className="fill-[#146B27]" />
+                <Heart size={18} className="fill-[#146B27]" />
                 Quiero Ayudar
               </button>
             </div>
