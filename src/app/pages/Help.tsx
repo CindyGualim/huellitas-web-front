@@ -114,8 +114,8 @@ export function Help() {
 
                   return (
                     <div key={pet.id} className="bg-[#F8F8F8] rounded-xl overflow-hidden border border-[#D9D9D9]/50 flex flex-col">
-                      <div className="h-36 relative">
-                        <ImageWithFallback src={cover?.imageUrl} alt={pet.name} className="absolute inset-0 w-full h-full object-cover" />
+                      <div className="h-28 relative">
+                        <ImageWithFallback src={cover?.imageUrl} alt={pet.name} className="absolute inset-0 w-full h-full object-cover object-top" />
                         <div className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-xs font-semibold text-[#146B27]">
                           {pet.species}
                         </div>
