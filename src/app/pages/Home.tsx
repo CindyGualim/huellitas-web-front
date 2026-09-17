@@ -114,7 +114,7 @@ function HeroCarousel({ slides }: { slides: HeroSlideView[] }) {
       <div className="absolute inset-0 z-10" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 55%, rgba(0,0,0,0.1) 100%)' }} />
 
       <div
-        className="absolute inset-0 z-20 flex flex-col justify-end px-5 md:px-10 pb-14 md:pb-16 transition-opacity duration-300"
+        className="absolute inset-0 z-20 flex flex-col justify-end px-14 md:px-20 pb-14 md:pb-16 transition-opacity duration-300"
         style={{ opacity: transitioning ? 0 : 1 }}
       >
         <div className="max-w-2xl">
