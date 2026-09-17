@@ -80,7 +80,12 @@ export function AdminDonations() {
               <thead className="bg-[#F8F8F8] border-b border-[#D9D9D9]/50">
                 <tr>
                   {['Donante', 'Correo', 'Monto', 'Método', 'Fecha', 'Acciones'].map(h => (
-                    <th key={h} className="px-6 py-4 text-left text-xs font-medium text-[#222222]/50 uppercase tracking-wider">{h}</th>
+                    <th
+                      key={h}
+                      className={`px-6 py-4 text-xs font-medium text-[#222222]/50 uppercase tracking-wider ${h === 'Monto' ? 'text-right' : 'text-left'}`}
+                    >
+                      {h}
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -98,7 +103,7 @@ export function AdminDonations() {
                     <td className="px-6 py-4">
                       <span className="text-[#222222]/70 text-sm">{donation.donorEmail}</span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 text-right">
                       <span className="text-[#222222] font-medium text-sm">Q{Number(donation.amount).toFixed(2)}</span>
                     </td>
                     <td className="px-6 py-4">

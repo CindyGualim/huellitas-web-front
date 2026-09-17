@@ -94,18 +94,18 @@ export function AdminJornadaDashboard() {
                 <thead className="bg-[#F8F8F8] text-left text-xs text-[#222222]/50 uppercase tracking-wider">
                   <tr>
                     <th className="px-6 py-3 font-medium">Horario</th>
-                    <th className="px-6 py-3 font-medium">Cupo</th>
-                    <th className="px-6 py-3 font-medium">Inscritos</th>
-                    <th className="px-6 py-3 font-medium">Disponible</th>
+                    <th className="px-6 py-3 font-medium text-right">Cupo</th>
+                    <th className="px-6 py-3 font-medium text-right">Inscritos</th>
+                    <th className="px-6 py-3 font-medium text-right">Disponible</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#D9D9D9]/30">
                   {dashboard.timeSlots.map(slot => (
                     <tr key={slot.id}>
                       <td className="px-6 py-3 text-[#222222] font-medium">{slot.startTime}</td>
-                      <td className="px-6 py-3 text-[#222222]/70">{slot.capacity}</td>
-                      <td className="px-6 py-3 text-[#222222]/70">{slot.registered}</td>
-                      <td className="px-6 py-3">
+                      <td className="px-6 py-3 text-[#222222]/70 text-right">{slot.capacity}</td>
+                      <td className="px-6 py-3 text-[#222222]/70 text-right">{slot.registered}</td>
+                      <td className="px-6 py-3 text-right">
                         <span className={slot.available === 0 ? 'text-red-500 font-medium' : 'text-[#20A83E] font-medium'}>
                           {slot.available === 0 ? 'Sin cupo' : slot.available}
                         </span>
