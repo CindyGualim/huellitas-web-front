@@ -89,7 +89,7 @@ function HeroCarousel({ slides }: { slides: HeroSlideView[] }) {
   if (!slide) return null;
 
   return (
-    <div className="relative w-full h-[540px] md:h-[700px] overflow-hidden">
+    <div className="relative w-full h-[380px] md:h-[520px] overflow-hidden rounded-[32px]">
       {slides.map((s, i) => (
         <div
           key={s.id}
@@ -108,21 +108,21 @@ function HeroCarousel({ slides }: { slides: HeroSlideView[] }) {
       <div className="absolute inset-0 z-10" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 55%, rgba(0,0,0,0.1) 100%)' }} />
 
       <div
-        className="absolute inset-0 z-20 flex flex-col justify-end px-6 md:px-16 pb-16 md:pb-24 transition-opacity duration-300"
+        className="absolute inset-0 z-20 flex flex-col justify-end px-6 md:px-12 pb-10 md:pb-14 transition-opacity duration-300"
         style={{ opacity: transitioning ? 0 : 1 }}
       >
-        <div className="max-w-3xl">
-          <span className="inline-flex items-center gap-2 bg-[#20A83E] text-white text-xs px-3 py-1 rounded-full uppercase tracking-wide mb-4">
+        <div className="max-w-2xl">
+          <span className="inline-flex items-center gap-2 bg-[#20A83E] text-white text-xs px-3 py-1 rounded-full uppercase tracking-wide mb-3">
             {slide.theme}
           </span>
 
-          <h1 className="text-white text-4xl md:text-6xl mb-1 leading-tight">
+          <h1 className="text-white text-3xl md:text-5xl mb-1 leading-tight">
             {slide.headline}
             <br />
             {slide.headlineLine2}
           </h1>
 
-          <p className="text-white/80 text-lg mb-8 max-w-xl">
+          <p className="text-white/80 text-base md:text-lg mb-6 max-w-xl">
             Acompáñanos a darles el amor y cuidado que se merecen. Conoce nuestros próximos eventos en tu comunidad.
           </p>
 
@@ -136,20 +136,20 @@ function HeroCarousel({ slides }: { slides: HeroSlideView[] }) {
 
       <button
         onClick={prev}
-        className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-30 bg-black/20 hover:bg-black/40 text-white rounded-full p-3 transition-all duration-250 backdrop-blur-sm border border-white/20"
+        className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 z-30 bg-black/20 hover:bg-black/40 text-white rounded-full p-3 transition-all duration-250 backdrop-blur-sm border border-white/20"
         aria-label="Anterior"
       >
         <ChevronLeft size={22} />
       </button>
       <button
         onClick={next}
-        className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-30 bg-black/20 hover:bg-black/40 text-white rounded-full p-3 transition-all duration-250 backdrop-blur-sm border border-white/20"
+        className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 z-30 bg-black/20 hover:bg-black/40 text-white rounded-full p-3 transition-all duration-250 backdrop-blur-sm border border-white/20"
         aria-label="Siguiente"
       >
         <ChevronRight size={22} />
       </button>
 
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2">
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2">
         {slides.map((_, i) => (
           <button
             key={i}
@@ -162,7 +162,7 @@ function HeroCarousel({ slides }: { slides: HeroSlideView[] }) {
         ))}
       </div>
 
-      <div className="absolute bottom-6 right-6 z-30 text-white/40 text-xs tabular-nums">
+      <div className="absolute bottom-5 right-5 z-30 text-white/40 text-xs tabular-nums">
         {String(current + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}
       </div>
     </div>
@@ -227,7 +227,7 @@ export function Home() {
         theme: s.theme,
         headline: s.headline,
         headlineLine2: s.headlineLine2,
-        focusPosition: 'center center'
+        focusPosition: s.focusPosition ?? 'center center'
       }))
     : defaultHeroSlides;
 
@@ -252,10 +252,12 @@ export function Home() {
   return (
     <Layout>
       <div className="pb-16 bg-white">
-        <HeroCarousel slides={heroSlides} />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-6 md:pt-8">
+          <HeroCarousel slides={heroSlides} />
+        </div>
 
         {impactStats && (
-          <div className="bg-[#146B27]">
+          <div className="bg-[#146B27] mt-10 md:mt-14">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 grid grid-cols-3 gap-4 text-center">
               <div>
                 <div className="flex items-center justify-center gap-2 text-white text-3xl md:text-5xl font-bold mb-1">

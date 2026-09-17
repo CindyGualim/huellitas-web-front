@@ -663,6 +663,7 @@ export interface ApiHeroSlide {
   theme: string;
   headline: string;
   headlineLine2: string;
+  focusPosition?: 'center top' | 'center center' | 'center bottom';
 }
 
 export interface ApiSiteSettings {

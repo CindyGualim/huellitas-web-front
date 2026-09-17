@@ -242,16 +242,22 @@ export function AdminSiteContent() {
             </div>
           </div>
           <p className="text-xs text-[#222222]/50 mb-6">
-            Si no agregás ningún slide aquí, el sitio muestra el carrusel original por defecto.
+            Si no agregás ningún slide aquí, el sitio muestra el carrusel original por defecto. El carrusel es ancho y bajo (proporción aproximada 2.4:1) —
+            funcionan mejor fotos horizontales, con el sujeto principal cerca del centro. Si la foto no queda bien encuadrada, usá el ajuste de "Encuadre" para subir o bajar el punto de enfoque.
           </p>
 
           <div className="space-y-4 mb-4">
             {settings.heroSlides.map((slide, i) => (
               <div key={i} className="p-4 bg-[#F8F8F8] rounded-xl border border-[#D9D9D9]/50">
                 <div className="flex items-start gap-4">
-                  <div className="w-32 h-20 shrink-0 rounded-lg overflow-hidden bg-white border border-[#D9D9D9] flex items-center justify-center relative">
+                  <div className="w-48 h-20 shrink-0 rounded-lg overflow-hidden bg-white border border-[#D9D9D9] flex items-center justify-center relative">
                     {slide.imageUrl ? (
-                      <img src={slide.imageUrl} alt="" className="w-full h-full object-cover" />
+                      <img
+                        src={slide.imageUrl}
+                        alt=""
+                        className="w-full h-full object-cover"
+                        style={{ objectPosition: slide.focusPosition ?? 'center center' }}
+                      />
                     ) : (
                       <span className="text-xs text-[#222222]/30">Sin imagen</span>
                     )}
@@ -285,6 +291,27 @@ export function AdminSiteContent() {
                         className={inputClass}
                         placeholder="Segunda línea del título"
                       />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-[#222222]/50">Encuadre:</span>
+                      {([
+                        { value: 'center top', label: 'Arriba' },
+                        { value: 'center center', label: 'Centro' },
+                        { value: 'center bottom', label: 'Abajo' }
+                      ] as const).map(option => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => updateSlide(i, { focusPosition: option.value })}
+                          className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors ${
+                            (slide.focusPosition ?? 'center center') === option.value
+                              ? 'bg-[#20A83E] text-white border-[#20A83E]'
+                              : 'bg-white text-[#222222]/60 border-[#D9D9D9] hover:border-[#20A83E]/40'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
                     </div>
                     {uploadingSlideIndex === i && <p className="text-xs text-[#222222]/50">Subiendo imagen...</p>}
                   </div>
