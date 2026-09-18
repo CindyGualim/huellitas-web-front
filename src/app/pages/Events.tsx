@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Calendar, MapPin, ArrowRight } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { PrimaryButton } from '../components/PrimaryButton';
+import { EventDetailModal } from '../components/EventDetailModal';
 import { apiGetEvents, ApiEvent } from '../lib/api';
 import { EVENT_TYPE_OPTIONS, eventTypeLabel } from '../lib/eventMappings';
 
@@ -18,6 +19,7 @@ function eventBadgeClass(type: string) {
 
 function EventCard({ event }: { event: ApiEvent }) {
   const isCastration = event.type === 'Jornada_castracion';
+  const [showDetail, setShowDetail] = useState(false);
 
   return (
     <div className="bg-white rounded-[16px] p-4 border border-[#D9D9D9]/60 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col h-full transform hover:-translate-y-1">
@@ -52,11 +54,16 @@ function EventCard({ event }: { event: ApiEvent }) {
             </PrimaryButton>
           </Link>
         ) : (
-          <button className="w-full bg-[#F8F8F8] text-[#222222] py-2.5 text-sm rounded-xl font-medium border border-[#D9D9D9] hover:border-[#20A83E]/50 transition-colors flex items-center justify-center gap-2">
+          <button
+            onClick={() => setShowDetail(true)}
+            className="w-full bg-[#F8F8F8] text-[#222222] py-2.5 text-sm rounded-xl font-medium border border-[#D9D9D9] hover:border-[#20A83E]/50 transition-colors flex items-center justify-center gap-2"
+          >
             Ver detalles <ArrowRight size={14} />
           </button>
         )}
       </div>
+
+      {showDetail && <EventDetailModal event={event} onClose={() => setShowDetail(false)} />}
     </div>
   );
 }

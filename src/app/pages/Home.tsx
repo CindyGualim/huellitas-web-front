@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Calendar, MapPin, ArrowRight, PawPrint, Hear
 import { Layout } from '../components/Layout';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { EventDetailModal } from '../components/EventDetailModal';
 import { apiGetPets, apiGetEvents, apiGetImpactStats, ApiPet, ApiEvent, ApiImpactStats } from '../lib/api';
 import { eventTypeLabel } from '../lib/eventMappings';
 import { useSiteSettings } from '../lib/useSiteSettings';
@@ -219,6 +220,59 @@ function FeaturedPetCard({ pet }: { pet: ApiPet }) {
   );
 }
 
+function UpcomingEventCard({ event }: { event: ApiEvent }) {
+  const isCastration = event.type === 'Jornada_castracion';
+  const [showDetail, setShowDetail] = useState(false);
+
+  return (
+    <div className="bg-white rounded-[16px] p-4 border border-[#D9D9D9]/60 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col transform hover:-translate-y-1">
+      <div className="mb-3">
+        <span className={`px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm ${
+          event.type === 'Jornada_castracion' ? 'bg-[#20A83E] text-white' :
+          event.type === 'Jornada_adopcion' ? 'bg-[#146B27] text-white' :
+          'bg-[#D9D9D9] text-[#222222]'
+        }`}>
+          {eventTypeLabel(event.type)}
+        </span>
+      </div>
+      <h3 className="text-[#222222] text-base font-bold mb-2">{event.title}</h3>
+      <div className="flex flex-col gap-1.5 mb-3">
+        <div className="flex items-center gap-2 text-[#222222]/70 text-sm">
+          <Calendar size={14} className="text-[#20A83E]" />
+          <span>{new Date(event.startDate).toLocaleDateString('es-GT', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+        </div>
+        <div className="flex items-center gap-2 text-[#222222]/70 text-sm">
+          <MapPin size={14} className="text-[#20A83E]" />
+          <span>{event.location}</span>
+        </div>
+      </div>
+
+      <p className="text-[#222222]/70 text-sm mb-4 flex-1 line-clamp-2">
+        {event.description}
+      </p>
+
+      <div className="mt-auto">
+        {isCastration ? (
+          <Link to={`/events/register/${event.id}`} className="block">
+            <button className="w-full bg-[#F8F8F8] hover:bg-[#D9D9D9]/50 text-[#222222] py-2.5 rounded-xl font-medium text-sm transition-colors border border-[#D9D9D9] flex items-center justify-center gap-2">
+              Inscribirse <ArrowRight size={14} />
+            </button>
+          </Link>
+        ) : (
+          <button
+            onClick={() => setShowDetail(true)}
+            className="w-full bg-[#F8F8F8] hover:bg-[#D9D9D9]/50 text-[#222222] py-2.5 rounded-xl font-medium text-sm transition-colors border border-[#D9D9D9] flex items-center justify-center gap-2"
+          >
+            Más información <ArrowRight size={14} />
+          </button>
+        )}
+      </div>
+
+      {showDetail && <EventDetailModal event={event} onClose={() => setShowDetail(false)} />}
+    </div>
+  );
+}
+
 export function Home() {
   const [featuredPets, setFeaturedPets] = useState<ApiPet[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<ApiEvent[]>([]);
@@ -320,40 +374,7 @@ export function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {upcomingEvents.map(event => (
-                <div key={event.id} className="bg-white rounded-[16px] p-4 border border-[#D9D9D9]/60 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col transform hover:-translate-y-1">
-                  <div className="mb-3">
-                    <span className={`px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm ${
-                      event.type === 'Jornada_castracion' ? 'bg-[#20A83E] text-white' :
-                      event.type === 'Jornada_adopcion' ? 'bg-[#146B27] text-white' :
-                      'bg-[#D9D9D9] text-[#222222]'
-                    }`}>
-                      {eventTypeLabel(event.type)}
-                    </span>
-                  </div>
-                  <h3 className="text-[#222222] text-base font-bold mb-2">{event.title}</h3>
-                  <div className="flex flex-col gap-1.5 mb-3">
-                    <div className="flex items-center gap-2 text-[#222222]/70 text-sm">
-                      <Calendar size={14} className="text-[#20A83E]" />
-                      <span>{new Date(event.startDate).toLocaleDateString('es-GT', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[#222222]/70 text-sm">
-                      <MapPin size={14} className="text-[#20A83E]" />
-                      <span>{event.location}</span>
-                    </div>
-                  </div>
-
-                  <p className="text-[#222222]/70 text-sm mb-4 flex-1 line-clamp-2">
-                    {event.description}
-                  </p>
-
-                  <div className="mt-auto">
-                    <Link to={event.type === 'Jornada_castracion' ? `/events/register/${event.id}` : '/events'} className="block">
-                      <button className="w-full bg-[#F8F8F8] hover:bg-[#D9D9D9]/50 text-[#222222] py-2.5 rounded-xl font-medium text-sm transition-colors border border-[#D9D9D9] flex items-center justify-center gap-2">
-                        {event.type === 'Jornada_castracion' ? 'Inscribirse' : 'Más información'} <ArrowRight size={14} />
-                      </button>
-                    </Link>
-                  </div>
-                </div>
+                <UpcomingEventCard key={event.id} event={event} />
               ))}
             </div>
           </div>
