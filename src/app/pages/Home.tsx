@@ -359,9 +359,9 @@ export function Home() {
           </div>
 
           {urgentCases.length > 0 && (
-            <div className="mb-8 md:mb-10 bg-[#FFF7ED] rounded-[24px] p-5 md:p-7 border border-[#F3DCB8]">
+            <div className="mb-8 md:mb-10 bg-[#FDF1F2] rounded-[24px] p-5 md:p-7 border border-[#F3C6CD]">
               <div className="flex items-center gap-2.5 mb-5">
-                <ShieldAlert className="text-[#C2751A]" size={22} />
+                <ShieldAlert className="text-[#C2374A]" size={22} />
                 <div>
                   <h2 className="text-[#222222] text-xl md:text-2xl font-semibold mb-1">Casos que necesitan tu ayuda</h2>
                   <p className="text-[#222222]/60 text-sm md:text-base">Están en tratamiento veterinario activo ahora mismo</p>
