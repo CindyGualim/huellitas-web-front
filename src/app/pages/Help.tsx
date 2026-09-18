@@ -134,16 +134,19 @@ export function Help() {
                             <h3 className="text-white text-base font-medium">{pet.name}</h3>
                           </div>
                         </div>
-                        <div className="p-3.5 flex-1 flex flex-col">
-                          <p className="text-[#222222]/70 text-sm mb-3 line-clamp-3">
-                            {pet.rescueStory}
-                          </p>
-
-                          <div className="mt-auto">
-                            <div className="bg-[#20A83E]/10 rounded-xl p-2.5">
-                              <h4 className="text-xs font-semibold uppercase text-[#146B27] mb-1 tracking-wider">En Recuperación</h4>
-                              <p className="text-xs text-[#222222]/80 leading-tight">{pet.breed} · Actualmente bajo tratamiento veterinario</p>
+                        <div className="p-3.5 flex-1 flex flex-col justify-between">
+                          <div>
+                            <span className="inline-block text-xs font-semibold uppercase text-[#146B27] bg-[#20A83E]/10 px-2.5 py-1 rounded-full tracking-wider mb-2">
+                              En Recuperación
+                            </span>
+                            <div className="flex flex-wrap gap-1.5">
+                              <span className="bg-[#F8F8F8] text-[#222222] px-2.5 py-0.5 rounded-md text-xs border border-[#D9D9D9]">{pet.breed}</span>
+                              <span className="bg-[#F8F8F8] text-[#222222] px-2.5 py-0.5 rounded-md text-xs border border-[#D9D9D9]">{pet.gender}</span>
                             </div>
+                          </div>
+                          <div className="flex items-center gap-2 text-[#146B27] group-hover:text-[#20A83E] font-medium transition-all duration-250 mt-3">
+                            <span className="text-sm">Conocer su historia</span>
+                            <span className="transform group-hover:translate-x-1 transition-transform">→</span>
                           </div>
                         </div>
                       </div>
