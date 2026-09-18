@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Heart, Package, Banknote, ShieldAlert, Info, HelpCircle } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
@@ -113,38 +114,40 @@ export function Help() {
                   const cover = pet.images.find(img => img.isCover) ?? pet.images[0];
 
                   return (
-                    <div key={pet.id} className="bg-white rounded-[16px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-250 border border-[#D9D9D9]/50 transform hover:-translate-y-1 flex flex-col">
-                      <div className="relative overflow-hidden h-64 md:h-72 shrink-0 bg-[#F8F8F8]">
-                        {cover && (
-                          <ImageWithFallback
-                            src={cover.imageUrl}
-                            alt={pet.name}
-                            className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                          />
-                        )}
-                        <div className="absolute top-2.5 right-2.5">
-                          <span className="bg-[#20A83E] text-white px-2.5 py-0.5 rounded-full text-xs font-medium shadow-sm">
-                            {pet.species}
-                          </span>
+                    <Link key={pet.id} to={`/adoptions/pet-profile/${pet.id}`} className="group block">
+                      <div className="bg-white rounded-[16px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-250 border border-[#D9D9D9]/50 transform hover:-translate-y-1 flex flex-col h-full">
+                        <div className="relative overflow-hidden h-64 md:h-72 shrink-0 bg-[#F8F8F8]">
+                          {cover && (
+                            <ImageWithFallback
+                              src={cover.imageUrl}
+                              alt={pet.name}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            />
+                          )}
+                          <div className="absolute top-2.5 right-2.5">
+                            <span className="bg-[#20A83E] text-white px-2.5 py-0.5 rounded-full text-xs font-medium shadow-sm">
+                              {pet.species}
+                            </span>
+                          </div>
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                          <div className="absolute bottom-0 left-0 right-0 p-3">
+                            <h3 className="text-white text-base font-medium">{pet.name}</h3>
+                          </div>
                         </div>
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                        <div className="absolute bottom-0 left-0 right-0 p-3">
-                          <h3 className="text-white text-base font-medium">{pet.name}</h3>
-                        </div>
-                      </div>
-                      <div className="p-3.5 flex-1 flex flex-col">
-                        <p className="text-[#222222]/70 text-sm mb-3 line-clamp-2">
-                          {pet.rescueStory}
-                        </p>
+                        <div className="p-3.5 flex-1 flex flex-col">
+                          <p className="text-[#222222]/70 text-sm mb-3 line-clamp-3">
+                            {pet.rescueStory}
+                          </p>
 
-                        <div className="mt-auto">
-                          <div className="bg-[#20A83E]/10 rounded-xl p-2.5">
-                            <h4 className="text-xs font-semibold uppercase text-[#146B27] mb-1 tracking-wider">En Recuperación</h4>
-                            <p className="text-xs text-[#222222]/80 leading-tight">{pet.breed} · Actualmente bajo tratamiento veterinario</p>
+                          <div className="mt-auto">
+                            <div className="bg-[#20A83E]/10 rounded-xl p-2.5">
+                              <h4 className="text-xs font-semibold uppercase text-[#146B27] mb-1 tracking-wider">En Recuperación</h4>
+                              <p className="text-xs text-[#222222]/80 leading-tight">{pet.breed} · Actualmente bajo tratamiento veterinario</p>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
