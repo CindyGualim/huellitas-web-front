@@ -666,6 +666,11 @@ export interface ApiHeroSlide {
   focusPosition?: 'center top' | 'center center' | 'center bottom';
 }
 
+export interface ApiFaqEntry {
+  question: string;
+  answer: string;
+}
+
 export interface ApiSiteSettings {
   instagramHandle: string;
   contactEmail: string;
@@ -681,6 +686,7 @@ export interface ApiSiteSettings {
   vision: string;
   timeline: ApiTimelineEntry[];
   heroSlides: ApiHeroSlide[];
+  faqs: ApiFaqEntry[];
 }
 
 export async function apiGetSiteSettings() {

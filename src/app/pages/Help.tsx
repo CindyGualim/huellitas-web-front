@@ -162,35 +162,17 @@ export function Help() {
             </div>
 
             <div className="space-y-3">
-              <div className="bg-white rounded-xl p-5 shadow-sm border border-[#D9D9D9]/50">
-                <h3 className="text-[#222222] font-semibold text-sm mb-1.5 flex items-center gap-2">
-                  <Info size={16} className="text-[#20A83E]" />
-                  ¿Cómo puedo realizar una donación?
-                </h3>
-                <p className="text-[#222222]/70 text-sm">
-                  Puedes realizar transferencias directas a nuestra cuenta bancaria en {settings?.bankName ?? 'nuestro banco'}. Para donaciones desde el extranjero o uso de tarjeta, contáctanos a nuestro WhatsApp para enviarte un enlace de pago seguro.
-                </p>
-              </div>
-
-              <div className="bg-white rounded-xl p-5 shadow-sm border border-[#D9D9D9]/50">
-                <h3 className="text-[#222222] font-semibold text-sm mb-1.5 flex items-center gap-2">
-                  <Info size={16} className="text-[#20A83E]" />
-                  ¿Dónde puedo entregar mis donaciones en especie?
-                </h3>
-                <p className="text-[#222222]/70 text-sm">
-                  Recibimos donaciones físicas en nuestro centro de acopio principal ubicado en {settings?.donationDropoffAddress ?? 'nuestro centro de acopio'}, {settings?.donationDropoffHours ?? 'en el horario habitual'}. Por favor, comunícate con nosotros para coordinar tu visita.
-                </p>
-              </div>
-
-              <div className="bg-white rounded-xl p-5 shadow-sm border border-[#D9D9D9]/50">
-                <h3 className="text-[#222222] font-semibold text-sm mb-1.5 flex items-center gap-2">
-                  <Info size={16} className="text-[#20A83E]" />
-                  ¿Cómo se utilizan las donaciones?
-                </h3>
-                <p className="text-[#222222]/70 text-sm">
-                  El 100% de las donaciones se destina directamente al bienestar animal. Los fondos cubren facturas veterinarias, cirugías de emergencia, medicamentos, alimentos, y gastos de refugios temporales. Publicamos reportes de transparencia trimestrales en nuestra plataforma.
-                </p>
-              </div>
+              {(settings?.faqs ?? []).map((faq, i) => (
+                <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-[#D9D9D9]/50">
+                  <h3 className="text-[#222222] font-semibold text-sm mb-1.5 flex items-center gap-2">
+                    <Info size={16} className="text-[#20A83E]" />
+                    {faq.question}
+                  </h3>
+                  <p className="text-[#222222]/70 text-sm">
+                    {faq.answer}
+                  </p>
+                </div>
+              ))}
             </div>
           </section>
 

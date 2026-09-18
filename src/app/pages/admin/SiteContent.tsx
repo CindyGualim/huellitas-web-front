@@ -1,5 +1,5 @@
 import { useEffect, useState, FormEvent } from 'react';
-import { Heart, Eye, Clock, Images, Plus, X, Upload, ChevronUp, ChevronDown } from 'lucide-react';
+import { Heart, Eye, Clock, Images, Plus, X, Upload, ChevronUp, ChevronDown, HelpCircle } from 'lucide-react';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { RestrictedAccess } from '../../components/admin/RestrictedAccess';
 import { useAuth } from '../../context/AuthContext';
@@ -9,7 +9,8 @@ import {
   apiUploadImage,
   ApiSiteSettings,
   ApiTimelineEntry,
-  ApiHeroSlide
+  ApiHeroSlide,
+  ApiFaqEntry
 } from '../../lib/api';
 import { setSiteSettingsCache } from '../../lib/useSiteSettings';
 
@@ -80,6 +81,18 @@ export function AdminSiteContent() {
     update('heroSlides', settings.heroSlides.filter((_, i) => i !== index));
   };
 
+  const updateFaq = (index: number, faq: Partial<ApiFaqEntry>) => {
+    update('faqs', settings.faqs.map((f, i) => (i === index ? { ...f, ...faq } : f)));
+  };
+
+  const addFaq = () => {
+    update('faqs', [...settings.faqs, { question: '', answer: '' }]);
+  };
+
+  const removeFaq = (index: number) => {
+    update('faqs', settings.faqs.filter((_, i) => i !== index));
+  };
+
   const handleSlideImageUpload = async (index: number, file: File | undefined) => {
     if (!file || !token) return;
 
@@ -125,7 +138,7 @@ export function AdminSiteContent() {
     <div className="p-8 bg-[#F8F8F8] min-h-screen">
       <div className="mb-8">
         <h1 className="text-[#222222] mb-1 text-3xl">Contenido del sitio</h1>
-        <p className="text-[#222222]/50">Misión, visión, línea del tiempo y carrusel de inicio</p>
+        <p className="text-[#222222]/50">Misión, visión, línea del tiempo, carrusel de inicio y preguntas frecuentes</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -341,6 +354,63 @@ export function AdminSiteContent() {
             className="flex items-center gap-2 px-4 py-2.5 bg-[#20A83E]/10 text-[#20A83E] rounded-xl hover:bg-[#20A83E]/20 transition-colors text-sm font-medium"
           >
             <Plus size={16} /> Agregar slide
+          </button>
+        </div>
+
+        <div className="bg-white rounded-[16px] p-6 shadow-sm border border-[#D9D9D9]/50">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 bg-[#20A83E]/10 rounded-xl">
+              <HelpCircle size={22} className="text-[#20A83E]" />
+            </div>
+            <div>
+              <h2 className="text-[#222222] text-lg font-medium">Preguntas Frecuentes</h2>
+              <p className="text-xs text-[#222222]/40">Sección "Preguntas Frecuentes" de la página Quiero Ayudar</p>
+            </div>
+          </div>
+
+          <div className="space-y-3 mb-4">
+            {settings.faqs.map((faq, i) => (
+              <div key={i} className="flex items-start gap-3 p-3 bg-[#F8F8F8] rounded-xl border border-[#D9D9D9]/50">
+                <div className="flex flex-col gap-1 pt-1">
+                  <button type="button" onClick={() => update('faqs', move(settings.faqs, i, -1))} disabled={i === 0} className="text-[#222222]/40 hover:text-[#222222] disabled:opacity-20" aria-label="Mover arriba">
+                    <ChevronUp size={16} />
+                  </button>
+                  <button type="button" onClick={() => update('faqs', move(settings.faqs, i, 1))} disabled={i === settings.faqs.length - 1} className="text-[#222222]/40 hover:text-[#222222] disabled:opacity-20" aria-label="Mover abajo">
+                    <ChevronDown size={16} />
+                  </button>
+                </div>
+                <div className="flex-1 space-y-2">
+                  <input
+                    value={faq.question}
+                    onChange={e => updateFaq(i, { question: e.target.value })}
+                    className={inputClass}
+                    placeholder="Pregunta"
+                  />
+                  <textarea
+                    value={faq.answer}
+                    onChange={e => updateFaq(i, { answer: e.target.value })}
+                    className={textareaClass}
+                    rows={2}
+                    placeholder="Respuesta"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeFaq(i)}
+                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                  aria-label="Quitar esta pregunta"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={addFaq}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#20A83E]/10 text-[#20A83E] rounded-xl hover:bg-[#20A83E]/20 transition-colors text-sm font-medium"
+          >
+            <Plus size={16} /> Agregar pregunta
           </button>
         </div>
 
