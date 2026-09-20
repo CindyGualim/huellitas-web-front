@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { X, Calendar, MapPin } from 'lucide-react';
 import { ApiEvent } from '../lib/api';
@@ -13,7 +14,7 @@ function formatEventDate(value: string) {
 }
 
 export function EventDetailModal({ event, onClose }: EventDetailModalProps) {
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={onClose}>
       <div
         className="bg-white rounded-2xl p-6 md:p-8 max-w-lg w-full shadow-xl relative max-h-[85vh] overflow-y-auto"
@@ -57,6 +58,7 @@ export function EventDetailModal({ event, onClose }: EventDetailModalProps) {
           Quiero participar o ayudar
         </Link>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

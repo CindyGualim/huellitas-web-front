@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Copy, Check, Banknote } from 'lucide-react';
 import { ApiSiteSettings } from '../lib/api';
 
@@ -20,7 +21,7 @@ export function DonationAccountModal({ settings, onClose }: DonationAccountModal
     }
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={onClose}>
       <div
         className="bg-white rounded-2xl p-8 max-w-md w-full shadow-xl relative"
@@ -80,6 +81,7 @@ export function DonationAccountModal({ settings, onClose }: DonationAccountModal
           Enviar comprobante por WhatsApp
         </a>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
