@@ -1,20 +1,52 @@
-import { Link } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { CheckCircle, Calendar, Share2 } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { PrimaryButton } from '../components/PrimaryButton';
+import { formatEventDate } from '../lib/dateUtils';
+
+interface ConfirmationState {
+  petName: string;
+  eventTitle: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  time: string;
+}
+
+// Fecha en formato de Google Calendar (UTC, sin separadores).
+function toCalendarDate(iso: string) {
+  return new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+}
 
 export function CastrationConfirmation() {
+  const { state } = useLocation() as { state: ConfirmationState | null };
+
+  // Sin datos de una inscripción real (p. ej. al recargar o entrar directo) no hay nada que confirmar.
+  if (!state) {
+    return <Navigate to="/events" replace />;
+  }
+
   const confirmationData = {
-    municipality: 'Guatemala',
-    date: '2026-06-15',
-    time: '9:00 AM',
-    petName: 'Firulais'
+    eventTitle: state.eventTitle,
+    location: state.location,
+    date: formatEventDate(state.startDate),
+    time: state.time,
+    petName: state.petName
   };
 
-  const handleAddToCalendar = () => alert('Evento agregado al calendario (demo)');
+  const handleAddToCalendar = () => {
+    const params = new URLSearchParams({
+      action: 'TEMPLATE',
+      text: `${state.eventTitle} — ${state.petName}`,
+      dates: `${toCalendarDate(state.startDate)}/${toCalendarDate(state.endDate)}`,
+      details: `Horario asignado: ${state.time}`,
+      location: state.location
+    });
+    window.open(`https://calendar.google.com/calendar/render?${params.toString()}`, '_blank');
+  };
 
   const handleShareWhatsApp = () => {
-    const message = `¡Cita confirmada!\nMunicipio: ${confirmationData.municipality}\nFecha: ${confirmationData.date}\nHora: ${confirmationData.time}\nMascota: ${confirmationData.petName}`;
+    const message = `¡Cita confirmada!\nJornada: ${confirmationData.eventTitle}\nLugar: ${confirmationData.location}\nFecha: ${confirmationData.date}\nHora: ${confirmationData.time}\nMascota: ${confirmationData.petName}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
   };
 
@@ -40,7 +72,8 @@ export function CastrationConfirmation() {
             <div className="bg-[#F8F8F8] rounded-[12px] p-5 text-left mb-5 border border-[#D9D9D9]/50">
               <div className="space-y-3">
                 {[
-                  { label: 'Municipio', value: confirmationData.municipality },
+                  { label: 'Jornada', value: confirmationData.eventTitle },
+                  { label: 'Lugar', value: confirmationData.location },
                   { label: 'Fecha', value: confirmationData.date },
                   { label: 'Hora', value: confirmationData.time },
                   { label: 'Mascota', value: confirmationData.petName },

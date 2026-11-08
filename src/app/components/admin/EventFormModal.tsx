@@ -3,6 +3,7 @@ import { X, Plus, Trash2 } from 'lucide-react';
 import { PrimaryButton } from '../PrimaryButton';
 import { ApiEvent, ApiEventTimeSlot, EventPayload } from '../../lib/api';
 import { EVENT_TYPE_OPTIONS, EVENT_STATUS_OPTIONS } from '../../lib/eventMappings';
+import { toDatetimeLocalValue } from '../../lib/dateUtils';
 
 interface EventFormModalProps {
   mode: 'create' | 'edit';
@@ -11,10 +12,8 @@ interface EventFormModalProps {
   onClose: () => void;
 }
 
-function toDatetimeLocal(isoString?: string) {
-  if (!isoString) return '';
-  return isoString.slice(0, 16);
-}
+// El ISO llega en UTC; el input datetime-local espera hora local (ver toDatetimeLocalValue).
+const toDatetimeLocal = toDatetimeLocalValue;
 
 function toFormState(event?: ApiEvent) {
   return {

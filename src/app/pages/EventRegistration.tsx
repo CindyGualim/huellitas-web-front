@@ -4,24 +4,15 @@ import { CheckCircle, Calendar, MapPin, ArrowLeft } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { apiGetEvent, apiCreateEventRegistration, ApiEvent } from '../lib/api';
-import { todayDateInputValue } from '../lib/dateUtils';
+import { todayDateInputValue, monthsBetweenUtc, birthDateFromAge, formatEventDate } from '../lib/dateUtils';
 
 const MIN_AGE_MONTHS = 5;
 const MAX_AGE_MONTHS = 6 * 12;
 const MAX_DEWORMING_AGE_MONTHS = 5;
 const MAX_VACCINATION_AGE_MONTHS = 12;
 
-function monthsBetween(from: Date, to: Date) {
-  let months = (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth());
-  if (to.getDate() < from.getDate()) months -= 1;
-  return months;
-}
-
-function birthDateFromAge(years: number, months: number) {
-  const today = new Date();
-  const result = new Date(today.getFullYear() - years, today.getMonth() - months, today.getDate());
-  return result.toISOString().slice(0, 10);
-}
+// Misma regla (UTC) que utils/dateMath.js del backend, para que ambas validaciones coincidan.
+const monthsBetween = monthsBetweenUtc;
 
 export function EventRegistration() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -62,11 +53,17 @@ export function EventRegistration() {
     );
   }
 
-  if (!event || event.type !== 'Jornada_castracion') {
+  const isClosed = !!event && (
+    event.status === 'Finalizado' || event.status === 'Cancelado' || new Date(event.endDate) < new Date()
+  );
+
+  if (!event || event.type !== 'Jornada_castracion' || isClosed) {
     return (
       <Layout>
         <div className="min-h-[50vh] flex flex-col items-center justify-center">
-          <p className="text-[#222222] mb-4">Evento no encontrado o no requiere inscripción.</p>
+          <p className="text-[#222222] mb-4">
+            {isClosed ? 'Esta jornada ya no recibe inscripciones.' : 'Evento no encontrado o no requiere inscripción.'}
+          </p>
           <PrimaryButton onClick={() => navigate('/events')}>Volver a Eventos</PrimaryButton>
         </div>
       </Layout>
@@ -127,7 +124,7 @@ export function EventRegistration() {
     setIsSubmitting(true);
 
     try {
-      await apiCreateEventRegistration({
+      const registration = await apiCreateEventRegistration({
         eventId: event.id,
         timeSlotId: selectedTimeSlotId,
         petName: formData.petName,
@@ -142,9 +139,21 @@ export function EventRegistration() {
         ownerEmail: formData.email,
         procedureType: 'Castracion'
       });
-      navigate('/castration/confirmation');
+      const slot = event.timeSlots?.find(s => s.id === selectedTimeSlotId);
+      navigate('/castration/confirmation', {
+        state: {
+          petName: registration.petName ?? formData.petName,
+          eventTitle: event.title,
+          location: event.location,
+          startDate: event.startDate,
+          endDate: event.endDate,
+          time: slot?.startTime ?? ''
+        }
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo completar la inscripción');
+      // El cupo pudo cambiar mientras se llenaba el formulario: se recarga la disponibilidad.
+      apiGetEvent(event.id).then(setEvent).catch(() => {});
     } finally {
       setIsSubmitting(false);
     }
@@ -178,7 +187,7 @@ export function EventRegistration() {
               </div>
               <div className="flex items-center gap-2">
                 <Calendar size={16} />
-                <span>{eventDate.toLocaleDateString('es-GT', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}</span>
+                <span>{formatEventDate(event.startDate)}</span>
               </div>
             </div>
           </div>

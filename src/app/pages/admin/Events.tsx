@@ -20,6 +20,7 @@ export function AdminEvents() {
 
   const loadEvents = () => {
     setIsLoading(true);
+    setError(null);
     apiGetEvents({ page })
       .then(({ items, pagination }) => {
         setEvents(items);
@@ -37,8 +38,12 @@ export function AdminEvents() {
     if (!token) return;
     if (!confirm(`¿Eliminar la jornada "${event.title}"?`)) return;
 
-    await apiDeleteEvent(token, event.id);
-    setEvents(events.filter(e => e.id !== event.id));
+    try {
+      await apiDeleteEvent(token, event.id);
+      loadEvents();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo eliminar el evento');
+    }
   };
 
   const handleFormSubmit = async (payload: EventPayload) => {
@@ -46,10 +51,10 @@ export function AdminEvents() {
 
     if (modalState?.mode === 'edit' && modalState.event) {
       const updated = await apiUpdateEvent(token, modalState.event.id, payload);
-      setEvents(events.map(e => (e.id === updated.id ? updated : e)));
+      setEvents(prev => prev.map(e => (e.id === updated.id ? updated : e)));
     } else {
-      const created = await apiCreateEvent(token, payload);
-      setEvents([created, ...events]);
+      await apiCreateEvent(token, payload);
+      loadEvents();
     }
   };
 

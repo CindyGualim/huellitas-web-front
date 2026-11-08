@@ -49,6 +49,20 @@ export const PATIENT_STATUS_OPTIONS = [
   { value: 'Seguimiento_finalizado', label: 'Seguimiento finalizado', badgeClass: 'bg-[#222222]/10 text-[#222222]' }
 ] as const;
 
+// Refleja VALID_PATIENT_TRANSITIONS en eventRegistration.service.js — mantener sincronizado.
+export const PATIENT_STATUS_TRANSITIONS: Record<string, string[]> = {
+  Inscrito: ['Evaluado', 'Aprobado', 'Pagado', 'Rechazado'],
+  Evaluado: ['Inscrito', 'Aprobado', 'Pagado', 'Rechazado'],
+  Aprobado: ['Evaluado', 'Pagado', 'Castrado', 'Rechazado'],
+  Pagado: ['Aprobado', 'Castrado', 'Rechazado'],
+  Castrado: ['Aprobado', 'Pagado', 'En_seguimiento', 'Seguimiento_finalizado'],
+  En_seguimiento: ['Castrado', 'Seguimiento_finalizado'],
+  Seguimiento_finalizado: ['En_seguimiento'],
+  Rechazado: ['Inscrito', 'Evaluado']
+};
+
+export const CASTRATION_PATIENT_STATUSES = ['Castrado', 'En_seguimiento', 'Seguimiento_finalizado'];
+
 export function patientStatusLabel(value: string) {
   return PATIENT_STATUS_OPTIONS.find(option => option.value === value)?.label ?? value;
 }

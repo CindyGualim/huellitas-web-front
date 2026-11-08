@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { X, Mail, Phone, Send } from 'lucide-react';
 import { PrimaryButton } from '../PrimaryButton';
 import { ApiEventRegistration, PatientRecordPayload, apiUpdatePatientRecord, apiSendReminder } from '../../lib/api';
-import { PATIENT_STATUS_OPTIONS, FOLLOW_UP_STATUS_OPTIONS, patientStatusBadgeClass } from '../../lib/eventMappings';
+import { PATIENT_STATUS_OPTIONS, PATIENT_STATUS_TRANSITIONS, CASTRATION_PATIENT_STATUSES, FOLLOW_UP_STATUS_OPTIONS, patientStatusBadgeClass } from '../../lib/eventMappings';
 import { formatDateOnly, todayDateInputValue } from '../../lib/dateUtils';
 import { useAuth } from '../../context/AuthContext';
 
@@ -102,10 +102,14 @@ export function PatientDetailModal({ registration, onClose, onUpdated }: Patient
           <section>
             <h3 className="text-xs font-semibold uppercase text-[#222222]/40 mb-2 tracking-wider">Estado del paciente</h3>
             <div className="flex flex-wrap gap-2">
-              {PATIENT_STATUS_OPTIONS.map(option => (
+              {PATIENT_STATUS_OPTIONS.filter(option => {
+                if (option.value === record.status) return true;
+                if (!(PATIENT_STATUS_TRANSITIONS[record.status] ?? []).includes(option.value)) return false;
+                return record.procedureType === 'Castracion' || !CASTRATION_PATIENT_STATUSES.includes(option.value);
+              }).map(option => (
                 <button
                   key={option.value}
-                  disabled={isSaving}
+                  disabled={isSaving || option.value === record.status}
                   onClick={() => save({ status: option.value })}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-250 cursor-pointer disabled:opacity-50 ${
                     record.status === option.value ? option.badgeClass + ' ring-2 ring-offset-1 ring-[#20A83E]/40' : 'bg-[#F8F8F8] text-[#222222]/50 hover:bg-[#D9D9D9]/40'
@@ -135,6 +139,7 @@ export function PatientDetailModal({ registration, onClose, onUpdated }: Patient
                 <label className={labelClass}>Antibiótico</label>
                 <select
                   className={inputClass}
+                  disabled={isSaving}
                   value={record.antibioticStatus ?? ''}
                   onChange={e => save({ antibioticStatus: (e.target.value || null) as 'Pendiente' | 'Finalizado' | null })}
                 >
@@ -146,6 +151,7 @@ export function PatientDetailModal({ registration, onClose, onUpdated }: Patient
                 <label className={labelClass}>Retiro de puntos</label>
                 <select
                   className={inputClass}
+                  disabled={isSaving}
                   value={record.stitchRemovalStatus ?? ''}
                   onChange={e => save({ stitchRemovalStatus: (e.target.value || null) as 'Pendiente' | 'Finalizado' | null })}
                 >
@@ -157,6 +163,7 @@ export function PatientDetailModal({ registration, onClose, onUpdated }: Patient
                 <label className="flex items-center gap-2 text-sm text-[#222222] cursor-pointer">
                   <input
                     type="checkbox"
+                    disabled={isSaving || !CASTRATION_PATIENT_STATUSES.includes(record.status)}
                     checked={record.followUpCompleted}
                     onChange={e => save({ followUpCompleted: e.target.checked })}
                     className="accent-[#20A83E]"

@@ -17,3 +17,44 @@ export function todayDateInputValue() {
 
   return `${year}-${month}-${day}`;
 }
+
+// Zona horaria de la ONG. Los eventos son instantes (fecha + hora) y se muestran en hora de Guatemala,
+// sin importar la zona del navegador.
+export const ORG_TIME_ZONE = 'America/Guatemala';
+
+export function formatEventDate(value: string, options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' }) {
+  return new Date(value).toLocaleDateString('es-GT', { ...options, timeZone: ORG_TIME_ZONE });
+}
+
+// Convierte un ISO (UTC) al formato que espera <input type="datetime-local">, en hora local del navegador.
+// Usar isoString.slice(0, 16) mete la hora UTC como si fuera local y corre el evento al guardarlo.
+export function toDatetimeLocalValue(isoString?: string) {
+  if (!isoString) return '';
+  const date = new Date(isoString);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+// Año y mes (0-11) de una fecha sin hora guardada como medianoche UTC (p. ej. donationDate).
+export function dateOnlyYearMonth(value: string) {
+  const date = new Date(value);
+  return { year: date.getUTCFullYear(), month: date.getUTCMonth() };
+}
+
+// Meses completos entre dos fechas, con la misma regla UTC que utils/dateMath.js del backend.
+export function monthsBetweenUtc(from: Date, to: Date) {
+  let months = (to.getUTCFullYear() - from.getUTCFullYear()) * 12 + (to.getUTCMonth() - from.getUTCMonth());
+  if (to.getUTCDate() < from.getUTCDate()) months -= 1;
+  return months;
+}
+
+// Fecha de nacimiento aproximada (YYYY-MM-DD) a partir de años y meses de edad. Si el día no existe
+// en el mes destino (31 de marzo - 1 mes) se usa el último día de ese mes en vez de desbordar.
+export function birthDateFromAge(years: number, months: number, today = new Date()) {
+  const totalMonths = today.getFullYear() * 12 + today.getMonth() - (years * 12 + months);
+  const year = Math.floor(totalMonths / 12);
+  const month = totalMonths - year * 12;
+  const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  const day = Math.min(today.getDate(), lastDay);
+  return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}

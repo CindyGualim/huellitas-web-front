@@ -7,6 +7,7 @@ import { Pagination } from '../../components/admin/Pagination';
 import { useAuth } from '../../context/AuthContext';
 import { apiGetJornadaDashboard, apiGetEventRegistrations, JornadaDashboard as JornadaDashboardData, ApiEventRegistration, ApiPagination } from '../../lib/api';
 import { PATIENT_STATUS_OPTIONS, patientStatusLabel, patientStatusBadgeClass } from '../../lib/eventMappings';
+import { formatEventDate } from '../../lib/dateUtils';
 
 export function AdminJornadaDashboard() {
   const { id } = useParams<{ id: string }>();
@@ -70,7 +71,7 @@ export function AdminJornadaDashboard() {
           <div className="mb-6">
             <h1 className="text-[#222222] mb-1 text-3xl">{dashboard.event.title}</h1>
             <div className="flex flex-wrap gap-4 text-[#222222]/50 text-sm">
-              <span className="flex items-center gap-1.5"><Calendar size={14} /> {new Date(dashboard.event.startDate).toLocaleDateString('es-GT', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}</span>
+              <span className="flex items-center gap-1.5"><Calendar size={14} /> {formatEventDate(dashboard.event.startDate)}</span>
               <span className="flex items-center gap-1.5"><MapPin size={14} /> {dashboard.event.location}</span>
               <span className="flex items-center gap-1.5"><Users size={14} /> {dashboard.totalRegistered} / {dashboard.totalCapacity} inscritos</span>
             </div>
