@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { apiLogin, apiGetMe, AuthUser } from '../lib/api';
+import { ApiRequestError, UNAUTHORIZED_EVENT } from '../lib/apiErrors';
 
 const TOKEN_STORAGE_KEY = 'huellitas_token';
 
@@ -32,8 +33,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(fetchedUser);
         setToken(storedToken);
       })
-      .catch(() => localStorage.removeItem(TOKEN_STORAGE_KEY))
+      .catch(err => {
+        // Solo un token rechazado invalida la sesión; si el backend está caído no se borra.
+        if (err instanceof ApiRequestError && err.status === 401) {
+          localStorage.removeItem(TOKEN_STORAGE_KEY);
+        }
+      })
       .finally(() => setIsLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const handleUnauthorized = () => logout();
+    // Cerrar sesión en una pestaña la cierra también en las demás.
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === TOKEN_STORAGE_KEY && !event.newValue) {
+        setToken(null);
+        setUser(null);
+      }
+    };
+
+    window.addEventListener(UNAUTHORIZED_EVENT, handleUnauthorized);
+    window.addEventListener('storage', handleStorage);
+
+    return () => {
+      window.removeEventListener(UNAUTHORIZED_EVENT, handleUnauthorized);
+      window.removeEventListener('storage', handleStorage);
+    };
   }, []);
 
   const login = async (email: string, password: string) => {

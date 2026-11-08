@@ -45,11 +45,26 @@ function paginationQuery(params?: PaginationParams) {
   return query ? `?${query}` : '';
 }
 
+import { ApiRequestError, UNAUTHORIZED_EVENT } from './apiErrors';
+
+export { ApiRequestError, UNAUTHORIZED_EVENT };
+
 async function parseResponse<T>(response: Response): Promise<T> {
-  const body: ApiResponse<T> = await response.json();
+  let body: ApiResponse<T>;
+
+  try {
+    body = await response.json();
+  } catch {
+    // Respuestas que no son JSON (p. ej. un 502/413 de nginx en HTML).
+    throw new ApiRequestError('El servidor no respondió correctamente. Intentá de nuevo en unos minutos.', response.status);
+  }
 
   if (!body.success) {
-    throw new Error(body.message);
+    if (response.status === 401 && !response.url?.includes('/auth/login')) {
+      window.dispatchEvent(new Event(UNAUTHORIZED_EVENT));
+    }
+
+    throw new ApiRequestError(body.message, response.status);
   }
 
   return body.data;
