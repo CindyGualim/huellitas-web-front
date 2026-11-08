@@ -43,7 +43,8 @@ export function statusBadgeClass(value: string) {
 export const PET_STATUS_TRANSITIONS: Record<string, StatusValue[]> = {
   Disponible: ['En_tratamiento', 'Reservada', 'No_disponible'],
   En_tratamiento: ['Disponible', 'No_disponible'],
-  Reservada: ['Adoptada', 'Disponible', 'No_disponible'],
+  // "Adoptada" no se asigna a mano: solo al aprobar una solicitud de adopción.
+  Reservada: ['Disponible', 'No_disponible'],
   Adoptada: ['En_tratamiento', 'No_disponible'],
   No_disponible: ['Disponible', 'En_tratamiento']
 };
@@ -75,6 +76,17 @@ export const ADOPTION_REQUEST_STATUS_OPTIONS = [
   { value: 'Aprobada', label: 'Aprobada', badgeClass: 'bg-[#20A83E] text-white' },
   { value: 'Rechazada', label: 'Rechazada', badgeClass: 'bg-[#222222] text-white' }
 ] as const;
+
+// Refleja VALID_REQUEST_TRANSITIONS en adoption.service.js. Salir de "Aprobada" revierte la adopción.
+export const ADOPTION_REQUEST_TRANSITIONS: Record<string, string[]> = {
+  Pendiente: ['En_revision', 'Aprobada', 'Rechazada'],
+  En_revision: ['Pendiente', 'Aprobada', 'Rechazada'],
+  Aprobada: ['Pendiente', 'En_revision', 'Rechazada'],
+  Rechazada: ['Pendiente', 'En_revision']
+};
+
+// Estados con los que se puede crear una mascota (Reservada/Adoptada solo se alcanzan por transiciones).
+export const INITIAL_PET_STATUSES = ['Disponible', 'En_tratamiento', 'No_disponible'];
 
 export function adoptionRequestStatusLabel(value: string) {
   return ADOPTION_REQUEST_STATUS_OPTIONS.find(option => option.value === value)?.label ?? value;

@@ -7,6 +7,7 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { EventDetailModal } from '../components/EventDetailModal';
 import { apiGetPets, apiGetEvents, apiGetImpactStats, ApiPet, ApiEvent, ApiImpactStats } from '../lib/api';
 import { eventTypeLabel } from '../lib/eventMappings';
+import { statusLabel } from '../lib/petMappings';
 import { useSiteSettings } from '../lib/useSiteSettings';
 
 // Carousel photos
@@ -192,7 +193,7 @@ function FeaturedPetCard({ pet }: { pet: ApiPet }) {
           )}
           <div className="absolute top-2.5 right-2.5">
             <span className="bg-[#20A83E] text-white px-2.5 py-0.5 rounded-full text-xs font-medium shadow-sm">
-              {pet.status}
+              {statusLabel(pet.status)}
             </span>
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />

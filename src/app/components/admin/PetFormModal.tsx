@@ -2,7 +2,7 @@ import { useState, FormEvent } from 'react';
 import { X, Plus, Trash2, Upload } from 'lucide-react';
 import { PrimaryButton } from '../PrimaryButton';
 import { ApiPet, PetPayload, apiUploadImage } from '../../lib/api';
-import { SPECIES_OPTIONS, GENDER_OPTIONS, SIZE_OPTIONS, STATUS_OPTIONS } from '../../lib/petMappings';
+import { SPECIES_OPTIONS, GENDER_OPTIONS, SIZE_OPTIONS, STATUS_OPTIONS, INITIAL_PET_STATUSES, nextValidStatuses } from '../../lib/petMappings';
 import { todayDateInputValue } from '../../lib/dateUtils';
 import { useAuth } from '../../context/AuthContext';
 
@@ -179,7 +179,12 @@ export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormMo
             <div>
               <label className={labelClass}>Estado {required}</label>
               <select name="status" value={formData.status} onChange={handleChange} className={inputClass}>
-                {STATUS_OPTIONS.map(option => (
+                {STATUS_OPTIONS.filter(option =>
+                  // Al crear solo se permiten estados iniciales; al editar, el actual y sus transiciones válidas.
+                  mode === 'create'
+                    ? INITIAL_PET_STATUSES.includes(option.value)
+                    : option.value === initialData?.status || nextValidStatuses(initialData?.status ?? '').includes(option.value)
+                ).map(option => (
                   <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
               </select>
@@ -263,8 +268,8 @@ export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormMo
             <PrimaryButton type="button" variant="ghost" onClick={onClose} className="flex-1">
               Cancelar
             </PrimaryButton>
-            <PrimaryButton type="submit" variant="primary" disabled={isSubmitting} className="flex-1">
-              {isSubmitting ? 'Guardando...' : 'Guardar'}
+            <PrimaryButton type="submit" variant="primary" disabled={isSubmitting || uploadingIndex !== null} className="flex-1">
+              {isSubmitting ? 'Guardando...' : uploadingIndex !== null ? 'Subiendo imagen...' : 'Guardar'}
             </PrimaryButton>
           </div>
         </form>

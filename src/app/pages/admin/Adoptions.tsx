@@ -20,6 +20,7 @@ export function AdminAdoptions() {
 
   const loadPets = () => {
     setIsLoading(true);
+    setError(null);
     apiGetPets({ page })
       .then(({ items, pagination }) => {
         setPets(items);
@@ -39,7 +40,7 @@ export function AdminAdoptions() {
 
     try {
       const updated = await apiUpdatePet(token, pet.id, { status: nextStatus });
-      setPets(pets.map(p => (p.id === pet.id ? updated : p)));
+      setPets(prev => prev.map(p => (p.id === pet.id ? updated : p)));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo cambiar el estado de la mascota');
     }
@@ -49,8 +50,12 @@ export function AdminAdoptions() {
     if (!token) return;
     if (!confirm(`¿Dar de baja a ${pet.name}? Dejará de listarse públicamente.`)) return;
 
-    await apiDeletePet(token, pet.id);
-    setPets(pets.filter(p => p.id !== pet.id));
+    try {
+      await apiDeletePet(token, pet.id);
+      loadPets();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo dar de baja a la mascota');
+    }
   };
 
   const handleFormSubmit = async (payload: PetPayload) => {
@@ -58,10 +63,11 @@ export function AdminAdoptions() {
 
     if (modalState?.mode === 'edit' && modalState.pet) {
       const updated = await apiUpdatePet(token, modalState.pet.id, payload);
-      setPets(pets.map(p => (p.id === updated.id ? updated : p)));
+      setPets(prev => prev.map(p => (p.id === updated.id ? updated : p)));
     } else {
-      const created = await apiCreatePet(token, payload);
-      setPets([created, ...pets]);
+      await apiCreatePet(token, payload);
+      // Se recarga para respetar el orden, el tamaño de página y el total de la paginación.
+      loadPets();
     }
   };
 

@@ -4,7 +4,7 @@ import { RestrictedAccess } from '../../components/admin/RestrictedAccess';
 import { Pagination } from '../../components/admin/Pagination';
 import { useAuth } from '../../context/AuthContext';
 import { apiGetAdoptionRequests, apiUpdateAdoptionRequestStatus, ApiAdoptionRequest, AdoptionRequestStatus, ApiPagination } from '../../lib/api';
-import { ADOPTION_REQUEST_STATUS_OPTIONS, adoptionRequestStatusLabel, adoptionRequestStatusBadgeClass } from '../../lib/petMappings';
+import { ADOPTION_REQUEST_STATUS_OPTIONS, ADOPTION_REQUEST_TRANSITIONS, adoptionRequestStatusLabel, adoptionRequestStatusBadgeClass } from '../../lib/petMappings';
 
 const YES_NO_QUESTIONS: { key: 'hasChildren' | 'familyAgreement' | 'hasVeterinarian' | 'secureSpace'; question: string }[] = [
   { key: 'hasChildren', question: '¿Hay niños en el hogar?' },
@@ -23,6 +23,7 @@ export function AdminAdoptionRequests() {
   const [error, setError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     if (!token || !hasAccess) return;
@@ -35,18 +36,28 @@ export function AdminAdoptionRequests() {
       })
       .catch(err => setError(err instanceof Error ? err.message : 'No se pudieron cargar las solicitudes'))
       .finally(() => setIsLoading(false));
-  }, [token, hasAccess, page]);
+  }, [token, hasAccess, page, reloadKey]);
 
   if (!hasAccess) return <RestrictedAccess />;
 
   const handleStatusChange = async (request: ApiAdoptionRequest, status: AdoptionRequestStatus) => {
     if (!token) return;
+
+    if (status === 'Aprobada' && !window.confirm(
+      `¿Aprobar la adopción de ${request.pet.name} por ${request.adopter.fullName}? La mascota pasará a "Adoptada" y las demás solicitudes abiertas para ella se rechazarán.`
+    )) return;
+
+    if (request.status === 'Aprobada' && !window.confirm(
+      `Esta solicitud está aprobada. Cambiarla a "${adoptionRequestStatusLabel(status)}" revierte la adopción: ${request.pet.name} vuelve a estar Disponible. ¿Continuar?`
+    )) return;
+
     setError(null);
     setUpdatingId(request.id);
 
     try {
-      const updated = await apiUpdateAdoptionRequestStatus(token, request.id, status);
-      setRequests(requests.map(r => (r.id === request.id ? updated : r)));
+      await apiUpdateAdoptionRequestStatus(token, request.id, status);
+      // Aprobar o revertir también cambia otras solicitudes y la mascota: se recarga la página completa.
+      setReloadKey(key => key + 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo actualizar el estado de la solicitud');
     } finally {
@@ -126,7 +137,7 @@ export function AdminAdoptionRequests() {
                     </div>
 
                     <div className="flex flex-wrap gap-2">
-                      {ADOPTION_REQUEST_STATUS_OPTIONS.filter(option => option.value !== request.status).map(option => (
+                      {ADOPTION_REQUEST_STATUS_OPTIONS.filter(option => (ADOPTION_REQUEST_TRANSITIONS[request.status] ?? []).includes(option.value)).map(option => (
                         <button
                           key={option.value}
                           disabled={updatingId === request.id}

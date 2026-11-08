@@ -28,9 +28,12 @@ export function PetProfile() {
     apiGetPet(id)
       .then(fetchedPet => {
         setPet(fetchedPet);
-        return apiGetPets({ availableOnly: true, limit: 100 }).then(({ items }) => {
-          setOtherPets(items.filter(p => p.id !== fetchedPet.id && p.species === fetchedPet.species).slice(0, 3));
-        });
+        // Si solo falla la carga de "otras mascotas" no se debe redirigir: la mascota principal sí existe.
+        apiGetPets({ availableOnly: true, limit: 100 })
+          .then(({ items }) => {
+            setOtherPets(items.filter(p => p.id !== fetchedPet.id && p.species === fetchedPet.species).slice(0, 3));
+          })
+          .catch(() => setOtherPets([]));
       })
       .catch(() => setNotFound(true))
       .finally(() => setIsLoading(false));
