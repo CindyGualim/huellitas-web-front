@@ -10,7 +10,28 @@ import { setSiteSettingsCache } from '../../lib/useSiteSettings';
 const inputClass = "w-full px-4 py-3 bg-[#F8F8F8] rounded-xl text-[#222222] border border-[#D9D9D9] focus:outline-none focus:ring-2 focus:ring-[#20A83E] transition-all duration-250 text-sm";
 const labelClass = "block text-sm text-[#222222]/60 mb-2";
 
-const EMPTY_SETTINGS: ApiSiteSettings = {
+// Campos que pertenecen a esta pantalla. Solo estos se envían al guardar, para no pisar
+// lo que se edita en Contenido del sitio (misión, timeline, carrusel, FAQ).
+const SETTINGS_FIELDS = [
+  'instagramHandle',
+  'contactEmail',
+  'whatsappNumber',
+  'bankName',
+  'bankAccountType',
+  'bankAccountNumber',
+  'bankAccountHolder',
+  'donationDropoffAddress',
+  'donationDropoffHours',
+  'neededSupplies'
+] as const;
+
+type SettingsFields = Pick<ApiSiteSettings, typeof SETTINGS_FIELDS[number]>;
+
+function pickSettingsFields(settings: ApiSiteSettings): SettingsFields {
+  return Object.fromEntries(SETTINGS_FIELDS.map(key => [key, settings[key]])) as SettingsFields;
+}
+
+const EMPTY_SETTINGS: SettingsFields = {
   instagramHandle: '',
   contactEmail: '',
   whatsappNumber: '',
@@ -26,7 +47,7 @@ const EMPTY_SETTINGS: ApiSiteSettings = {
 export function AdminSettings() {
   const { token, user } = useAuth();
   const hasAccess = user?.role === 'Superadministrador';
-  const [settings, setSettings] = useState<ApiSiteSettings>(EMPTY_SETTINGS);
+  const [settings, setSettings] = useState<SettingsFields>(EMPTY_SETTINGS);
   const [newSupply, setNewSupply] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,14 +56,14 @@ export function AdminSettings() {
 
   useEffect(() => {
     apiGetSiteSettings()
-      .then(setSettings)
+      .then(loaded => setSettings(pickSettingsFields(loaded)))
       .catch(err => setError(err instanceof Error ? err.message : 'No se pudo cargar la configuración'))
       .finally(() => setIsLoading(false));
   }, []);
 
   if (!hasAccess) return <RestrictedAccess />;
 
-  const update = <K extends keyof ApiSiteSettings>(key: K, value: ApiSiteSettings[K]) => {
+  const update = <K extends keyof SettingsFields>(key: K, value: SettingsFields[K]) => {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
 
@@ -67,7 +88,7 @@ export function AdminSettings() {
 
     try {
       const saved = await apiUpdateSiteSettings(token, settings);
-      setSettings(saved);
+      setSettings(pickSettingsFields(saved));
       setSiteSettingsCache(saved);
       setSuccess(true);
     } catch (err) {

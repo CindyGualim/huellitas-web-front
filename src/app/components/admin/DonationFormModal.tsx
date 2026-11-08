@@ -89,7 +89,7 @@ export function DonationFormModal({ mode, initialData, onSubmit, onClose }: Dona
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Monto (Q) <span className="text-red-500">*</span></label>
-              <input name="amount" type="number" step="0.01" min="0.01" required value={formData.amount} onChange={handleChange} className={inputClass} />
+              <input name="amount" type="number" step="0.01" min="0.01" max="99999999.99" required value={formData.amount} onChange={handleChange} className={inputClass} />
             </div>
 
             <div>

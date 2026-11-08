@@ -19,7 +19,7 @@ describe('Login — envío de credenciales', () => {
   it('envía el email y la contraseña ingresados al hacer submit', async () => {
     vi.mocked(api.apiLogin).mockResolvedValue({
       token: 'fake-token',
-      user: { id: 1, name: 'Admin', email: 'admin@huellitas.org', phone: '000', role: 'Superadministrador', isActive: true, createdAt: '' }
+      user: { id: 1, name: 'Admin', email: 'admin@huellitas.org', phone: '000', role: 'Superadministrador', isActive: true, createdAt: '', lastLoginAt: null }
     });
 
     render(

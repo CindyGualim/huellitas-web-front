@@ -10,7 +10,7 @@ vi.mock('../lib/api', () => ({
 
 const TOKEN_KEY = 'huellitas_token';
 
-const fakeUser = { id: 1, name: 'Admin', email: 'admin@huellitas.org', phone: '000', role: 'Superadministrador' as const, isActive: true, createdAt: '' };
+const fakeUser = { id: 1, name: 'Admin', email: 'admin@huellitas.org', phone: '000', role: 'Superadministrador' as const, isActive: true, createdAt: '', lastLoginAt: null };
 
 describe('AuthContext — manejo del token', () => {
   beforeEach(() => {

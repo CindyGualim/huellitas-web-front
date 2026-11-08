@@ -18,6 +18,13 @@ const inputClass = "w-full px-4 py-3 bg-[#F8F8F8] rounded-xl text-[#222222] bord
 const textareaClass = inputClass + " resize-none";
 const labelClass = "block text-sm text-[#222222]/60 mb-2";
 
+// Campos que pertenecen a esta pantalla; el resto (contacto, banco, insumos) es de Configuración.
+const CONTENT_FIELDS = ['mission', 'vision', 'timeline', 'heroSlides', 'faqs'] as const;
+
+function pickContentFields(settings: ApiSiteSettings) {
+  return Object.fromEntries(CONTENT_FIELDS.map(key => [key, settings[key]])) as Pick<ApiSiteSettings, typeof CONTENT_FIELDS[number]>;
+}
+
 function move<T>(list: T[], index: number, direction: -1 | 1): T[] {
   const target = index + direction;
   if (target < 0 || target >= list.length) return list;
@@ -48,17 +55,30 @@ export function AdminSiteContent() {
   if (isLoading || !settings) {
     return (
       <div className="p-8 bg-[#F8F8F8] min-h-screen">
-        <p className="text-[#222222]/50">Cargando...</p>
+        {!isLoading && error ? (
+          <div className="px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">{error}</div>
+        ) : (
+          <p className="text-[#222222]/50">Cargando...</p>
+        )}
       </div>
     );
   }
+
+  const isUploading = uploadingSlideIndex !== null;
 
   const update = <K extends keyof ApiSiteSettings>(key: K, value: ApiSiteSettings[K]) => {
     setSettings(prev => (prev ? { ...prev, [key]: value } : prev));
   };
 
+  const updateList = <K extends 'timeline' | 'heroSlides' | 'faqs'>(
+    key: K,
+    change: (list: ApiSiteSettings[K]) => ApiSiteSettings[K]
+  ) => {
+    setSettings(prev => (prev ? { ...prev, [key]: change(prev[key]) } : prev));
+  };
+
   const updateTimelineEntry = (index: number, entry: Partial<ApiTimelineEntry>) => {
-    update('timeline', settings.timeline.map((t, i) => (i === index ? { ...t, ...entry } : t)));
+    updateList('timeline', list => list.map((t, i) => (i === index ? { ...t, ...entry } : t)));
   };
 
   const addTimelineEntry = () => {
@@ -70,7 +90,7 @@ export function AdminSiteContent() {
   };
 
   const updateSlide = (index: number, slide: Partial<ApiHeroSlide>) => {
-    update('heroSlides', settings.heroSlides.map((s, i) => (i === index ? { ...s, ...slide } : s)));
+    updateList('heroSlides', list => list.map((s, i) => (i === index ? { ...s, ...slide } : s)));
   };
 
   const addSlide = () => {
@@ -82,7 +102,7 @@ export function AdminSiteContent() {
   };
 
   const updateFaq = (index: number, faq: Partial<ApiFaqEntry>) => {
-    update('faqs', settings.faqs.map((f, i) => (i === index ? { ...f, ...faq } : f)));
+    updateList('faqs', list => list.map((f, i) => (i === index ? { ...f, ...faq } : f)));
   };
 
   const addFaq = () => {
@@ -111,7 +131,7 @@ export function AdminSiteContent() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!token) return;
+    if (!token || isUploading) return;
 
     if (settings.heroSlides.some(s => !s.imageUrl)) {
       setError('Cada slide del carrusel necesita una imagen. Quita los que estén incompletos o súbeles una foto.');
@@ -123,7 +143,7 @@ export function AdminSiteContent() {
     setIsSubmitting(true);
 
     try {
-      const saved = await apiUpdateSiteSettings(token, settings);
+      const saved = await apiUpdateSiteSettings(token, pickContentFields(settings));
       setSettings(saved);
       setSiteSettingsCache(saved);
       setSuccess(true);
@@ -329,15 +349,16 @@ export function AdminSiteContent() {
                     {uploadingSlideIndex === i && <p className="text-xs text-[#222222]/50">Subiendo imagen...</p>}
                   </div>
                   <div className="flex flex-col gap-1">
-                    <button type="button" onClick={() => update('heroSlides', move(settings.heroSlides, i, -1))} disabled={i === 0} className="text-[#222222]/40 hover:text-[#222222] disabled:opacity-20" aria-label="Mover arriba">
+                    <button type="button" onClick={() => update('heroSlides', move(settings.heroSlides, i, -1))} disabled={i === 0 || isUploading} className="text-[#222222]/40 hover:text-[#222222] disabled:opacity-20" aria-label="Mover arriba">
                       <ChevronUp size={16} />
                     </button>
-                    <button type="button" onClick={() => update('heroSlides', move(settings.heroSlides, i, 1))} disabled={i === settings.heroSlides.length - 1} className="text-[#222222]/40 hover:text-[#222222] disabled:opacity-20" aria-label="Mover abajo">
+                    <button type="button" onClick={() => update('heroSlides', move(settings.heroSlides, i, 1))} disabled={i === settings.heroSlides.length - 1 || isUploading} className="text-[#222222]/40 hover:text-[#222222] disabled:opacity-20" aria-label="Mover abajo">
                       <ChevronDown size={16} />
                     </button>
                     <button
                       type="button"
                       onClick={() => removeSlide(i)}
+                      disabled={isUploading}
                       className="p-1 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                       aria-label="Quitar este slide"
                     >
@@ -414,8 +435,8 @@ export function AdminSiteContent() {
           </button>
         </div>
 
-        <PrimaryButton type="submit" variant="primary" disabled={isSubmitting}>
-          {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+        <PrimaryButton type="submit" variant="primary" disabled={isSubmitting || isUploading}>
+          {isSubmitting ? 'Guardando...' : isUploading ? 'Subiendo imagen...' : 'Guardar Cambios'}
         </PrimaryButton>
       </form>
     </div>

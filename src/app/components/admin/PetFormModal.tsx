@@ -168,7 +168,7 @@ export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormMo
 
             <div>
               <label className={labelClass}>Peso (kg) {required}</label>
-              <input name="weight" type="number" step="0.1" min="0" required value={formData.weight} onChange={handleChange} className={inputClass} />
+              <input name="weight" type="number" step="0.01" min="0.01" max="999.99" required value={formData.weight} onChange={handleChange} className={inputClass} />
             </div>
 
             <div>
