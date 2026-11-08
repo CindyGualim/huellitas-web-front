@@ -293,16 +293,16 @@ export function Home() {
     : defaultHeroSlides;
 
   useEffect(() => {
-    apiGetPets({ availableOnly: true, limit: 100 })
-      .then(({ items }) => setFeaturedPets(items.filter(pet => pet.featured)))
+    apiGetPets({ availableOnly: true, featured: true, limit: 100 })
+      .then(({ items }) => setFeaturedPets(items))
       .catch(() => setFeaturedPets([]));
 
-    apiGetPets({ limit: 100 })
-      .then(({ items }) => setUrgentCases(items.filter(pet => pet.status === 'En_tratamiento').slice(0, 5)))
+    apiGetPets({ status: 'En_tratamiento', limit: 5 })
+      .then(({ items }) => setUrgentCases(items))
       .catch(() => setUrgentCases([]));
 
-    apiGetEvents({ limit: 100 })
-      .then(({ items }) => setUpcomingEvents(items.filter(e => e.status === 'Programado' || e.status === 'En_curso').slice(0, 3)))
+    apiGetEvents({ upcoming: true, limit: 3 })
+      .then(({ items }) => setUpcomingEvents(items))
       .catch(() => setUpcomingEvents([]));
 
     apiGetImpactStats()

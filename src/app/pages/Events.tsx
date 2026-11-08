@@ -4,7 +4,7 @@ import { Calendar, MapPin, ArrowRight } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { EventDetailModal } from '../components/EventDetailModal';
-import { apiGetEvents, ApiEvent } from '../lib/api';
+import { apiGetEvents, fetchAllPages, ApiEvent } from '../lib/api';
 import { EVENT_TYPE_OPTIONS, eventTypeLabel } from '../lib/eventMappings';
 
 function formatEventDate(value: string) {
@@ -74,8 +74,8 @@ export function Events() {
   const [activeType, setActiveType] = useState<string | 'Todas'>('Todas');
 
   useEffect(() => {
-    apiGetEvents({ limit: 100 })
-      .then(({ items }) => setEvents(items.filter(e => e.status === 'Programado' || e.status === 'En_curso')))
+    fetchAllPages(params => apiGetEvents({ ...params, upcoming: true }))
+      .then(setEvents)
       .catch(() => setEvents([]))
       .finally(() => setIsLoading(false));
   }, []);

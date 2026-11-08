@@ -4,7 +4,7 @@ import { PrimaryButton } from '../../components/PrimaryButton';
 import { MedicalRecordFormModal } from '../../components/admin/MedicalRecordFormModal';
 import { RestrictedAccess } from '../../components/admin/RestrictedAccess';
 import { useAuth } from '../../context/AuthContext';
-import { apiGetPets, apiGetMedicalRecords, apiCreateMedicalRecord, apiGetPetStatusHistory, ApiPet, ApiMedicalRecord, ApiPetStatusHistory, MedicalRecordPayload } from '../../lib/api';
+import { apiGetPets, fetchAllPages, apiGetMedicalRecords, apiCreateMedicalRecord, apiGetPetStatusHistory, ApiPet, ApiMedicalRecord, ApiPetStatusHistory, MedicalRecordPayload } from '../../lib/api';
 import { medicalRecordTypeLabel, sizeLabel, statusLabel } from '../../lib/petMappings';
 
 const RECORD_ICONS: Record<string, typeof Stethoscope> = {
@@ -49,8 +49,8 @@ export function AdminTracking() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    apiGetPets({ limit: 100 })
-      .then(({ items }) => {
+    fetchAllPages(params => apiGetPets(params))
+      .then(items => {
         setPets(items);
         if (items.length > 0) setSelectedPet(items[0]);
       })

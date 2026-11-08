@@ -37,6 +37,18 @@ export interface PaginationParams {
   limit?: number;
 }
 
+// El backend limita cada página a 100 registros: para selectores o filtros en cliente que
+// necesitan todo el conjunto, se recorren las páginas en lugar de quedarse con la primera.
+export async function fetchAllPages<T>(fetchPage: (params: PaginationParams) => Promise<ApiPage<T>>) {
+  const limit = 100;
+  const first = await fetchPage({ page: 1, limit });
+  const rest = await Promise.all(
+    Array.from({ length: first.pagination.totalPages - 1 }, (_, i) => fetchPage({ page: i + 2, limit }))
+  );
+
+  return [first, ...rest].flatMap(page => page.items);
+}
+
 function paginationQuery(params?: PaginationParams) {
   const search = new URLSearchParams();
   if (params?.page) search.set('page', String(params.page));
@@ -150,6 +162,26 @@ export async function apiGetUsers(token: string, params?: PaginationParams) {
   return parseResponse<ApiPage<AuthUser>>(response);
 }
 
+export interface UserUpdatePayload {
+  name?: string;
+  phone?: string;
+  role?: UserRole;
+  isActive?: boolean;
+}
+
+export async function apiUpdateUser(token: string, id: number, payload: UserUpdatePayload) {
+  const response = await fetch(`${API_URL}/users/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  return parseResponse<AuthUser>(response);
+}
+
 export async function apiCreateUser(token: string, payload: UserPayload) {
   const response = await fetch(`${API_URL}/users`, {
     method: 'POST',
@@ -206,9 +238,19 @@ export interface PetPayload {
   images?: { imageUrl: string; isCover?: boolean }[];
 }
 
-export async function apiGetPets(options?: { availableOnly?: boolean } & PaginationParams) {
+export interface PetFilters {
+  availableOnly?: boolean;
+  species?: ApiPet['species'];
+  status?: ApiPet['status'];
+  featured?: boolean;
+}
+
+export async function apiGetPets(options?: PetFilters & PaginationParams) {
   const search = new URLSearchParams(paginationQuery(options).slice(1));
   if (options?.availableOnly) search.set('availableOnly', 'true');
+  if (options?.species) search.set('species', options.species);
+  if (options?.status) search.set('status', options.status);
+  if (options?.featured !== undefined) search.set('featured', String(options.featured));
   const query = search.toString();
   const response = await fetch(`${API_URL}/pets${query ? `?${query}` : ''}`);
 
@@ -320,8 +362,12 @@ export async function apiGetJornadaDashboard(token: string, eventId: number) {
   return parseResponse<JornadaDashboard>(response);
 }
 
-export async function apiGetEvents(params?: PaginationParams) {
-  const response = await fetch(`${API_URL}/events${paginationQuery(params)}`);
+export async function apiGetEvents(params?: PaginationParams & { upcoming?: boolean }) {
+  const search = new URLSearchParams(paginationQuery(params).slice(1));
+  // upcoming: solo Programado/En curso cuya fecha de fin todavía no pasó.
+  if (params?.upcoming) search.set('upcoming', 'true');
+  const query = search.toString();
+  const response = await fetch(`${API_URL}/events${query ? `?${query}` : ''}`);
 
   return parseResponse<ApiPage<ApiEvent>>(response);
 }
@@ -710,7 +756,8 @@ export async function apiGetSiteSettings() {
   return parseResponse<ApiSiteSettings>(response);
 }
 
-export async function apiUpdateSiteSettings(token: string, payload: ApiSiteSettings) {
+// Cada pantalla envía solo los campos que edita para no pisar los de otra.
+export async function apiUpdateSiteSettings(token: string, payload: Partial<ApiSiteSettings>) {
   const response = await fetch(`${API_URL}/site-settings`, {
     method: 'PUT',
     headers: {
@@ -733,4 +780,30 @@ export async function apiGetImpactStats() {
   const response = await fetch(`${API_URL}/stats/impact`);
 
   return parseResponse<ApiImpactStats>(response);
+}
+
+export type ApiActivityItem =
+  | { type: 'event'; id: number; title: string; date: string }
+  | { type: 'donation'; id: number; donorName: string; amount: number; date: string }
+  | { type: 'adoptionRequest'; id: number; adopterName: string; petName: string; date: string };
+
+export interface ApiDashboardStats {
+  pets: {
+    byStatus: Partial<Record<ApiPet['status'], number>>;
+    bySpecies: Partial<Record<ApiPet['species'], number>>;
+  };
+  upcomingEvents: number;
+  /** null si el rol no puede ver solicitudes. */
+  adoptionRequests: { byStatus: Partial<Record<ApiAdoptionRequest['status'], number>>; pending: number } | null;
+  /** null si el rol no puede ver donaciones. month va de 1 a 12. */
+  donations: { monthly: { year: number; month: number; total: number }[]; thisMonth: number } | null;
+  recentActivity: ApiActivityItem[];
+}
+
+export async function apiGetDashboardStats(token: string) {
+  const response = await fetch(`${API_URL}/stats/dashboard`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  return parseResponse<ApiDashboardStats>(response);
 }

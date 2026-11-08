@@ -29,9 +29,9 @@ export function PetProfile() {
       .then(fetchedPet => {
         setPet(fetchedPet);
         // Si solo falla la carga de "otras mascotas" no se debe redirigir: la mascota principal sí existe.
-        apiGetPets({ availableOnly: true, limit: 100 })
+        apiGetPets({ availableOnly: true, species: fetchedPet.species, limit: 4 })
           .then(({ items }) => {
-            setOtherPets(items.filter(p => p.id !== fetchedPet.id && p.species === fetchedPet.species).slice(0, 3));
+            setOtherPets(items.filter(p => p.id !== fetchedPet.id).slice(0, 3));
           })
           .catch(() => setOtherPets([]));
       })

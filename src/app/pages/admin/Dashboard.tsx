@@ -2,10 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Calendar, Users, DollarSign, Gift } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { apiGetPets, apiGetEvents, apiGetDonations, apiGetAdoptionRequests, ApiPet, ApiEvent, ApiDonation, ApiAdoptionRequest } from '../../lib/api';
+import { apiGetDashboardStats, ApiDashboardStats, ApiActivityItem } from '../../lib/api';
 import { ChartCarousel } from '../../components/admin/ChartCarousel';
 import { PetsByStatusChart, PetsBySpeciesChart, DonationsTrendChart, AdoptionRequestsChart } from '../../components/admin/DashboardCharts';
-import { dateOnlyYearMonth } from '../../lib/dateUtils';
 
 interface ActivityItem {
   key: string;
@@ -13,13 +12,6 @@ interface ActivityItem {
   title: string;
   subtitle: string;
   date: Date;
-}
-
-interface DashboardData {
-  pets: ApiPet[];
-  events: ApiEvent[];
-  donations: ApiDonation[] | null;
-  requests: ApiAdoptionRequest[] | null;
 }
 
 function timeAgo(date: Date) {
@@ -33,83 +25,44 @@ function timeAgo(date: Date) {
   return `Hace ${diffDays} día${diffDays === 1 ? '' : 's'}`;
 }
 
+function toActivityItem(item: ApiActivityItem): ActivityItem {
+  switch (item.type) {
+    case 'event':
+      return { key: `event-${item.id}`, icon: Calendar, title: item.title, subtitle: 'Nuevo evento programado', date: new Date(item.date) };
+    case 'donation':
+      return { key: `donation-${item.id}`, icon: Gift, title: item.donorName, subtitle: `Donó Q${item.amount.toFixed(2)}`, date: new Date(item.date) };
+    case 'adoptionRequest':
+      return { key: `request-${item.id}`, icon: Heart, title: item.adopterName, subtitle: `Solicitud de adopción de ${item.petName}`, date: new Date(item.date) };
+  }
+}
+
 export function AdminDashboard() {
-  const { token, user } = useAuth();
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [activity, setActivity] = useState<ActivityItem[]>([]);
+  const { token } = useAuth();
+  const [data, setData] = useState<ApiDashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Cada rol solo puede consultar lo que el backend le permite — pedir de más
-  // solo produce un 403 y rompe el dashboard entero para ese usuario.
-  const canViewDonations = user?.role === 'Superadministrador';
-  const canViewAdoptionRequests = user?.role === 'Superadministrador' || user?.role === 'Operador';
 
   useEffect(() => {
     if (!token) return;
 
-    Promise.all([
-      apiGetPets({ limit: 100 }),
-      apiGetEvents({ limit: 100 }),
-      canViewDonations ? apiGetDonations(token, { limit: 100 }) : Promise.resolve(null),
-      canViewAdoptionRequests ? apiGetAdoptionRequests(token, { limit: 100 }) : Promise.resolve(null)
-    ])
-      .then(([petsPage, eventsPage, donationsPage, requestsPage]) => {
-        const pets = petsPage.items;
-        const events = eventsPage.items;
-        const donations = donationsPage?.items ?? null;
-        const requests = requestsPage?.items ?? null;
-
-        setData({ pets, events, donations, requests });
-
-        const eventItems: ActivityItem[] = events.map(e => ({
-          key: `event-${e.id}`,
-          icon: Calendar,
-          title: e.title,
-          subtitle: 'Nuevo evento programado',
-          date: new Date(e.createdAt)
-        }));
-
-        const donationItems: ActivityItem[] = (donations ?? []).map(d => ({
-          key: `donation-${d.id}`,
-          icon: Gift,
-          title: d.donorName,
-          subtitle: `Donó Q${Number(d.amount).toFixed(2)}`,
-          date: new Date(d.donationDate)
-        }));
-
-        const requestItems: ActivityItem[] = (requests ?? []).map(r => ({
-          key: `request-${r.id}`,
-          icon: Heart,
-          title: r.adopter.fullName,
-          subtitle: `Solicitud de adopción de ${r.pet.name}`,
-          date: new Date(r.submittedAt)
-        }));
-
-        const merged = [...eventItems, ...donationItems, ...requestItems]
-          .sort((a, b) => b.date.getTime() - a.date.getTime())
-          .slice(0, 5);
-
-        setActivity(merged);
-      })
+    // Los totales se calculan en el servidor sobre todos los registros (antes se contaban
+    // solo los primeros 100 de cada listado). El backend omite donaciones y solicitudes
+    // para los roles que no pueden verlas.
+    apiGetDashboardStats(token)
+      .then(setData)
       .catch(err => setError(err instanceof Error ? err.message : 'No se pudieron cargar los datos del dashboard'))
       .finally(() => setIsLoading(false));
-  }, [token, canViewDonations, canViewAdoptionRequests]);
+  }, [token]);
 
-  const now = new Date();
+  const activity = data ? data.recentActivity.map(toActivityItem) : [];
+
   const statCards = data ? [
-    { label: 'Mascotas Disponibles', value: String(data.pets.filter(p => p.status === 'Disponible').length), icon: Heart, link: '/admin/adoptions', color: '#20A83E' },
-    { label: 'Próximas Jornadas', value: String(data.events.filter(e => e.status === 'Programado').length), icon: Calendar, link: '/admin/events', color: '#146B27' },
-    ...(data.requests ? [{ label: 'Adopciones Pendientes', value: String(data.requests.filter(r => r.status === 'Pendiente' || r.status === 'En_revision').length), icon: Users, link: '/admin/adoption-requests', color: '#20A83E' }] : []),
+    { label: 'Mascotas Disponibles', value: String(data.pets.byStatus.Disponible ?? 0), icon: Heart, link: '/admin/adoptions', color: '#20A83E' },
+    { label: 'Próximas Jornadas', value: String(data.upcomingEvents), icon: Calendar, link: '/admin/events', color: '#146B27' },
+    ...(data.adoptionRequests ? [{ label: 'Adopciones Pendientes', value: String(data.adoptionRequests.pending), icon: Users, link: '/admin/adoption-requests', color: '#20A83E' }] : []),
     ...(data.donations ? [{
       label: 'Donaciones Este Mes',
-      value: `Q${data.donations
-        .filter(d => {
-          const date = dateOnlyYearMonth(d.donationDate);
-          return date.month === now.getMonth() && date.year === now.getFullYear();
-        })
-        .reduce((sum, d) => sum + Number(d.amount), 0)
-        .toFixed(2)}`,
+      value: `Q${data.donations.thisMonth.toFixed(2)}`,
       icon: DollarSign,
       link: '/admin/donations',
       color: '#146B27'
@@ -117,10 +70,10 @@ export function AdminDashboard() {
   ] : [];
 
   const chartSlides = data ? [
-    { title: 'Mascotas por estado', subtitle: 'Distribución actual del refugio', content: <PetsByStatusChart pets={data.pets} /> },
-    { title: 'Mascotas por especie', subtitle: 'Perros vs. gatos en el registro', content: <PetsBySpeciesChart pets={data.pets} /> },
-    ...(data.donations ? [{ title: 'Donaciones', subtitle: 'Total recaudado por mes (últimos 6 meses)', content: <DonationsTrendChart donations={data.donations} /> }] : []),
-    ...(data.requests ? [{ title: 'Solicitudes de adopción', subtitle: 'Distribución por estado', content: <AdoptionRequestsChart requests={data.requests} /> }] : [])
+    { title: 'Mascotas por estado', subtitle: 'Distribución actual del refugio', content: <PetsByStatusChart byStatus={data.pets.byStatus} /> },
+    { title: 'Mascotas por especie', subtitle: 'Perros vs. gatos en el registro', content: <PetsBySpeciesChart bySpecies={data.pets.bySpecies} /> },
+    ...(data.donations ? [{ title: 'Donaciones', subtitle: 'Total recaudado por mes (últimos 6 meses)', content: <DonationsTrendChart monthly={data.donations.monthly} /> }] : []),
+    ...(data.adoptionRequests ? [{ title: 'Solicitudes de adopción', subtitle: 'Distribución por estado', content: <AdoptionRequestsChart byStatus={data.adoptionRequests.byStatus} /> }] : [])
   ] : [];
 
   return (

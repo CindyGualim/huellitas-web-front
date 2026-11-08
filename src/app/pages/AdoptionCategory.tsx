@@ -3,7 +3,7 @@ import { useParams, Link, Navigate } from 'react-router-dom';
 import { Search, Scale, ArrowLeft } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { apiGetPets, ApiPet } from '../lib/api';
+import { apiGetPets, fetchAllPages, ApiPet } from '../lib/api';
 import { SIZE_OPTIONS, GENDER_OPTIONS, sizeLabel, statusLabel, statusBadgeClass } from '../lib/petMappings';
 import dogsHeroImg from '../../imports/WhatsApp_Image_2026-06-16_at_3.21.02_PM__1_.jpeg';
 import catsHeroImg from '../../imports/WhatsApp_Image_2026-06-16_at_3.21.02_PM__2_.jpeg';
@@ -58,8 +58,8 @@ export function AdoptionCategory() {
   const [genderFilter, setGenderFilter] = useState<string | null>(null);
 
   useEffect(() => {
-    apiGetPets({ availableOnly: true, limit: 100 })
-      .then(({ items }) => setPets(items))
+    fetchAllPages(params => apiGetPets({ ...params, availableOnly: true }))
+      .then(setPets)
       .catch(() => setPets([]))
       .finally(() => setIsLoading(false));
   }, []);

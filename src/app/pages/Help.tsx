@@ -14,9 +14,9 @@ export function Help() {
   const settings = useSiteSettings();
 
   useEffect(() => {
-    apiGetPets({ limit: 100 })
+    apiGetPets({ status: 'En_tratamiento', limit: 5 })
       .then(({ items }) => {
-        setCasesNeedingHelp(items.filter(pet => pet.status === 'En_tratamiento').slice(0, 5));
+        setCasesNeedingHelp(items);
       })
       .catch(() => setCasesNeedingHelp([]))
       .finally(() => setIsLoading(false));

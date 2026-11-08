@@ -7,14 +7,18 @@ import dogsImg from '../../imports/WhatsApp_Image_2026-06-16_at_3.21.02_PM__1_.j
 import catsImg from '../../imports/WhatsApp_Image_2026-06-16_at_3.21.02_PM__2_.jpeg';
 
 export function Adoptions() {
-  const [pets, setPets] = useState<ApiPet[]>([]);
+  const [counts, setCounts] = useState<Record<ApiPet['species'], number>>({ Perro: 0, Gato: 0 });
 
   useEffect(() => {
-    apiGetPets({ availableOnly: true, limit: 100 }).then(({ items }) => setPets(items)).catch(() => setPets([]));
+    const countSpecies = (species: ApiPet['species']) =>
+      apiGetPets({ availableOnly: true, species, limit: 1 }).then(({ pagination }) => pagination.total);
+
+    Promise.all([countSpecies('Perro'), countSpecies('Gato')])
+      .then(([Perro, Gato]) => setCounts({ Perro, Gato }))
+      .catch(() => setCounts({ Perro: 0, Gato: 0 }));
   }, []);
 
-  const countFor = (species: 'Perro' | 'Gato') =>
-    pets.filter(pet => pet.species === species && pet.status === 'Disponible').length;
+  const countFor = (species: ApiPet['species']) => counts[species];
 
   const categories = [
     {

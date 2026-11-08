@@ -5,8 +5,10 @@ import {
 } from 'recharts';
 import { STATUS_OPTIONS } from '../../lib/petMappings';
 import { CATEGORICAL_COLORS, BRAND_COLOR, CHART_TEXT } from '../../lib/chartColors';
-import { ApiPet, ApiDonation, ApiAdoptionRequest } from '../../lib/api';
-import { dateOnlyYearMonth } from '../../lib/dateUtils';
+import { ApiDashboardStats } from '../../lib/api';
+
+type DashboardDonations = NonNullable<ApiDashboardStats['donations']>;
+type DashboardRequests = NonNullable<ApiDashboardStats['adoptionRequests']>;
 
 const tooltipStyle = {
   contentStyle: {
@@ -19,9 +21,9 @@ const tooltipStyle = {
   labelStyle: { color: CHART_TEXT.primary, fontWeight: 500 }
 };
 
-export function PetsByStatusChart({ pets }: { pets: ApiPet[] }) {
+export function PetsByStatusChart({ byStatus }: { byStatus: ApiDashboardStats['pets']['byStatus'] }) {
   const data = STATUS_OPTIONS
-    .map(option => ({ name: option.label, value: pets.filter(p => p.status === option.value).length }))
+    .map(option => ({ name: option.label, value: byStatus[option.value] ?? 0 }))
     .filter(d => d.value > 0);
 
   if (data.length === 0) {
@@ -50,10 +52,10 @@ export function PetsByStatusChart({ pets }: { pets: ApiPet[] }) {
   );
 }
 
-export function PetsBySpeciesChart({ pets }: { pets: ApiPet[] }) {
+export function PetsBySpeciesChart({ bySpecies }: { bySpecies: ApiDashboardStats['pets']['bySpecies'] }) {
   const data = [
-    { name: 'Perros', value: pets.filter(p => p.species === 'Perro').length },
-    { name: 'Gatos', value: pets.filter(p => p.species === 'Gato').length }
+    { name: 'Perros', value: bySpecies.Perro ?? 0 },
+    { name: 'Gatos', value: bySpecies.Gato ?? 0 }
   ];
 
   return (
@@ -69,22 +71,11 @@ export function PetsBySpeciesChart({ pets }: { pets: ApiPet[] }) {
   );
 }
 
-export function DonationsTrendChart({ donations }: { donations: ApiDonation[] }) {
-  const now = new Date();
-  const months = Array.from({ length: 6 }, (_, i) => {
-    const date = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
-    return { year: date.getFullYear(), month: date.getMonth(), label: date.toLocaleDateString('es-GT', { month: 'short' }) };
-  });
-
-  const data = months.map(({ year, month, label }) => ({
-    name: label,
-    total: donations
-      .filter(d => {
-        // donationDate es una fecha sin hora (medianoche UTC): leerla en hora local la corre al mes anterior.
-        const date = dateOnlyYearMonth(d.donationDate);
-        return date.year === year && date.month === month;
-      })
-      .reduce((sum, d) => sum + Number(d.amount), 0)
+export function DonationsTrendChart({ monthly }: { monthly: DashboardDonations['monthly'] }) {
+  // Los totales ya vienen agrupados por mes desde el servidor (month de 1 a 12).
+  const data = monthly.map(({ year, month, total }) => ({
+    name: new Date(year, month - 1, 1).toLocaleDateString('es-GT', { month: 'short' }),
+    total
   }));
 
   return (
@@ -107,16 +98,17 @@ const REQUEST_STATUS_LABELS: Record<string, string> = {
   Rechazada: 'Rechazada'
 };
 
-export function AdoptionRequestsChart({ requests }: { requests: ApiAdoptionRequest[] }) {
-  const statuses = Object.keys(REQUEST_STATUS_LABELS);
+export function AdoptionRequestsChart({ byStatus }: { byStatus: DashboardRequests['byStatus'] }) {
+  const statuses = Object.keys(REQUEST_STATUS_LABELS) as (keyof typeof byStatus)[];
   const data = [
     statuses.reduce(
-      (row, status) => ({ ...row, [status]: requests.filter(r => r.status === status).length }),
+      (row, status) => ({ ...row, [status]: byStatus[status] ?? 0 }),
       { name: 'Solicitudes' } as Record<string, string | number>
     )
   ];
+  const total = statuses.reduce((sum, status) => sum + (byStatus[status] ?? 0), 0);
 
-  if (requests.length === 0) {
+  if (total === 0) {
     return <p className="text-[#222222]/50 text-sm text-center py-16">Todavía no hay solicitudes de adopción.</p>;
   }
 
