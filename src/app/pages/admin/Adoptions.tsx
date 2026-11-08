@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Plus, Edit2, Eye, Trash2 } from 'lucide-react';
+import { Plus, Edit2, Eye, Trash2, History } from 'lucide-react';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { PetFormModal } from '../../components/admin/PetFormModal';
+import { PetVersionsModal } from '../../components/admin/PetVersionsModal';
 import { Pagination } from '../../components/admin/Pagination';
 import { useAuth } from '../../context/AuthContext';
 import { apiGetPets, apiCreatePet, apiUpdatePet, apiDeletePet, ApiPet, PetPayload, ApiPagination } from '../../lib/api';
@@ -17,6 +18,7 @@ export function AdminAdoptions() {
   const [error, setError] = useState<string | null>(null);
   const [modalState, setModalState] = useState<{ mode: 'create' | 'edit'; pet?: ApiPet } | null>(null);
   const [statusMenuPetId, setStatusMenuPetId] = useState<number | null>(null);
+  const [versionsPet, setVersionsPet] = useState<ApiPet | null>(null);
 
   const loadPets = () => {
     setIsLoading(true);
@@ -177,6 +179,14 @@ export function AdminAdoptions() {
                           Editar
                         </button>
                         <button
+                          onClick={() => setVersionsPet(pet)}
+                          title="Historial de cambios"
+                          aria-label={`Historial de cambios de ${pet.name}`}
+                          className="flex items-center justify-center px-3 py-2 text-[#222222] bg-[#F8F8F8] rounded-lg hover:bg-[#D9D9D9]/40 transition-all duration-250 text-sm border border-[#D9D9D9] cursor-pointer"
+                        >
+                          <History size={15} />
+                        </button>
+                        <button
                           onClick={() => handleDelete(pet)}
                           className="flex items-center justify-center px-3 py-2 text-red-500 bg-red-50 rounded-lg hover:bg-red-100 transition-all duration-250 text-sm border border-red-100 cursor-pointer"
                         >
@@ -200,6 +210,14 @@ export function AdminAdoptions() {
           initialData={modalState.pet}
           onSubmit={handleFormSubmit}
           onClose={() => setModalState(null)}
+        />
+      )}
+
+      {versionsPet && (
+        <PetVersionsModal
+          pet={versionsPet}
+          onClose={() => setVersionsPet(null)}
+          onRestored={restored => setPets(prev => prev.map(p => (p.id === restored.id ? restored : p)))}
         />
       )}
     </div>

@@ -587,6 +587,49 @@ export interface ApiPetStatusHistory {
   changedBy: { id: number; name: string };
 }
 
+export interface ApiPetSnapshot {
+  name: string;
+  species: ApiPet['species'];
+  breed: string;
+  gender: ApiPet['gender'];
+  estimatedAge: string;
+  size: ApiPet['size'];
+  weight: number;
+  color: string;
+  description: string;
+  rescueStory: string;
+  status: ApiPet['status'];
+  intakeDate: string | null;
+  featured: boolean;
+  images: { imageUrl: string; isCover: boolean }[];
+}
+
+export interface ApiPetVersion {
+  id: number;
+  version: number;
+  snapshot: ApiPetSnapshot;
+  changedAt: string;
+  /** null en la versión base guardada automáticamente para mascotas anteriores al historial. */
+  changedBy: { id: number; name: string } | null;
+}
+
+export async function apiGetPetVersions(token: string, petId: number) {
+  const response = await fetch(`${API_URL}/pets/${petId}/versions`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  return parseResponse<ApiPetVersion[]>(response);
+}
+
+export async function apiRestorePetVersion(token: string, petId: number, version: number) {
+  const response = await fetch(`${API_URL}/pets/${petId}/versions/${version}/restore`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  return parseResponse<ApiPet>(response);
+}
+
 export async function apiGetPetStatusHistory(token: string, petId: number) {
   const response = await fetch(`${API_URL}/pets/${petId}/status-history`, {
     headers: { Authorization: `Bearer ${token}` }
