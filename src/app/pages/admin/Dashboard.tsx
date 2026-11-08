@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { apiGetPets, apiGetEvents, apiGetDonations, apiGetAdoptionRequests, ApiPet, ApiEvent, ApiDonation, ApiAdoptionRequest } from '../../lib/api';
 import { ChartCarousel } from '../../components/admin/ChartCarousel';
 import { PetsByStatusChart, PetsBySpeciesChart, DonationsTrendChart, AdoptionRequestsChart } from '../../components/admin/DashboardCharts';
+import { dateOnlyYearMonth } from '../../lib/dateUtils';
 
 interface ActivityItem {
   key: string;
@@ -99,13 +100,13 @@ export function AdminDashboard() {
   const statCards = data ? [
     { label: 'Mascotas Disponibles', value: String(data.pets.filter(p => p.status === 'Disponible').length), icon: Heart, link: '/admin/adoptions', color: '#20A83E' },
     { label: 'Próximas Jornadas', value: String(data.events.filter(e => e.status === 'Programado').length), icon: Calendar, link: '/admin/events', color: '#146B27' },
-    ...(data.requests ? [{ label: 'Adopciones Pendientes', value: String(data.requests.filter(r => r.status === 'Pendiente').length), icon: Users, link: '/admin/adoptions', color: '#20A83E' }] : []),
+    ...(data.requests ? [{ label: 'Adopciones Pendientes', value: String(data.requests.filter(r => r.status === 'Pendiente' || r.status === 'En_revision').length), icon: Users, link: '/admin/adoption-requests', color: '#20A83E' }] : []),
     ...(data.donations ? [{
       label: 'Donaciones Este Mes',
       value: `Q${data.donations
         .filter(d => {
-          const date = new Date(d.donationDate);
-          return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+          const date = dateOnlyYearMonth(d.donationDate);
+          return date.month === now.getMonth() && date.year === now.getFullYear();
         })
         .reduce((sum, d) => sum + Number(d.amount), 0)
         .toFixed(2)}`,
@@ -117,7 +118,7 @@ export function AdminDashboard() {
 
   const chartSlides = data ? [
     { title: 'Mascotas por estado', subtitle: 'Distribución actual del refugio', content: <PetsByStatusChart pets={data.pets} /> },
-    { title: 'Mascotas por especie', subtitle: 'Perros vs. gatos disponibles', content: <PetsBySpeciesChart pets={data.pets} /> },
+    { title: 'Mascotas por especie', subtitle: 'Perros vs. gatos en el registro', content: <PetsBySpeciesChart pets={data.pets} /> },
     ...(data.donations ? [{ title: 'Donaciones', subtitle: 'Total recaudado por mes (últimos 6 meses)', content: <DonationsTrendChart donations={data.donations} /> }] : []),
     ...(data.requests ? [{ title: 'Solicitudes de adopción', subtitle: 'Distribución por estado', content: <AdoptionRequestsChart requests={data.requests} /> }] : [])
   ] : [];

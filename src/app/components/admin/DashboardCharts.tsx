@@ -6,6 +6,7 @@ import {
 import { STATUS_OPTIONS } from '../../lib/petMappings';
 import { CATEGORICAL_COLORS, BRAND_COLOR, CHART_TEXT } from '../../lib/chartColors';
 import { ApiPet, ApiDonation, ApiAdoptionRequest } from '../../lib/api';
+import { dateOnlyYearMonth } from '../../lib/dateUtils';
 
 const tooltipStyle = {
   contentStyle: {
@@ -79,8 +80,9 @@ export function DonationsTrendChart({ donations }: { donations: ApiDonation[] })
     name: label,
     total: donations
       .filter(d => {
-        const date = new Date(d.donationDate);
-        return date.getFullYear() === year && date.getMonth() === month;
+        // donationDate es una fecha sin hora (medianoche UTC): leerla en hora local la corre al mes anterior.
+        const date = dateOnlyYearMonth(d.donationDate);
+        return date.year === year && date.month === month;
       })
       .reduce((sum, d) => sum + Number(d.amount), 0)
   }));
