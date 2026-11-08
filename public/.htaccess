@@ -1,0 +1,45 @@
+# Configuración para Apache/LiteSpeed (hosting compartido de Namecheap, cPanel).
+# Vite copia este archivo a dist/; subilo junto con el resto del build a la carpeta del sitio.
+# La Content-Security-Policy va como <meta> en index.html (la genera vite.config.ts).
+
+Options -Indexes
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Forzar HTTPS
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # No servir archivos ocultos ni restos de despliegue (.env, .git, .zip, mapas de código).
+  # /.well-known/ queda permitido: lo usa el SSL gratuito de cPanel (AutoSSL) para renovarse.
+  RewriteCond %{REQUEST_URI} !^/\.well-known/
+  RewriteRule (^|/)\. - [F,L]
+  RewriteRule \.(zip|env|log|map|sql|bak)$ - [F,L,NC]
+
+  # SPA: cualquier ruta que no sea un archivo real la resuelve React Router
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  # El navegador recordará 180 días que el sitio solo se usa por HTTPS. Activar solo con el SSL ya funcionando.
+  Header always set Strict-Transport-Security "max-age=15552000" "expr=%{HTTPS} == 'on'"
+
+  # index.html sin caché, para que cada despliegue se vea de inmediato
+  <FilesMatch "^index\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+
+  # JS y CSS del build llevan un hash en el nombre: se pueden cachear un año
+  <FilesMatch "\.(js|css|woff2?)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>

@@ -27,6 +27,7 @@ import { AuthProvider } from './context/AuthContext';
 import { Login } from './pages/Login';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { ResetPassword } from './pages/ResetPassword';
+import { NotFound } from './pages/NotFound';
 
 export default function App() {
   return (
@@ -70,7 +71,10 @@ export default function App() {
             <Route path="users" element={<AdminUsers />} />
             <Route path="donations" element={<AdminDonations />} />
             <Route path="tracking" element={<AdminTracking />} />
+            <Route path="*" element={<Navigate to="/admin" replace />} />
           </Route>
+
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

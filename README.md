@@ -48,6 +48,14 @@ Corre la suite de Vitest + Testing Library (`**/*.test.ts(x)`) sobre el flujo de
 
 Con el backend corriendo y un usuario creado (`prisma/createAdmin.js` en el repo del backend), entrá a `/login` con esas credenciales. Las rutas bajo `/admin` están protegidas y redirigen a `/login` si no hay sesión activa.
 
+## Despliegue en cPanel (Namecheap)
+
+1. Definir `VITE_API_URL` en `.env.production` (URL pública de la API, con https).
+2. `pnpm build` y subir **el contenido** de `dist/` a la carpeta del dominio (incluye el `.htaccess` oculto).
+3. El `.htaccess` fuerza HTTPS, resuelve las rutas del SPA y agrega cabeceras de seguridad.
+   La Content-Security-Policy se genera en el build (`vite.config.ts`) a partir de `VITE_API_URL`:
+   si se agrega un servicio externo nuevo (imágenes, mapas, analítica) hay que sumarlo ahí.
+
 ## Estructura del proyecto
 
 ```
