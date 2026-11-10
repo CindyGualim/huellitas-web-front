@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Edit2, Eye, Trash2, History } from 'lucide-react';
+import { Plus, Edit2, Eye, Trash2, History, Star } from 'lucide-react';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { PetFormModal } from '../../components/admin/PetFormModal';
 import { PetVersionsModal } from '../../components/admin/PetVersionsModal';
@@ -65,7 +65,12 @@ export function AdminAdoptions() {
 
     if (modalState?.mode === 'edit' && modalState.pet) {
       const updated = await apiUpdatePet(token, modalState.pet.id, payload);
-      setPets(prev => prev.map(p => (p.id === updated.id ? updated : p)));
+      if (payload.replaceFeaturedPetId) {
+        // También cambió la mascota retirada de destacadas: se recarga la página completa.
+        loadPets();
+      } else {
+        setPets(prev => prev.map(p => (p.id === updated.id ? updated : p)));
+      }
     } else {
       await apiCreatePet(token, payload);
       // Se recarga para respetar el orden, el tamaño de página y el total de la paginación.
@@ -75,9 +80,9 @@ export function AdminAdoptions() {
 
   return (
     <div className="p-8 bg-[#F8F8F8] min-h-screen">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-[#222222] mb-1 text-3xl">Adopciones</h1>
+          <h1 className="text-[#222222] mb-1 text-2xl sm:text-3xl">Adopciones</h1>
           <p className="text-[#222222]/50">Gestiona perritos y gatitos disponibles</p>
         </div>
         {canManagePets && (
@@ -116,6 +121,12 @@ export function AdminAdoptions() {
                     <div className="w-full h-48 bg-[#F8F8F8] flex items-center justify-center text-[#222222]/30 text-sm">
                       Sin imagen
                     </div>
+                  )}
+                  {pet.featured && (
+                    <span className="absolute top-3 left-3 inline-flex items-center gap-1 bg-white/95 text-[#146B27] px-2.5 py-1 rounded-full text-xs font-medium shadow-sm">
+                      <Star size={12} className="fill-[#20A83E] text-[#20A83E]" />
+                      Destacada
+                    </span>
                   )}
                   {canManagePets ? (
                     <div className="absolute top-3 right-3">

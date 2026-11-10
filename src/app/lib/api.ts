@@ -17,6 +17,8 @@ interface ApiResponse<T> {
   success: boolean;
   statusCode: number;
   message: string;
+  /** Código de error de negocio (p. ej. FEATURED_LIMIT) cuando la API lo indica. */
+  code?: string;
   data: T;
 }
 
@@ -76,7 +78,7 @@ async function parseResponse<T>(response: Response): Promise<T> {
       window.dispatchEvent(new Event(UNAUTHORIZED_EVENT));
     }
 
-    throw new ApiRequestError(body.message, response.status);
+    throw new ApiRequestError(body.message, response.status, body.code);
   }
 
   return body.data;
@@ -221,6 +223,9 @@ export interface ApiPet {
   images: ApiPetImage[];
 }
 
+/** Máximo de mascotas destacadas en la página principal (lo valida también el backend). */
+export const MAX_FEATURED_PETS = 4;
+
 export interface PetPayload {
   name: string;
   species: string;
@@ -236,6 +241,8 @@ export interface PetPayload {
   intakeDate?: string;
   featured?: boolean;
   images?: { imageUrl: string; isCover?: boolean }[];
+  /** Al destacar con el máximo alcanzado: id de la destacada que se retira en su lugar. */
+  replaceFeaturedPetId?: number;
 }
 
 export interface PetFilters {

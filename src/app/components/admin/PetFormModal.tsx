@@ -1,7 +1,8 @@
 import { useState, FormEvent } from 'react';
 import { X, Plus, Trash2, Upload } from 'lucide-react';
 import { PrimaryButton } from '../PrimaryButton';
-import { ApiPet, PetPayload, apiUploadImage } from '../../lib/api';
+import { ApiPet, PetPayload, apiUploadImage, apiGetPets, ApiRequestError, MAX_FEATURED_PETS } from '../../lib/api';
+import { FeaturedReplaceDialog } from './FeaturedReplaceDialog';
 import { SPECIES_OPTIONS, GENDER_OPTIONS, SIZE_OPTIONS, STATUS_OPTIONS, INITIAL_PET_STATUSES, nextValidStatuses } from '../../lib/petMappings';
 import { todayDateInputValue } from '../../lib/dateUtils';
 import { useAuth } from '../../context/AuthContext';
@@ -40,6 +41,8 @@ export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormMo
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+  // Aviso de "ya hay 4 destacadas": guarda el formulario pendiente hasta que se elija qué retirar.
+  const [replaceState, setReplaceState] = useState<{ payload: PetPayload; candidates: ApiPet[] } | null>(null);
 
   const inputClass = "w-full px-4 py-3 bg-[#F8F8F8] rounded-xl text-[#222222] placeholder-[#222222]/30 focus:outline-none focus:ring-2 focus:ring-[#20A83E] border border-[#D9D9D9] transition-all duration-250 text-sm";
   const labelClass = "block text-[#222222] mb-1.5 font-medium text-sm";
@@ -76,28 +79,68 @@ export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormMo
     }
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  // Mascotas destacadas actuales, sin contar la que se está editando.
+  const loadOtherFeatured = async () => {
+    const { items } = await apiGetPets({ featured: true, limit: 100 });
+    return items.filter(pet => pet.id !== initialData?.id);
+  };
+
+  const save = async (payload: PetPayload) => {
     setError(null);
     setIsSubmitting(true);
+
+    try {
+      await onSubmit(payload);
+      setReplaceState(null);
+      onClose();
+    } catch (err) {
+      // Otro admin pudo destacar una mascota mientras tanto: se vuelve a ofrecer el reemplazo.
+      if (err instanceof ApiRequestError && err.code === 'FEATURED_LIMIT') {
+        const candidates = await loadOtherFeatured().catch(() => []);
+        if (candidates.length > 0) {
+          setReplaceState({ payload: { ...payload, replaceFeaturedPetId: undefined }, candidates });
+          return;
+        }
+      }
+      setReplaceState(null);
+      setError(err instanceof Error ? err.message : 'No se pudo guardar la mascota');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
 
     const images = imageUrls
       .map(url => url.trim())
       .filter(Boolean)
       .map((imageUrl, index) => ({ imageUrl, isCover: index === 0 }));
 
-    try {
-      await onSubmit({
-        ...formData,
-        weight: Number(formData.weight),
-        images
-      });
-      onClose();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo guardar la mascota');
-    } finally {
-      setIsSubmitting(false);
+    const payload: PetPayload = {
+      ...formData,
+      weight: Number(formData.weight),
+      images
+    };
+
+    const becomesFeatured = formData.featured && !initialData?.featured;
+
+    if (becomesFeatured) {
+      setError(null);
+      setIsSubmitting(true);
+      try {
+        const others = await loadOtherFeatured();
+        if (others.length >= MAX_FEATURED_PETS) {
+          setReplaceState({ payload, candidates: others });
+          setIsSubmitting(false);
+          return;
+        }
+      } catch {
+        // Si no se pudo consultar, el backend igual valida el máximo al guardar.
+      }
     }
+
+    await save(payload);
   };
 
   return (
@@ -215,10 +258,24 @@ export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormMo
             <textarea name="rescueStory" required rows={3} value={formData.rescueStory} onChange={handleChange} className={inputClass} />
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-[#222222]">
-            <input type="checkbox" name="featured" checked={formData.featured} onChange={handleChange} className="accent-[#20A83E]" />
-            Destacar en la página principal
-          </label>
+          <div>
+            <label className={`flex items-center gap-2 text-sm text-[#222222] ${formData.status === 'Adoptada' ? 'opacity-50' : 'cursor-pointer'}`}>
+              <input
+                type="checkbox"
+                name="featured"
+                checked={formData.featured && formData.status !== 'Adoptada'}
+                disabled={formData.status === 'Adoptada'}
+                onChange={handleChange}
+                className="accent-[#20A83E] w-4 h-4"
+              />
+              Destacar en la página principal
+            </label>
+            <p className="text-xs text-[#222222]/50 mt-1 ml-6">
+              {formData.status === 'Adoptada'
+                ? 'Las mascotas adoptadas no se destacan.'
+                : `Máximo ${MAX_FEATURED_PETS}. Al aprobarse su adopción deja de estar destacada automáticamente.`}
+            </p>
+          </div>
 
           <div>
             <label className={labelClass}>Imágenes <span className="text-[#222222]/40 font-normal">(opcional, la primera es la portada)</span></label>
@@ -274,6 +331,16 @@ export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormMo
           </div>
         </form>
       </div>
+
+      {replaceState && (
+        <FeaturedReplaceDialog
+          newPetName={formData.name}
+          featuredPets={replaceState.candidates}
+          isSubmitting={isSubmitting}
+          onCancel={() => setReplaceState(null)}
+          onReplace={petIdToRemove => save({ ...replaceState.payload, replaceFeaturedPetId: petIdToRemove })}
+        />
+      )}
     </div>
   );
 }
