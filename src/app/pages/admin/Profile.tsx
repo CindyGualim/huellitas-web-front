@@ -13,7 +13,7 @@ function formatDate(value: string | null) {
 }
 
 function ChangePasswordModal({ onClose }: { onClose: () => void }) {
-  const { token } = useAuth();
+  const { token, replaceToken } = useAuth();
   const [formData, setFormData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [showPasswords, setShowPasswords] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,10 +33,12 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
     setIsSubmitting(true);
 
     try {
-      await apiChangePassword(token, {
+      const { token: newToken } = await apiChangePassword(token, {
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword
       });
+      // El token anterior quedó invalidado: sin esto, la siguiente acción expulsaría a la persona.
+      replaceToken(newToken);
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo cambiar la contraseña');

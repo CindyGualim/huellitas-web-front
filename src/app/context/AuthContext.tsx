@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { apiLogin, apiGetMe, AuthUser } from '../lib/api';
+import { apiLogin, apiGetMe, apiLogout, AuthUser } from '../lib/api';
 import { ApiRequestError, UNAUTHORIZED_EVENT } from '../lib/apiErrors';
 
 const TOKEN_STORAGE_KEY = 'huellitas_token';
@@ -11,6 +11,8 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   updateUser: (user: AuthUser) => void;
+  // Reemplaza el token de la sesión actual (p. ej. el que devuelve el cambio de contraseña).
+  replaceToken: (token: string) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -43,7 +45,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const handleUnauthorized = () => logout();
+    // Token rechazado por el servidor: solo se limpia la sesión local (avisar al servidor no tiene sentido).
+    const handleUnauthorized = () => clearSession();
     // Cerrar sesión en una pestaña la cierra también en las demás.
     const handleStorage = (event: StorageEvent) => {
       if (event.key === TOKEN_STORAGE_KEY && !event.newValue) {
@@ -69,14 +72,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(loggedInUser);
   };
 
-  const logout = () => {
+  // Cierra la sesión local. Si fue la persona quien pidió salir, además se avisa al servidor para
+  // que el token deje de servir aunque alguien lo haya copiado (si falla la red, igual se sale).
+  const clearSession = () => {
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     setToken(null);
     setUser(null);
   };
 
+  const logout = () => {
+    const current = localStorage.getItem(TOKEN_STORAGE_KEY);
+    if (current) apiLogout(current).catch(() => {});
+    clearSession();
+  };
+
+  const replaceToken = (newToken: string) => {
+    localStorage.setItem(TOKEN_STORAGE_KEY, newToken);
+    setToken(newToken);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, logout, updateUser: setUser }}>
+    <AuthContext.Provider value={{ user, token, isLoading, login, logout, updateUser: setUser, replaceToken }}>
       {children}
     </AuthContext.Provider>
   );

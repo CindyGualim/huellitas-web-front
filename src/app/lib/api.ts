@@ -125,6 +125,17 @@ export async function apiChangePassword(token: string, payload: { currentPasswor
     body: JSON.stringify(payload)
   });
 
+  // El backend devuelve un token nuevo: el anterior deja de valer al cambiar la contraseña.
+  return parseResponse<{ token: string }>(response);
+}
+
+// Invalida en el servidor los tokens emitidos hasta ahora (en todos los dispositivos).
+export async function apiLogout(token: string) {
+  const response = await fetch(`${API_URL}/auth/logout`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
   return parseResponse<null>(response);
 }
 
