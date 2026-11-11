@@ -1,9 +1,10 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, useRef, FormEvent } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { apiGetPet, apiCreateAdoptionRequest, ApiPet } from '../lib/api';
+import { errorMessage, isNotFound } from '../lib/useApiResource';
 
 const inputClass = "w-full px-5 py-4 bg-[#F8F8F8] rounded-[12px] text-[#222222] placeholder-[#222222]/30 focus:outline-none focus:ring-2 focus:ring-[#20A83E] border border-[#D9D9D9] transition-all duration-250 hover:border-[#20A83E]/50";
 const labelClass = "block text-[#222222] mb-2 font-medium text-sm";
@@ -31,6 +32,10 @@ export function AdoptionRequest() {
     hasChildren: null, familyAgreement: null, hasVeterinarian: null, secureSpace: null
   });
 
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const errorRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const id = Number(petId);
 
@@ -39,11 +44,25 @@ export function AdoptionRequest() {
       return;
     }
 
+    let cancelled = false;
+    setIsLoadingPet(true);
+    setLoadError(null);
     apiGetPet(id)
-      .then(setPet)
-      .catch(() => setPet(null))
-      .finally(() => setIsLoadingPet(false));
-  }, [petId]);
+      .then(result => { if (!cancelled) setPet(result); })
+      .catch(err => {
+        if (cancelled) return;
+        // Un fallo de red no es "no encontramos esta mascota": se ofrece reintentar.
+        if (isNotFound(err)) setPet(null);
+        else setLoadError(errorMessage(err, 'No se pudo cargar la mascota'));
+      })
+      .finally(() => { if (!cancelled) setIsLoadingPet(false); });
+    return () => { cancelled = true; };
+  }, [petId, reloadKey]);
+
+  // En el teléfono el error queda arriba del formulario: se lleva la vista hasta él.
+  useEffect(() => {
+    if (error) errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [error]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -73,7 +92,7 @@ export function AdoptionRequest() {
       });
       setSubmitted(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo enviar la solicitud');
+      setError(errorMessage(err, 'No se pudo enviar la solicitud'));
     } finally {
       setIsSubmitting(false);
     }
@@ -83,6 +102,17 @@ export function AdoptionRequest() {
     return (
       <Layout>
         <div className="min-h-[50vh] flex items-center justify-center text-[#222222]/50">Cargando...</div>
+      </Layout>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <Layout>
+        <div className="min-h-[50vh] flex flex-col items-center justify-center gap-4 px-4 text-center">
+          <p className="text-[#222222]">{loadError}</p>
+          <PrimaryButton variant="primary" onClick={() => setReloadKey(key => key + 1)}>Reintentar</PrimaryButton>
+        </div>
       </Layout>
     );
   }
@@ -159,7 +189,7 @@ export function AdoptionRequest() {
         <div className="mx-auto max-w-2xl px-4 py-8 pb-16">
           <div className="bg-white rounded-[16px] p-6 md:p-8 shadow-sm border border-[#D9D9D9]/50">
             {error && (
-              <div className="mb-6 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+              <div ref={errorRef} role="alert" className="mb-6 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
                 {error}
               </div>
             )}

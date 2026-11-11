@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { Share2, ArrowLeft, Instagram, Scale, Sparkles, HeartHandshake, Info, Clock, PawPrint } from 'lucide-react';
 import { Layout } from '../components/Layout';
@@ -6,48 +5,47 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { apiGetPet, apiGetPets, ApiPet } from '../lib/api';
 import { sizeLabel, statusLabel } from '../lib/petMappings';
 import { useSiteSettings } from '../lib/useSiteSettings';
+import { useApiResource } from '../lib/useApiResource';
 
 export function PetProfile() {
   const { petId } = useParams<{ petId: string }>();
   const settings = useSiteSettings();
   const instagramUrl = `https://www.instagram.com/${(settings?.instagramHandle ?? '@huellitasdelacalleong').replace(/^@/, '')}/`;
-  const [pet, setPet] = useState<ApiPet | null>(null);
-  const [otherPets, setOtherPets] = useState<ApiPet[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
+  const id = Number(petId);
+  const validId = Number.isInteger(id) && id > 0;
 
-  useEffect(() => {
-    const id = Number(petId);
+  // Al pasar de una mascota a otra (enlaces de "otras mascotas") se vacía la anterior y se
+  // descarta cualquier respuesta vieja.
+  const petResource = useApiResource(validId ? () => apiGetPet(id) : null, [id, validId], { fallbackMessage: 'No se pudo cargar esta mascota' });
+  const pet = petResource.data;
+  const othersResource = useApiResource(
+    pet ? () => apiGetPets({ availableOnly: true, species: pet.species, limit: 4 }) : null,
+    [pet?.id, pet?.species]
+  );
+  // Si solo falla la carga de "otras mascotas" no pasa nada: la mascota principal sí existe.
+  const otherPets: ApiPet[] = (othersResource.data?.items ?? []).filter(p => p.id !== pet?.id).slice(0, 3);
 
-    if (!id) {
-      setNotFound(true);
-      setIsLoading(false);
-      return;
-    }
+  if (!validId || petResource.notFound) return <Navigate to="/adoptions" replace />;
 
-    apiGetPet(id)
-      .then(fetchedPet => {
-        setPet(fetchedPet);
-        // Si solo falla la carga de "otras mascotas" no se debe redirigir: la mascota principal sí existe.
-        apiGetPets({ availableOnly: true, species: fetchedPet.species, limit: 4 })
-          .then(({ items }) => {
-            setOtherPets(items.filter(p => p.id !== fetchedPet.id).slice(0, 3));
-          })
-          .catch(() => setOtherPets([]));
-      })
-      .catch(() => setNotFound(true))
-      .finally(() => setIsLoading(false));
-  }, [petId]);
+  if (petResource.error) {
+    // Un fallo de red no es "no existe": se ofrece reintentar en vez de mandar al listado.
+    return (
+      <Layout>
+        <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4 text-center">
+          <p className="text-[#222222]/70">{petResource.error}</p>
+          <PrimaryButton variant="primary" onClick={petResource.reload}>Reintentar</PrimaryButton>
+        </div>
+      </Layout>
+    );
+  }
 
-  if (isLoading) {
+  if (petResource.loading || !pet) {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center text-[#222222]/50">Cargando...</div>
       </Layout>
     );
   }
-
-  if (notFound || !pet) return <Navigate to="/adoptions" replace />;
 
   const handleShare = () => {
     const message = `¡Conoce a ${pet.name}! Buscando un hogar amoroso. ${window.location.href}`;

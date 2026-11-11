@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { apiGetDashboardStats, ApiDashboardStats, ApiActivityItem } from '../../lib/api';
 import { ChartCarousel } from '../../components/admin/ChartCarousel';
 import { PetsByStatusChart, PetsBySpeciesChart, DonationsTrendChart, AdoptionRequestsChart } from '../../components/admin/DashboardCharts';
+import { formatDateOnly } from '../../lib/dateUtils';
 
 interface ActivityItem {
   key: string;
@@ -12,6 +13,8 @@ interface ActivityItem {
   title: string;
   subtitle: string;
   date: Date;
+  // Las donaciones solo tienen fecha (sin hora): "Hace 5 horas" sería engañoso.
+  dateOnly?: boolean;
 }
 
 function timeAgo(date: Date) {
@@ -30,7 +33,7 @@ function toActivityItem(item: ApiActivityItem): ActivityItem {
     case 'event':
       return { key: `event-${item.id}`, icon: Calendar, title: item.title, subtitle: 'Nuevo evento programado', date: new Date(item.date) };
     case 'donation':
-      return { key: `donation-${item.id}`, icon: Gift, title: item.donorName, subtitle: `Donó Q${item.amount.toFixed(2)}`, date: new Date(item.date) };
+      return { key: `donation-${item.id}`, icon: Gift, title: item.donorName, subtitle: `Donó Q${Number(item.amount).toFixed(2)}`, date: new Date(item.date), dateOnly: true };
     case 'adoptionRequest':
       return { key: `request-${item.id}`, icon: Heart, title: item.adopterName, subtitle: `Solicitud de adopción de ${item.petName}`, date: new Date(item.date) };
   }
@@ -128,7 +131,7 @@ export function AdminDashboard() {
                       <div className="flex-1">
                         <div className="font-medium text-[#222222] text-sm">{item.title}</div>
                         <div className="text-xs text-[#222222]/50">{item.subtitle}</div>
-                        <div className="text-xs text-[#222222]/30 mt-0.5">{timeAgo(item.date)}</div>
+                        <div className="text-xs text-[#222222]/30 mt-0.5">{item.dateOnly ? formatDateOnly(item.date.toISOString(), { day: 'numeric', month: 'short', year: 'numeric' }) : timeAgo(item.date)}</div>
                       </div>
                     </div>
                   ))}

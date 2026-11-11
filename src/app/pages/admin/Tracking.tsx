@@ -6,6 +6,7 @@ import { RestrictedAccess } from '../../components/admin/RestrictedAccess';
 import { useAuth } from '../../context/AuthContext';
 import { apiGetPets, fetchAllPages, apiGetMedicalRecords, apiCreateMedicalRecord, apiGetPetStatusHistory, ApiPet, ApiMedicalRecord, ApiPetStatusHistory, MedicalRecordPayload } from '../../lib/api';
 import { medicalRecordTypeLabel, sizeLabel, statusLabel } from '../../lib/petMappings';
+import { errorMessage, useApiResource } from '../../lib/useApiResource';
 
 const RECORD_ICONS: Record<string, typeof Stethoscope> = {
   Consulta: Stethoscope,
@@ -41,10 +42,7 @@ export function AdminTracking() {
   const [pets, setPets] = useState<ApiPet[]>([]);
   const [search, setSearch] = useState('');
   const [selectedPet, setSelectedPet] = useState<ApiPet | null>(null);
-  const [records, setRecords] = useState<ApiMedicalRecord[]>([]);
-  const [statusHistory, setStatusHistory] = useState<ApiPetStatusHistory[]>([]);
   const [isLoadingPets, setIsLoadingPets] = useState(true);
-  const [isLoadingTimeline, setIsLoadingTimeline] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -54,28 +52,23 @@ export function AdminTracking() {
         setPets(items);
         if (items.length > 0) setSelectedPet(items[0]);
       })
-      .catch(err => setError(err instanceof Error ? err.message : 'No se pudieron cargar las mascotas'))
+      .catch(err => setError(errorMessage(err, 'No se pudieron cargar las mascotas')))
       .finally(() => setIsLoadingPets(false));
   }, []);
 
-  useEffect(() => {
-    if (!token || !selectedPet) return;
-
-    setIsLoadingTimeline(true);
-    Promise.all([
-      apiGetMedicalRecords(token, selectedPet.id),
-      apiGetPetStatusHistory(token, selectedPet.id)
-    ])
-      .then(([recordsResult, statusHistoryResult]) => {
-        setRecords(recordsResult);
-        setStatusHistory(statusHistoryResult);
-      })
-      .catch(() => {
-        setRecords([]);
-        setStatusHistory([]);
-      })
-      .finally(() => setIsLoadingTimeline(false));
-  }, [token, selectedPet]);
+  // Si se cambia de mascota antes de que llegue la respuesta anterior, esa respuesta se descarta:
+  // nunca se muestra el historial de otra mascota bajo el nombre de la elegida.
+  const timelineResource = useApiResource<{ records: ApiMedicalRecord[]; statusHistory: ApiPetStatusHistory[] }>(
+    token && selectedPet
+      ? () => Promise.all([apiGetMedicalRecords(token, selectedPet.id), apiGetPetStatusHistory(token, selectedPet.id)])
+        .then(([records, statusHistory]) => ({ records, statusHistory }))
+      : null,
+    [token, selectedPet?.id],
+    { fallbackMessage: 'No se pudo cargar el historial de esta mascota' }
+  );
+  const records = timelineResource.data?.records ?? [];
+  const statusHistory = timelineResource.data?.statusHistory ?? [];
+  const isLoadingTimeline = timelineResource.loading;
 
   if (!hasAccess) return <RestrictedAccess />;
 
@@ -83,7 +76,7 @@ export function AdminTracking() {
     if (!token || !selectedPet) return;
 
     const created = await apiCreateMedicalRecord(token, selectedPet.id, payload);
-    setRecords([created, ...records]);
+    timelineResource.setData(prev => (prev ? { ...prev, records: [created, ...prev.records] } : prev));
   };
 
   const filteredPets = pets.filter(pet => pet.name.toLowerCase().includes(search.toLowerCase()));
@@ -93,8 +86,9 @@ export function AdminTracking() {
       key: `record-${record.id}`,
       icon: RECORD_ICONS[record.recordType] ?? Stethoscope,
       title: medicalRecordTypeLabel(record.recordType),
-      subtitle: record.treatment,
-      description: record.observations,
+      subtitle: record.description,
+      description: [record.treatment && `Tratamiento: ${record.treatment}`, record.observations && `Observaciones: ${record.observations}`]
+        .filter(Boolean).join(' · '),
       date: new Date(record.consultationDate),
       dateOnly: true
     })),
@@ -184,7 +178,7 @@ export function AdminTracking() {
               <p className="text-[#222222]/50 text-sm">Seleccioná una mascota para ver su historial.</p>
             ) : (
               <>
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
                   <div>
                     <h2 className="text-[#222222] text-xl font-medium">{selectedPet.name}</h2>
                     <p className="text-[#222222]/50 text-sm">Línea de tiempo</p>
@@ -195,7 +189,12 @@ export function AdminTracking() {
                   </PrimaryButton>
                 </div>
 
-                {isLoadingTimeline ? (
+                {timelineResource.error ? (
+                  <div className="px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm flex flex-wrap items-center justify-between gap-3" role="alert">
+                    <span>{timelineResource.error}</span>
+                    <button onClick={timelineResource.reload} className="px-3 py-1.5 rounded-lg border border-red-300 text-red-700 hover:bg-red-100 cursor-pointer">Reintentar</button>
+                  </div>
+                ) : isLoadingTimeline ? (
                   <p className="text-[#222222]/50 text-sm">Cargando...</p>
                 ) : (
                   <div className="relative pl-8">
@@ -207,7 +206,7 @@ export function AdminTracking() {
                             <item.icon size={15} className="text-[#20A83E]" />
                           </div>
                           <div className="bg-[#F8F8F8] rounded-xl p-4 border border-[#D9D9D9]/40">
-                            <div className="flex items-center justify-between mb-1">
+                            <div className="flex flex-wrap items-center justify-between gap-x-3 mb-1">
                               <span className="font-medium text-[#222222] text-sm">{item.title}</span>
                               <span className="text-[#222222]/40 text-xs">
                                 {item.date.toLocaleDateString('es-GT', { day: 'numeric', month: 'short', year: 'numeric', ...(item.dateOnly ? { timeZone: 'UTC' } : {}) })}

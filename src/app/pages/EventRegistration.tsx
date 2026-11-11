@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, Calendar, MapPin, ArrowLeft } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { apiGetEvent, apiCreateEventRegistration, ApiEvent } from '../lib/api';
+import { errorMessage, isNotFound } from '../lib/useApiResource';
 import { formatSlotTime, todayDateInputValue, monthsBetweenUtc, birthDateFromAge, formatEventDate } from '../lib/dateUtils';
 
 const MIN_AGE_MONTHS = 5;
@@ -30,6 +31,9 @@ export function EventRegistration() {
   });
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const errorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const id = Number(eventId);
@@ -39,16 +43,41 @@ export function EventRegistration() {
       return;
     }
 
+    let cancelled = false;
+    setIsLoading(true);
+    setLoadError(null);
     apiGetEvent(id)
-      .then(setEvent)
-      .catch(() => setEvent(null))
-      .finally(() => setIsLoading(false));
-  }, [eventId]);
+      .then(result => { if (!cancelled) setEvent(result); })
+      .catch(err => {
+        if (cancelled) return;
+        // Un fallo de red no es "evento no encontrado": se ofrece reintentar.
+        if (isNotFound(err)) setEvent(null);
+        else setLoadError(errorMessage(err, 'No se pudo cargar la jornada'));
+      })
+      .finally(() => { if (!cancelled) setIsLoading(false); });
+    return () => { cancelled = true; };
+  }, [eventId, reloadKey]);
+
+  // En el teléfono el mensaje de error queda arriba del formulario, fuera de la vista: se lleva hasta él.
+  useEffect(() => {
+    if (error) errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [error]);
 
   if (isLoading) {
     return (
       <Layout>
         <div className="min-h-[50vh] flex items-center justify-center text-[#222222]/50">Cargando...</div>
+      </Layout>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <Layout>
+        <div className="min-h-[50vh] flex flex-col items-center justify-center gap-4 px-4 text-center">
+          <p className="text-[#222222]">{loadError}</p>
+          <PrimaryButton onClick={() => setReloadKey(key => key + 1)}>Reintentar</PrimaryButton>
+        </div>
       </Layout>
     );
   }
@@ -147,11 +176,11 @@ export function EventRegistration() {
           location: event.location,
           startDate: event.startDate,
           endDate: event.endDate,
-          time: slot?.startTime ?? ''
+          time: slot ? formatSlotTime(slot.startTime) : ''
         }
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo completar la inscripción');
+      setError(errorMessage(err, 'No se pudo completar la inscripción'));
       // El cupo pudo cambiar mientras se llenaba el formulario: se recarga la disponibilidad.
       apiGetEvent(event.id).then(setEvent).catch(() => {});
     } finally {
@@ -254,7 +283,7 @@ export function EventRegistration() {
                 <h2 className="text-[#222222] mb-6 text-2xl font-bold">Ingresa los datos del paciente</h2>
 
                 {error && (
-                  <div className="mb-6 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+                  <div ref={errorRef} role="alert" className="mb-6 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
                     {error}
                   </div>
                 )}

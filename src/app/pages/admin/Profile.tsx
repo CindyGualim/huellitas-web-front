@@ -47,7 +47,7 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-[20px] w-full max-w-md shadow-lg border border-[#D9D9D9]/50">
+      <div className="bg-white rounded-[20px] w-full max-w-md max-h-[90vh] overflow-y-auto shadow-lg border border-[#D9D9D9]/50">
         <div className="flex items-center justify-between p-6 border-b border-[#D9D9D9]/50">
           <h2 className="text-[#222222] text-xl font-medium">Cambiar contraseña</h2>
           <button type="button" onClick={onClose} className="text-[#222222]/50 hover:text-[#222222] cursor-pointer">

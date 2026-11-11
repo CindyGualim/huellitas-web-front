@@ -6,6 +6,7 @@ import { RestrictedAccess } from '../../components/admin/RestrictedAccess';
 import { useAuth } from '../../context/AuthContext';
 import { apiGetSiteSettings, apiUpdateSiteSettings, ApiSiteSettings } from '../../lib/api';
 import { setSiteSettingsCache } from '../../lib/useSiteSettings';
+import { errorMessage } from '../../lib/useApiResource';
 
 const inputClass = "w-full px-4 py-3 bg-[#F8F8F8] rounded-xl text-[#222222] border border-[#D9D9D9] focus:outline-none focus:ring-2 focus:ring-[#20A83E] transition-all duration-250 text-sm";
 const labelClass = "block text-sm text-[#222222]/60 mb-2";
@@ -53,13 +54,23 @@ export function AdminSettings() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  // Si la carga falla no se muestra el formulario: guardarlo vacío borraría la configuración real.
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+  const ready = !isLoading && !loadFailed;
 
   useEffect(() => {
+    setIsLoading(true);
+    setLoadFailed(false);
+    setError(null);
     apiGetSiteSettings()
       .then(loaded => setSettings(pickSettingsFields(loaded)))
-      .catch(err => setError(err instanceof Error ? err.message : 'No se pudo cargar la configuración'))
+      .catch(err => {
+        setLoadFailed(true);
+        setError(errorMessage(err, 'No se pudo cargar la configuración'));
+      })
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [reloadKey]);
 
   if (!hasAccess) return <RestrictedAccess />;
 
@@ -92,7 +103,7 @@ export function AdminSettings() {
       setSiteSettingsCache(saved);
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo guardar la configuración');
+      setError(errorMessage(err, 'No se pudo guardar la configuración'));
     } finally {
       setIsSubmitting(false);
     }
@@ -138,8 +149,8 @@ export function AdminSettings() {
             </div>
           </div>
 
-          {isLoading ? (
-            <p className="text-sm text-[#222222]/50">Cargando...</p>
+          {!ready ? (
+            <p className="text-sm text-[#222222]/50">{isLoading ? 'Cargando...' : 'No disponible hasta que se cargue la configuración.'}</p>
           ) : (
             <div className="space-y-4">
               <div>
@@ -161,7 +172,12 @@ export function AdminSettings() {
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
-          <div className="px-4 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">{error}</div>
+          <div className="px-4 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm flex flex-wrap items-center justify-between gap-3" role="alert">
+            <span>{error}</span>
+            {loadFailed && (
+              <button type="button" onClick={() => setReloadKey(key => key + 1)} className="px-3 py-1.5 rounded-lg border border-red-300 text-red-700 hover:bg-red-100 cursor-pointer">Reintentar</button>
+            )}
+          </div>
         )}
         {success && (
           <div className="px-4 py-2.5 rounded-xl bg-[#20A83E]/10 border border-[#20A83E]/30 text-[#146B27] text-sm">
@@ -169,7 +185,7 @@ export function AdminSettings() {
           </div>
         )}
 
-        {!isLoading && (
+        {ready && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <div className="bg-white rounded-[16px] p-6 shadow-sm border border-[#D9D9D9]/50">
               <div className="flex items-center gap-3 mb-6">
@@ -260,7 +276,7 @@ export function AdminSettings() {
           </div>
         )}
 
-        {!isLoading && (
+        {ready && (
           <PrimaryButton type="submit" variant="primary" disabled={isSubmitting}>
             {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
           </PrimaryButton>

@@ -40,7 +40,7 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-[20px] w-full max-w-md shadow-lg border border-[#D9D9D9]/50">
+      <div className="bg-white rounded-[20px] w-full max-w-md max-h-[90vh] overflow-y-auto shadow-lg border border-[#D9D9D9]/50">
         <div className="flex items-center justify-between p-6 border-b border-[#D9D9D9]/50">
           <h2 className="text-[#222222] text-xl font-medium">Agregar usuario</h2>
           <button type="button" onClick={onClose} className="text-[#222222]/50 hover:text-[#222222] cursor-pointer">
@@ -150,7 +150,7 @@ function EditUserModal({ editedUser, isSelf, onClose, onSaved }: {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-[20px] w-full max-w-md shadow-lg border border-[#D9D9D9]/50">
+      <div className="bg-white rounded-[20px] w-full max-w-md max-h-[90vh] overflow-y-auto shadow-lg border border-[#D9D9D9]/50">
         <div className="flex items-center justify-between p-6 border-b border-[#D9D9D9]/50">
           <div>
             <h2 className="text-[#222222] text-xl font-medium">Editar usuario</h2>
@@ -227,7 +227,7 @@ function formatLastLogin(value: string | null) {
 }
 
 export function AdminUsers() {
-  const { token, user } = useAuth();
+  const { token, user, updateUser } = useAuth();
   const hasAccess = user?.role === 'Superadministrador';
   const [users, setUsers] = useState<AuthUser[]>([]);
   const [pagination, setPagination] = useState<ApiPagination | null>(null);
@@ -256,7 +256,7 @@ export function AdminUsers() {
 
   return (
     <div className="p-8 bg-[#F8F8F8] min-h-screen">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-[#222222] mb-1 text-3xl">Usuarios</h1>
           <p className="text-[#222222]/50">Gestiona el acceso de tu equipo al panel</p>
@@ -277,7 +277,8 @@ export function AdminUsers() {
         <p className="text-[#222222]/50">Cargando...</p>
       ) : (
         <div className="bg-white rounded-[16px] shadow-sm border border-[#D9D9D9]/50 overflow-hidden">
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[720px]">
             <thead>
               <tr className="bg-[#F8F8F8] text-left text-[#222222]/50 text-xs uppercase tracking-wider">
                 <th className="px-6 py-3 font-medium">Nombre</th>
@@ -309,7 +310,7 @@ export function AdminUsers() {
                       <span className="text-xs font-medium text-red-600">Desactivado</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-[#222222]/60 text-xs">{formatLastLogin(row.lastLoginAt)}</td>
+                  <td className="px-6 py-4 text-[#222222]/60 text-xs whitespace-nowrap">{formatLastLogin(row.lastLoginAt)}</td>
                   <td className="px-6 py-4 text-right">
                     <button
                       type="button"
@@ -323,6 +324,7 @@ export function AdminUsers() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
@@ -340,7 +342,11 @@ export function AdminUsers() {
           editedUser={editingUser}
           isSelf={editingUser.id === user?.id}
           onClose={() => setEditingUser(null)}
-          onSaved={saved => setUsers(prev => prev.map(u => (u.id === saved.id ? saved : u)))}
+          onSaved={saved => {
+            setUsers(prev => prev.map(u => (u.id === saved.id ? saved : u)));
+            // Si se editó la propia cuenta, el nombre del menú lateral se actualiza al momento.
+            if (saved.id === user?.id) updateUser({ ...user, ...saved });
+          }}
         />
       )}
     </div>
