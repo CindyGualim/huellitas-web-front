@@ -5,7 +5,8 @@ import * as api from '../lib/api';
 
 vi.mock('../lib/api', () => ({
   apiLogin: vi.fn(),
-  apiGetMe: vi.fn()
+  apiGetMe: vi.fn(),
+  apiLogout: vi.fn()
 }));
 
 const TOKEN_KEY = 'huellitas_token';
@@ -43,8 +44,9 @@ describe('AuthContext — manejo del token', () => {
     expect(result.current.user?.email).toBe('admin@huellitas.org');
   });
 
-  it('limpia el token y el usuario al cerrar sesión', async () => {
+  it('limpia el token y el usuario al cerrar sesión, y avisa al servidor', async () => {
     vi.mocked(api.apiLogin).mockResolvedValue({ token: 'abc123', user: fakeUser });
+    vi.mocked(api.apiLogout).mockRejectedValue(new TypeError('Failed to fetch'));
 
     const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider });
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -57,7 +59,27 @@ describe('AuthContext — manejo del token', () => {
       result.current.logout();
     });
 
+    // Aunque falle la red, la sesión local se cierra igual.
+    expect(api.apiLogout).toHaveBeenCalledWith('abc123');
     expect(localStorage.getItem(TOKEN_KEY)).toBeNull();
     expect(result.current.user).toBeNull();
+  });
+
+  it('replaceToken guarda el token nuevo (cambio de contraseña)', async () => {
+    vi.mocked(api.apiLogin).mockResolvedValue({ token: 'abc123', user: fakeUser });
+
+    const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await act(async () => {
+      await result.current.login('admin@huellitas.org', 'secret');
+    });
+
+    act(() => {
+      result.current.replaceToken('token-nuevo');
+    });
+
+    expect(localStorage.getItem(TOKEN_KEY)).toBe('token-nuevo');
+    expect(result.current.token).toBe('token-nuevo');
+    expect(result.current.user?.email).toBe('admin@huellitas.org');
   });
 });
