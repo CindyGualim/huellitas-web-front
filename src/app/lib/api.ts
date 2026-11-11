@@ -203,6 +203,11 @@ export interface ApiPetImage {
   isCover: boolean;
 }
 
+// El peso llega como texto (Decimal de Prisma): se convierte a número al recibirlo.
+function normalizePet(pet: ApiPet): ApiPet {
+  return { ...pet, weight: Number(pet.weight) };
+}
+
 export interface ApiPet {
   id: number;
   name: string;
@@ -261,13 +266,14 @@ export async function apiGetPets(options?: PetFilters & PaginationParams) {
   const query = search.toString();
   const response = await fetch(`${API_URL}/pets${query ? `?${query}` : ''}`);
 
-  return parseResponse<ApiPage<ApiPet>>(response);
+  const page = await parseResponse<ApiPage<ApiPet>>(response);
+  return { ...page, items: page.items.map(normalizePet) };
 }
 
 export async function apiGetPet(id: number) {
   const response = await fetch(`${API_URL}/pets/${id}`);
 
-  return parseResponse<ApiPet>(response);
+  return normalizePet(await parseResponse<ApiPet>(response));
 }
 
 export async function apiCreatePet(token: string, payload: PetPayload) {
@@ -280,7 +286,7 @@ export async function apiCreatePet(token: string, payload: PetPayload) {
     body: JSON.stringify(payload)
   });
 
-  return parseResponse<ApiPet>(response);
+  return normalizePet(await parseResponse<ApiPet>(response));
 }
 
 export async function apiUpdatePet(token: string, id: number, payload: Partial<PetPayload>) {
@@ -293,7 +299,7 @@ export async function apiUpdatePet(token: string, id: number, payload: Partial<P
     body: JSON.stringify(payload)
   });
 
-  return parseResponse<ApiPet>(response);
+  return normalizePet(await parseResponse<ApiPet>(response));
 }
 
 export async function apiDeletePet(token: string, id: number) {
@@ -425,24 +431,32 @@ export async function apiDeleteEvent(token: string, id: number) {
 export interface ApiDonation {
   id: number;
   donorName: string;
-  donorEmail: string;
+  donorEmail: string | null;
   amount: number;
   paymentMethod: string;
   donationDate: string;
   notes: string | null;
+  isVoided: boolean;
+  voidReason: string | null;
+  voidedAt: string | null;
 }
 
 export interface DonationPayload {
   donorName: string;
-  donorEmail: string;
+  donorEmail?: string | null;
   amount: number;
   paymentMethod: string;
   donationDate?: string;
-  notes?: string;
+  notes?: string | null;
 }
 
 export interface ApiDonationsPage extends ApiPage<ApiDonation> {
   totalAmount: number;
+}
+
+// La API envía los Decimal de Prisma como texto ("150.00"): se convierten a número al recibirlos.
+function normalizeDonation(donation: ApiDonation): ApiDonation {
+  return { ...donation, amount: Number(donation.amount) };
 }
 
 export async function apiGetDonations(token: string, params?: PaginationParams) {
@@ -450,7 +464,8 @@ export async function apiGetDonations(token: string, params?: PaginationParams) 
     headers: { Authorization: `Bearer ${token}` }
   });
 
-  return parseResponse<ApiDonationsPage>(response);
+  const page = await parseResponse<ApiDonationsPage>(response);
+  return { ...page, totalAmount: Number(page.totalAmount), items: page.items.map(normalizeDonation) };
 }
 
 export async function apiCreateDonation(token: string, payload: DonationPayload) {
@@ -463,7 +478,7 @@ export async function apiCreateDonation(token: string, payload: DonationPayload)
     body: JSON.stringify(payload)
   });
 
-  return parseResponse<ApiDonation>(response);
+  return normalizeDonation(await parseResponse<ApiDonation>(response));
 }
 
 export async function apiUpdateDonation(token: string, id: number, payload: Partial<DonationPayload>) {
@@ -476,7 +491,20 @@ export async function apiUpdateDonation(token: string, id: number, payload: Part
     body: JSON.stringify(payload)
   });
 
-  return parseResponse<ApiDonation>(response);
+  return normalizeDonation(await parseResponse<ApiDonation>(response));
+}
+
+export async function apiVoidDonation(token: string, id: number, voidReason: string) {
+  const response = await fetch(`${API_URL}/donations/${id}/void`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ voidReason })
+  });
+
+  return normalizeDonation(await parseResponse<ApiDonation>(response));
 }
 
 export type AdoptionRequestStatus = 'Pendiente' | 'En_revision' | 'Aprobada' | 'Rechazada';
@@ -642,7 +670,7 @@ export async function apiRestorePetVersion(token: string, petId: number, version
     headers: { Authorization: `Bearer ${token}` }
   });
 
-  return parseResponse<ApiPet>(response);
+  return normalizePet(await parseResponse<ApiPet>(response));
 }
 
 export async function apiGetPetStatusHistory(token: string, petId: number) {

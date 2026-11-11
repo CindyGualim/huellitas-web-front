@@ -43,7 +43,10 @@ export function DonationFormModal({ mode, initialData, onSubmit, onClose }: Dona
     try {
       await onSubmit({
         ...formData,
-        amount: Number(formData.amount)
+        amount: Number(formData.amount),
+        // Vacío = sin correo (donaciones en efectivo) y notas borradas.
+        donorEmail: formData.donorEmail.trim() || null,
+        notes: formData.notes.trim() || null
       });
       onClose();
     } catch (err) {
@@ -55,12 +58,12 @@ export function DonationFormModal({ mode, initialData, onSubmit, onClose }: Dona
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-[20px] w-full max-w-md shadow-lg border border-[#D9D9D9]/50">
-        <div className="flex items-center justify-between p-6 border-b border-[#D9D9D9]/50">
+      <div className="bg-white rounded-[20px] w-full max-w-md max-h-[90vh] overflow-y-auto shadow-lg border border-[#D9D9D9]/50">
+        <div className="flex items-center justify-between p-6 border-b border-[#D9D9D9]/50 sticky top-0 bg-white">
           <h2 className="text-[#222222] text-xl font-medium">
             {mode === 'create' ? 'Registrar donación' : `Editar donación de ${initialData?.donorName}`}
           </h2>
-          <button type="button" onClick={onClose} className="text-[#222222]/50 hover:text-[#222222] cursor-pointer">
+          <button type="button" onClick={onClose} aria-label="Cerrar" className="text-[#222222]/50 hover:text-[#222222] cursor-pointer">
             <X size={22} />
           </button>
         </div>
@@ -82,11 +85,11 @@ export function DonationFormModal({ mode, initialData, onSubmit, onClose }: Dona
           </div>
 
           <div>
-            <label className={labelClass}>Correo del donante <span className="text-red-500">*</span></label>
-            <input name="donorEmail" type="email" required value={formData.donorEmail} onChange={handleChange} className={inputClass} />
+            <label className={labelClass}>Correo del donante (opcional)</label>
+            <input name="donorEmail" type="email" value={formData.donorEmail} onChange={handleChange} className={inputClass} />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Monto (Q) <span className="text-red-500">*</span></label>
               <input name="amount" type="number" step="0.01" min="0.01" max="99999999.99" required value={formData.amount} onChange={handleChange} className={inputClass} />
@@ -108,6 +111,7 @@ export function DonationFormModal({ mode, initialData, onSubmit, onClose }: Dona
               name="donationDate"
               type="date"
               required
+              min="2018-01-01"
               max={todayDateInputValue()}
               value={formData.donationDate}
               onChange={handleChange}
