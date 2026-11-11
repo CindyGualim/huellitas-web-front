@@ -26,6 +26,35 @@ export function formatEventDate(value: string, options: Intl.DateTimeFormatOptio
   return new Date(value).toLocaleDateString('es-GT', { ...options, timeZone: ORG_TIME_ZONE });
 }
 
+// Hora de un horario de jornada ("14:30") en formato de 12 h para mostrar ("2:30 p. m.").
+// Se guarda en 24 h para que se ordene bien; valores viejos que no sean HH:mm se muestran tal cual.
+export function formatSlotTime(value: string) {
+  const match = /^(\d{2}):(\d{2})$/.exec(value);
+  if (!match) return value;
+  const hours = Number(match[1]);
+  const suffix = hours < 12 ? 'a. m.' : 'p. m.';
+  return `${hours % 12 || 12}:${match[2]} ${suffix}`;
+}
+
+// Guatemala no tiene horario de verano: siempre UTC-6. Los formularios de eventos trabajan en esa
+// hora aunque quien edite tenga el navegador en otra zona (p. ej. de viaje).
+const ORG_UTC_OFFSET = '-06:00';
+
+// ISO (UTC) → valor de <input type="datetime-local"> en hora de Guatemala.
+export function toOrgDatetimeLocal(isoString?: string) {
+  if (!isoString) return '';
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: ORG_TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+  }).formatToParts(new Date(isoString));
+  const get = (type: string) => parts.find(part => part.type === type)?.value ?? '';
+  return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}`;
+}
+
+// Valor de <input type="datetime-local"> interpretado en hora de Guatemala → ISO (UTC).
+export function fromOrgDatetimeLocal(value: string) {
+  return new Date(`${value}:00${ORG_UTC_OFFSET}`).toISOString();
+}
+
 // Convierte un ISO (UTC) al formato que espera <input type="datetime-local">, en hora local del navegador.
 // Usar isoString.slice(0, 16) mete la hora UTC como si fuera local y corre el evento al guardarlo.
 export function toDatetimeLocalValue(isoString?: string) {

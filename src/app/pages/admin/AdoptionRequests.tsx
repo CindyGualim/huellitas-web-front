@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ChevronDown, ChevronUp, Phone, Mail, MapPin } from 'lucide-react';
 import { RestrictedAccess } from '../../components/admin/RestrictedAccess';
 import { Pagination } from '../../components/admin/Pagination';
 import { useAuth } from '../../context/AuthContext';
-import { apiGetAdoptionRequests, apiUpdateAdoptionRequestStatus, ApiAdoptionRequest, AdoptionRequestStatus, ApiPagination } from '../../lib/api';
+import { apiGetAdoptionRequests, apiUpdateAdoptionRequestStatus, ApiAdoptionRequest, AdoptionRequestStatus } from '../../lib/api';
 import { ADOPTION_REQUEST_STATUS_OPTIONS, ADOPTION_REQUEST_TRANSITIONS, adoptionRequestStatusLabel, adoptionRequestStatusBadgeClass } from '../../lib/petMappings';
+import { errorMessage, useApiResource } from '../../lib/useApiResource';
 
 const YES_NO_QUESTIONS: { key: 'hasChildren' | 'familyAgreement' | 'hasVeterinarian' | 'secureSpace'; question: string }[] = [
   { key: 'hasChildren', question: '¿Hay niños en el hogar?' },
@@ -16,27 +17,21 @@ const YES_NO_QUESTIONS: { key: 'hasChildren' | 'familyAgreement' | 'hasVeterinar
 export function AdminAdoptionRequests() {
   const { token, user } = useAuth();
   const hasAccess = user?.role === 'Superadministrador' || user?.role === 'Operador';
-  const [requests, setRequests] = useState<ApiAdoptionRequest[]>([]);
-  const [pagination, setPagination] = useState<ApiPagination | null>(null);
   const [page, setPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<AdoptionRequestStatus | ''>('');
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
-  const [reloadKey, setReloadKey] = useState(0);
 
-  useEffect(() => {
-    if (!token || !hasAccess) return;
-
-    setIsLoading(true);
-    apiGetAdoptionRequests(token, { page })
-      .then(({ items, pagination }) => {
-        setRequests(items);
-        setPagination(pagination);
-      })
-      .catch(err => setError(err instanceof Error ? err.message : 'No se pudieron cargar las solicitudes'))
-      .finally(() => setIsLoading(false));
-  }, [token, hasAccess, page, reloadKey]);
+  const { data, loading: isLoading, error: loadError, reload } = useApiResource(
+    token && hasAccess ? () => apiGetAdoptionRequests(token, { page, status: statusFilter || undefined }) : null,
+    [token, hasAccess, page, statusFilter],
+    { fallbackMessage: 'No se pudieron cargar las solicitudes', keepPreviousData: true }
+  );
+  const requests = data?.items ?? [];
+  const pagination = data?.pagination ?? null;
+  const error = actionError ?? loadError;
 
   if (!hasAccess) return <RestrictedAccess />;
 
@@ -51,15 +46,24 @@ export function AdminAdoptionRequests() {
       `Esta solicitud está aprobada. Cambiarla a "${adoptionRequestStatusLabel(status)}" revierte la adopción: ${request.pet.name} vuelve a estar Disponible. ¿Continuar?`
     )) return;
 
-    setError(null);
+    setActionError(null);
+    setNotice(null);
     setUpdatingId(request.id);
 
     try {
-      await apiUpdateAdoptionRequestStatus(token, request.id, status);
+      const updated = await apiUpdateAdoptionRequestStatus(token, request.id, status);
+      const siblings = updated.rejectedSiblingIds ?? [];
+      if (siblings.length > 0) {
+        // Al aprobar, las demás solicitudes de la mascota se rechazaron automáticamente: revertir no las reabre.
+        setNotice(
+          `${request.pet.name} vuelve a estar disponible. Tiene ${siblings.length} solicitud${siblings.length === 1 ? '' : 'es'} rechazada${siblings.length === 1 ? '' : 's'} ` +
+          `(#${siblings.join(', #')}). Si querés retomarlas, filtrá por "Rechazada" y marcalas como Pendiente.`
+        );
+      }
       // Aprobar o revertir también cambia otras solicitudes y la mascota: se recarga la página completa.
-      setReloadKey(key => key + 1);
+      reload();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo actualizar el estado de la solicitud');
+      setActionError(errorMessage(err, 'No se pudo actualizar el estado de la solicitud'));
     } finally {
       setUpdatingId(null);
     }
@@ -67,21 +71,46 @@ export function AdminAdoptionRequests() {
 
   return (
     <div className="p-8 bg-[#F8F8F8] min-h-screen">
-      <div className="mb-8">
-        <h1 className="text-[#222222] mb-1 text-3xl">Solicitudes de Adopción</h1>
-        <p className="text-[#222222]/50">Revisa y da seguimiento a quienes quieren adoptar</p>
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-[#222222] mb-1 text-3xl">Solicitudes de Adopción</h1>
+          <p className="text-[#222222]/50">Revisa y da seguimiento a quienes quieren adoptar</p>
+        </div>
+        <label className="flex items-center gap-2 text-sm text-[#222222]/70">
+          Estado
+          <select
+            value={statusFilter}
+            onChange={e => { setStatusFilter(e.target.value as AdoptionRequestStatus | ''); setPage(1); }}
+            className="px-3 py-2 rounded-lg border border-[#D9D9D9] bg-white text-[#222222]"
+          >
+            <option value="">Todas</option>
+            {ADOPTION_REQUEST_STATUS_OPTIONS.map(option => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+        </label>
       </div>
 
-      {error && (
-        <div className="mb-6 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
-          {error}
+      {notice && (
+        <div className="mb-6 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-start justify-between gap-3">
+          <span>{notice}</span>
+          <button onClick={() => setNotice(null)} className="text-amber-800/60 hover:text-amber-800 cursor-pointer" aria-label="Cerrar aviso">✕</button>
         </div>
       )}
 
-      {isLoading ? (
+      {error && (
+        <div className="mb-6 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm flex flex-wrap items-center justify-between gap-3">
+          <span>{error}</span>
+          {loadError && !actionError && (
+            <button onClick={reload} className="px-3 py-1.5 rounded-lg border border-red-300 text-red-700 hover:bg-red-100 cursor-pointer">Reintentar</button>
+          )}
+        </div>
+      )}
+
+      {isLoading && requests.length === 0 ? (
         <p className="text-[#222222]/50">Cargando...</p>
       ) : requests.length === 0 ? (
-        <p className="text-[#222222]/50">Todavía no hay solicitudes de adopción.</p>
+        !loadError && <p className="text-[#222222]/50">{statusFilter ? 'No hay solicitudes con ese estado.' : 'Todavía no hay solicitudes de adopción.'}</p>
       ) : (
         <div className="space-y-4">
           {requests.map(request => {

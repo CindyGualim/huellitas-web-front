@@ -46,7 +46,9 @@ export const PATIENT_STATUS_OPTIONS = [
   { value: 'Pagado', label: 'Pagado', badgeClass: 'bg-amber-50 text-amber-600' },
   { value: 'Castrado', label: 'Castrado', badgeClass: 'bg-[#146B27]/10 text-[#146B27]' },
   { value: 'En_seguimiento', label: 'En seguimiento', badgeClass: 'bg-purple-50 text-purple-600' },
-  { value: 'Seguimiento_finalizado', label: 'Seguimiento finalizado', badgeClass: 'bg-[#222222]/10 text-[#222222]' }
+  { value: 'Seguimiento_finalizado', label: 'Seguimiento finalizado', badgeClass: 'bg-[#222222]/10 text-[#222222]' },
+  // Solo al cancelar la jornada; no se elige a mano.
+  { value: 'Cancelado', label: 'Jornada cancelada', badgeClass: 'bg-red-50 text-red-600' }
 ] as const;
 
 // Refleja VALID_PATIENT_TRANSITIONS en eventRegistration.service.js — mantener sincronizado.
@@ -58,7 +60,8 @@ export const PATIENT_STATUS_TRANSITIONS: Record<string, string[]> = {
   Castrado: ['Aprobado', 'Pagado', 'En_seguimiento', 'Seguimiento_finalizado'],
   En_seguimiento: ['Castrado', 'Seguimiento_finalizado'],
   Seguimiento_finalizado: ['En_seguimiento'],
-  Rechazado: ['Inscrito', 'Evaluado']
+  Rechazado: ['Inscrito', 'Evaluado'],
+  Cancelado: ['Inscrito']
 };
 
 export const CASTRATION_PATIENT_STATUSES = ['Castrado', 'En_seguimiento', 'Seguimiento_finalizado'];

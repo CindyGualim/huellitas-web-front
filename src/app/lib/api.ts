@@ -340,6 +340,8 @@ export interface ApiEvent {
   isActive: boolean;
   createdAt: string;
   timeSlots: ApiEventTimeSlot[];
+  // Solo en la respuesta de editar: pacientes que pasaron a Cancelado al cancelar la jornada.
+  cancelledRegistrations?: number;
 }
 
 export interface EventPayload {
@@ -497,10 +499,16 @@ export interface ApiAdoptionRequest {
     municipality: string;
   };
   pet: ApiPet;
+  // Solo al revertir una aprobación: otras solicitudes rechazadas de la misma mascota, que se
+  // rechazaron automáticamente al aprobar y ahora se pueden reactivar.
+  rejectedSiblingIds?: number[];
 }
 
-export async function apiGetAdoptionRequests(token: string, params?: PaginationParams) {
-  const response = await fetch(`${API_URL}/adoption-requests${paginationQuery(params)}`, {
+export async function apiGetAdoptionRequests(token: string, params?: PaginationParams & { status?: AdoptionRequestStatus }) {
+  const search = new URLSearchParams(paginationQuery(params).slice(1));
+  if (params?.status) search.set('status', params.status);
+  const query = search.toString();
+  const response = await fetch(`${API_URL}/adoption-requests${query ? `?${query}` : ''}`, {
     headers: { Authorization: `Bearer ${token}` }
   });
 
@@ -653,7 +661,8 @@ export type CastrationPatientStatus =
   | 'Pagado'
   | 'Castrado'
   | 'En_seguimiento'
-  | 'Seguimiento_finalizado';
+  | 'Seguimiento_finalizado'
+  | 'Cancelado';
 
 export interface ApiEventRegistration {
   id: number;
@@ -677,6 +686,7 @@ export interface ApiEventRegistration {
   followUpCompleted: boolean;
   observations: string | null;
   notes: string | null;
+  reminderSentAt?: string | null;
   createdAt: string;
   event: ApiEvent;
   timeSlot: ApiEventTimeSlot;
@@ -761,7 +771,7 @@ export async function apiSendReminder(token: string, id: number, type: 'pre' | '
     body: JSON.stringify({ type })
   });
 
-  return parseResponse<null>(response);
+  return parseResponse<{ reminderSentAt: string | null } | null>(response);
 }
 
 export interface ApiTimelineEntry {

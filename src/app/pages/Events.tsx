@@ -6,10 +6,9 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { EventDetailModal } from '../components/EventDetailModal';
 import { apiGetEvents, fetchAllPages, ApiEvent } from '../lib/api';
 import { EVENT_TYPE_OPTIONS, eventTypeLabel } from '../lib/eventMappings';
+import { formatEventDate } from '../lib/dateUtils';
 
-function formatEventDate(value: string) {
-  return new Date(value).toLocaleDateString('es-GT', { day: 'numeric', month: 'long', year: 'numeric' });
-}
+// Fechas de eventos siempre en hora de Guatemala (ver dateUtils).
 
 function eventBadgeClass(type: string) {
   if (type === 'Jornada_castracion') return 'bg-[#20A83E] text-white';

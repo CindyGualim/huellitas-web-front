@@ -10,8 +10,24 @@ import { useAuth } from '../../context/AuthContext';
 interface PetFormModalProps {
   mode: 'create' | 'edit';
   initialData?: ApiPet;
-  onSubmit: (payload: PetPayload) => Promise<void>;
+  // Al crear se envía la ficha completa; al editar, solo los campos que cambiaron.
+  onSubmit: (payload: Partial<PetPayload>) => Promise<void>;
   onClose: () => void;
+}
+
+// La portada primero: si las fotos llegan en otro orden, editar no debe cambiar la portada.
+function initialImageUrls(pet?: ApiPet) {
+  if (!pet?.images?.length) return [''];
+  return [...pet.images]
+    .sort((a, b) => Number(Boolean(b.isCover)) - Number(Boolean(a.isCover)) || a.id - b.id)
+    .map(image => image.imageUrl);
+}
+
+function toImagesPayload(urls: string[]) {
+  return urls
+    .map(url => url.trim())
+    .filter(Boolean)
+    .map((imageUrl, index) => ({ imageUrl, isCover: index === 0 }));
 }
 
 function toFormState(pet?: ApiPet) {
@@ -35,14 +51,12 @@ function toFormState(pet?: ApiPet) {
 export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormModalProps) {
   const { token } = useAuth();
   const [formData, setFormData] = useState(toFormState(initialData));
-  const [imageUrls, setImageUrls] = useState<string[]>(
-    initialData?.images?.length ? initialData.images.map(image => image.imageUrl) : ['']
-  );
+  const [imageUrls, setImageUrls] = useState<string[]>(() => initialImageUrls(initialData));
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   // Aviso de "ya hay 4 destacadas": guarda el formulario pendiente hasta que se elija qué retirar.
-  const [replaceState, setReplaceState] = useState<{ payload: PetPayload; candidates: ApiPet[] } | null>(null);
+  const [replaceState, setReplaceState] = useState<{ payload: Partial<PetPayload>; candidates: ApiPet[] } | null>(null);
 
   const inputClass = "w-full px-4 py-3 bg-[#F8F8F8] rounded-xl text-[#222222] placeholder-[#222222]/30 focus:outline-none focus:ring-2 focus:ring-[#20A83E] border border-[#D9D9D9] transition-all duration-250 text-sm";
   const labelClass = "block text-[#222222] mb-1.5 font-medium text-sm";
@@ -85,7 +99,7 @@ export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormMo
     return items.filter(pet => pet.id !== initialData?.id);
   };
 
-  const save = async (payload: PetPayload) => {
+  const save = async (payload: Partial<PetPayload>) => {
     setError(null);
     setIsSubmitting(true);
 
@@ -112,16 +126,32 @@ export function PetFormModal({ mode, initialData, onSubmit, onClose }: PetFormMo
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    const images = imageUrls
-      .map(url => url.trim())
-      .filter(Boolean)
-      .map((imageUrl, index) => ({ imageUrl, isCover: index === 0 }));
-
-    const payload: PetPayload = {
+    const images = toImagesPayload(imageUrls);
+    let payload: Partial<PetPayload> = {
       ...formData,
       weight: Number(formData.weight),
       images
     };
+
+    if (mode === 'edit' && initialData) {
+      // Solo lo que cambió: si otra persona cambió el estado o "destacada" mientras este formulario
+      // estaba abierto, corregir un dato no debe revertir su cambio.
+      const initial = toFormState(initialData);
+      const changed: Record<string, unknown> = {};
+      for (const key of Object.keys(initial) as (keyof typeof initial)[]) {
+        if (formData[key] !== initial[key]) {
+          changed[key] = key === 'weight' ? Number(formData.weight) : formData[key];
+        }
+      }
+      if (JSON.stringify(images) !== JSON.stringify(toImagesPayload(initialImageUrls(initialData)))) {
+        changed.images = images;
+      }
+      if (Object.keys(changed).length === 0) {
+        onClose();
+        return;
+      }
+      payload = changed as Partial<PetPayload>;
+    }
 
     const becomesFeatured = formData.featured && !initialData?.featured;
 

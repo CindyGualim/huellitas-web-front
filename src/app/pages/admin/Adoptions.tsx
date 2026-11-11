@@ -60,7 +60,7 @@ export function AdminAdoptions() {
     }
   };
 
-  const handleFormSubmit = async (payload: PetPayload) => {
+  const handleFormSubmit = async (payload: Partial<PetPayload>) => {
     if (!token) throw new Error('No autorizado');
 
     if (modalState?.mode === 'edit' && modalState.pet) {
@@ -72,7 +72,7 @@ export function AdminAdoptions() {
         setPets(prev => prev.map(p => (p.id === updated.id ? updated : p)));
       }
     } else {
-      await apiCreatePet(token, payload);
+      await apiCreatePet(token, payload as PetPayload);
       // Se recarga para respetar el orden, el tamaño de página y el total de la paginación.
       loadPets();
     }

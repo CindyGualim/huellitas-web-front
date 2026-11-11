@@ -4,7 +4,7 @@ import { CheckCircle, Calendar, MapPin, ArrowLeft } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { apiGetEvent, apiCreateEventRegistration, ApiEvent } from '../lib/api';
-import { todayDateInputValue, monthsBetweenUtc, birthDateFromAge, formatEventDate } from '../lib/dateUtils';
+import { formatSlotTime, todayDateInputValue, monthsBetweenUtc, birthDateFromAge, formatEventDate } from '../lib/dateUtils';
 
 const MIN_AGE_MONTHS = 5;
 const MAX_AGE_MONTHS = 6 * 12;
@@ -230,7 +230,7 @@ export function EventRegistration() {
                               : 'bg-white hover:bg-[#F8F8F8] text-[#222222] border-[#D9D9D9]'
                           }`}
                         >
-                          {slot.startTime}
+                          {formatSlotTime(slot.startTime)}
                           <div className="text-xs mt-1 opacity-70">{isFull ? 'Sin cupo' : `${slot.available} cupos`}</div>
                           {selectedTimeSlotId === slot.id && <CheckCircle size={18} className="mx-auto mt-1" />}
                         </button>

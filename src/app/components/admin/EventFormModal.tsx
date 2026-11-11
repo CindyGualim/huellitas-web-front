@@ -3,7 +3,7 @@ import { X, Plus, Trash2 } from 'lucide-react';
 import { PrimaryButton } from '../PrimaryButton';
 import { ApiEvent, ApiEventTimeSlot, EventPayload } from '../../lib/api';
 import { EVENT_TYPE_OPTIONS, EVENT_STATUS_OPTIONS } from '../../lib/eventMappings';
-import { toDatetimeLocalValue } from '../../lib/dateUtils';
+import { toOrgDatetimeLocal, fromOrgDatetimeLocal } from '../../lib/dateUtils';
 
 interface EventFormModalProps {
   mode: 'create' | 'edit';
@@ -12,8 +12,8 @@ interface EventFormModalProps {
   onClose: () => void;
 }
 
-// El ISO llega en UTC; el input datetime-local espera hora local (ver toDatetimeLocalValue).
-const toDatetimeLocal = toDatetimeLocalValue;
+// El ISO llega en UTC; el formulario trabaja siempre en hora de Guatemala.
+const toDatetimeLocal = toOrgDatetimeLocal;
 
 function toFormState(event?: ApiEvent) {
   return {
@@ -67,11 +67,27 @@ export function EventFormModal({ mode, initialData, onSubmit, onClose }: EventFo
       return;
     }
 
+    if (showTimeSlots && new Set(timeSlots.map(slot => slot.startTime)).size !== timeSlots.length) {
+      setError('Hay dos horarios con la misma hora de inicio');
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Cancelar avisa por correo a los dueños: se confirma mostrando cuántos hay.
+    const registered = (initialData?.timeSlots ?? []).reduce((sum, slot) => sum + (slot.registered ?? 0), 0);
+    if (
+      mode === 'edit' && formData.status === 'Cancelado' && initialData?.status !== 'Cancelado' && registered > 0 &&
+      !window.confirm(`Esta jornada tiene ${registered} inscrito(s). Al cancelarla, los pacientes que todavía no se operaron quedarán como "Jornada cancelada" y se enviará un correo a cada dueño. ¿Continuar?`)
+    ) {
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       await onSubmit({
         ...formData,
-        startDate: new Date(formData.startDate).toISOString(),
-        endDate: new Date(formData.endDate).toISOString(),
+        startDate: fromOrgDatetimeLocal(formData.startDate),
+        endDate: fromOrgDatetimeLocal(formData.endDate),
         timeSlots: showTimeSlots
           ? timeSlots.map(slot => ({ ...(slot.id ? { id: slot.id } : {}), startTime: slot.startTime, capacity: Number(slot.capacity) }))
           : undefined
@@ -112,7 +128,7 @@ export function EventFormModal({ mode, initialData, onSubmit, onClose }: EventFo
             <input name="title" required value={formData.title} onChange={handleChange} className={inputClass} />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Tipo <span className="text-red-500">*</span></label>
               <select name="type" value={formData.type} onChange={handleChange} className={inputClass}>
@@ -137,7 +153,8 @@ export function EventFormModal({ mode, initialData, onSubmit, onClose }: EventFo
             <input name="location" required value={formData.location} onChange={handleChange} className={inputClass} />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <p className="text-xs text-[#222222]/50 -mb-2">Fechas y horas en hora de Guatemala.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Fecha y hora de inicio <span className="text-red-500">*</span></label>
               <input name="startDate" type="datetime-local" required value={formData.startDate} onChange={handleChange} className={inputClass} />
@@ -159,7 +176,9 @@ export function EventFormModal({ mode, initialData, onSubmit, onClose }: EventFo
                 {timeSlots.map((slot, index) => (
                   <div key={index} className="flex gap-2">
                     <input
-                      placeholder="Ej: 9:00 AM"
+                      type="time"
+                      required
+                      aria-label="Hora de inicio"
                       value={slot.startTime}
                       onChange={e => updateTimeSlot(index, 'startTime', e.target.value)}
                       className={inputClass}

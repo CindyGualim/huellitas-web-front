@@ -9,6 +9,7 @@ import { apiGetPets, apiGetEvents, apiGetImpactStats, ApiPet, ApiEvent, ApiImpac
 import { eventTypeLabel } from '../lib/eventMappings';
 import { statusLabel } from '../lib/petMappings';
 import { useSiteSettings } from '../lib/useSiteSettings';
+import { formatEventDate } from '../lib/dateUtils';
 
 // Carousel photos
 import photoHero1 from '../../imports/WhatsApp_Image_2026-06-16_at_3.21.02_PM__1_.jpeg';
@@ -240,7 +241,7 @@ function UpcomingEventCard({ event }: { event: ApiEvent }) {
       <div className="flex flex-col gap-1.5 mb-3">
         <div className="flex items-center gap-2 text-[#222222]/70 text-sm">
           <Calendar size={14} className="text-[#20A83E]" />
-          <span>{new Date(event.startDate).toLocaleDateString('es-GT', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+          <span>{formatEventDate(event.startDate)}</span>
         </div>
         <div className="flex items-center gap-2 text-[#222222]/70 text-sm">
           <MapPin size={14} className="text-[#20A83E]" />

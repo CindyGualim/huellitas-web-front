@@ -3,15 +3,14 @@ import { Link } from 'react-router-dom';
 import { X, Calendar, MapPin } from 'lucide-react';
 import { ApiEvent } from '../lib/api';
 import { eventTypeLabel, eventStatusLabel, eventStatusBadgeClass } from '../lib/eventMappings';
+import { formatEventDate } from '../lib/dateUtils';
 
 interface EventDetailModalProps {
   event: ApiEvent;
   onClose: () => void;
 }
 
-function formatEventDate(value: string) {
-  return new Date(value).toLocaleDateString('es-GT', { day: 'numeric', month: 'long', year: 'numeric' });
-}
+// Fechas de eventos siempre en hora de Guatemala (ver dateUtils).
 
 export function EventDetailModal({ event, onClose }: EventDetailModalProps) {
   return createPortal(
